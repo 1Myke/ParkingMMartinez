@@ -51,15 +51,19 @@ fun LoginScreen(
 
         LksTextField(
             value = email,
-            onValueChange = { email = it},
+            onValueChange = { email = it },
             label = "Username",
-            leadingIcon = Icons.Default.Email
+            leadingIcon = Icons.Default.Email,
+            // El text field se pondra en rojo si en el mensaje de error esta la palabra email o username
+            isError = errorMessage.contains("email", ignoreCase = true) ||
+                    errorMessage.contains("user", ignoreCase = true)
         )
 
         LksPasswordField(
             value = pass,
             onValueChange = { pass = it},
-            label = "Password"
+            label = "Password",
+            isError = errorMessage.contains("password", ignoreCase = true)
         )
 
         if (errorMessage.isNotEmpty()){
@@ -79,6 +83,7 @@ fun LoginScreen(
             onClick = {
                 errorMessage = ""
                 // MEJORAS: AQUI HAY QUE VALIDAR QUE ESTE EN LA BASE DE DATOS
+                // AL MIRAR EN LA BASE DE DATOS COMPROBAMOS AVER TANTO SI ES EL USERNAME O EL GMAIL PORQUE SE PUEDE ENTRAR CON AMBOS
                 // EN EL REGISTER HAY QUE HACER HASH
                 // EN EL REGISTER HAY QUE HACER LA VALIDACION DEL REGEX ANTES DE MANDARLO A LA BASE DE DATOS
                 if (!email.contains("@")) {

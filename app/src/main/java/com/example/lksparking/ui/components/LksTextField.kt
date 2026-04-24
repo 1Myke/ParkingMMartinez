@@ -9,6 +9,7 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import com.example.lksparking.ui.theme.LksOrange
@@ -19,6 +20,7 @@ fun LksTextField(
     onValueChange: (String) -> Unit, //Para actualizar la pantalla cada vez que se teclea una letra
     label: String,
     placeholder: String = "",
+    isError: Boolean = false,
     leadingIcon: ImageVector? = null
 ){
     OutlinedTextField(
@@ -26,6 +28,7 @@ fun LksTextField(
         onValueChange = onValueChange,
         label = { Text(label) },
         placeholder = { Text(placeholder) },
+        isError = isError,
         leadingIcon = leadingIcon?.let {
             { Icon(imageVector = it, contentDescription = null)}
         },
@@ -35,7 +38,10 @@ fun LksTextField(
         shape = RoundedCornerShape(12.dp),
         colors = OutlinedTextFieldDefaults.colors(
             focusedBorderColor = LksOrange,
-            focusedLabelColor = LksOrange
-        )
+            focusedLabelColor = LksOrange,
+            errorBorderColor = Color.Red,
+            errorLabelColor = Color.Red
+        ),
+        singleLine = true
     )
 }

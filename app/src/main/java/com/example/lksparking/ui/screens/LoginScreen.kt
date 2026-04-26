@@ -1,5 +1,6 @@
 package com.example.lksparking.ui.screens
 
+import android.content.res.Resources
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -8,6 +9,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Key
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -18,8 +20,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.lksparking.ui.components.LksButton
+import com.example.lksparking.ui.components.LksClickableLabel
 import com.example.lksparking.ui.components.LksPasswordField
 import com.example.lksparking.ui.components.LksTextField
 import com.example.lksparking.ui.theme.LksOrange
@@ -27,7 +31,8 @@ import com.example.lksparking.ui.theme.LksOrange
 @Composable
 fun LoginScreen(
     onLoginSuccess: () -> Unit,
-    onNavigateToRegister: () -> Unit
+    onNavigateToRegister: () -> Unit,
+    onNavigateToPasswordRecovery: () -> Unit
 ){
     var email by remember { mutableStateOf("") }
     var pass by remember { mutableStateOf("") }
@@ -63,7 +68,8 @@ fun LoginScreen(
             value = pass,
             onValueChange = { pass = it},
             label = "Password",
-            isError = errorMessage.contains("password", ignoreCase = true)
+            isError = errorMessage.contains("password", ignoreCase = true),
+            leadingIcon = Icons.Default.Key
         )
 
         if (errorMessage.isNotEmpty()){
@@ -75,7 +81,15 @@ fun LoginScreen(
             )
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        LksClickableLabel(
+            text = "Forgot Password?",
+            onClick = {
+                onNavigateToPasswordRecovery()
+            },
+            modifier = Modifier
+                .align(Alignment.Start) // <--- ESTO lo empuja a la izquierda
+                .padding(start = 4.dp)
+        )
 
         LksButton(
             text = "LOG IN",
@@ -98,4 +112,14 @@ fun LoginScreen(
         )
 
     }
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun LoginScreenPreview() {
+    LoginScreen(
+        onLoginSuccess = {},
+        onNavigateToRegister = {},
+        onNavigateToPasswordRecovery = {}
+    )
 }

@@ -7,6 +7,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import com.example.lksparking.ui.components.TimePickerField
 import com.example.lksparking.ui.components.TimeSlider
@@ -22,7 +23,11 @@ fun BookingScreen() {
     val context = LocalContext.current
     val picker = TimePickerDialog(context, { _, h, m -> startHour = h; startMinute = m }, startHour, startMinute, true)
 
-    Column(modifier = Modifier.padding(16.dp)) {
+    Column(
+        modifier = Modifier.padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
         Text("START TIME")
         TimePickerField(
             startTime = String.format("%02d:%02d", startHour, startMinute),

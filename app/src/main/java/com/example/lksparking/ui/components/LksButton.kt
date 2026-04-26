@@ -1,5 +1,6 @@
 package com.example.lksparking.ui.components
 
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -20,7 +21,8 @@ fun LksButton(
     Button(
         onClick = onClick,
         modifier = modifier
-            .height(50.dp),
+            .height(50.dp)
+            .fillMaxWidth(),
         enabled = enabled,
         shape = RoundedCornerShape(12.dp),
         colors = ButtonDefaults.buttonColors(

@@ -1,5 +1,6 @@
 package com.example.lksparking.ui.components
 
+import android.graphics.drawable.Icon
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -15,13 +16,15 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.ui.text.input.KeyboardType
 import com.example.lksparking.ui.theme.LksOrange
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 
 @Composable
 fun LksPasswordField(
     value: String,
     onValueChange: (String) -> Unit,
     label: String = "Password",
-    isError: Boolean = false
+    isError: Boolean = false,
+    leadingIcon: ImageVector? = null
 ) {
     var passwordVisible by remember { mutableStateOf(false) }
 
@@ -47,6 +50,9 @@ fun LksPasswordField(
             focusedLabelColor = LksOrange,
             errorBorderColor = Color.Red,
             errorLabelColor = Color.Red
-        )
+        ),
+        leadingIcon = leadingIcon?.let {
+            { Icon(imageVector = it, contentDescription = null)}
+        }
     )
 }

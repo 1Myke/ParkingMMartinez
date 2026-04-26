@@ -1,16 +1,23 @@
 package com.example.lksparking.ui.screens
 
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -19,8 +26,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.lksparking.ui.components.LksButton
+import com.example.lksparking.ui.components.LksClickableLabel
 import com.example.lksparking.ui.components.LksPasswordField
 import com.example.lksparking.ui.components.LksTextField
 import com.example.lksparking.ui.theme.LksOrange
@@ -37,8 +47,9 @@ fun RegistrationScreen(
     var pass by remember { mutableStateOf("")}
     var passRepeat by remember { mutableStateOf("")}
     var plate by remember { mutableStateOf("")}
-    // var vehicleType (Seleccionarlo en un combo box y que te de la opcion a elegir que tipo de coche es el que tienes, como se hacia en el diseño, eso sera otro componente que usaremos tambien en el perfil)
-
+    
+    var vehicleType by remember { mutableStateOf("Car") }
+    
     var errorMessage by remember { mutableStateOf("") }
 
     Column(
@@ -79,6 +90,33 @@ fun RegistrationScreen(
         )
 
         //Elegir el type
+        Text(
+            text = "Vehicle Type",
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier.align(Alignment.Start).padding(top = 8.dp)
+        )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp)
+                .horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            val vehicles = listOf("Car", "Motorcycle", "Electric Car", "Adapted Car")
+            vehicles.forEach { type ->
+                val isSelected = vehicleType == type
+                FilterChip(
+                    selected = isSelected,
+                    onClick = { vehicleType = type },
+                    label = { Text(type) },
+                    colors = FilterChipDefaults.filterChipColors(
+                        selectedContainerColor = LksOrange.copy(alpha = 0.2f),
+                        selectedLabelColor = LksOrange,
+                        selectedLeadingIconColor = LksOrange
+                    )
+                )
+            }
+        }
 
         LksTextField(
             value = plate,
@@ -104,7 +142,7 @@ fun RegistrationScreen(
         LksPasswordField(
             value = passRepeat,
             onValueChange = { passRepeat = it; errorMessage = "" },
-            label = "Password",
+            label = "Confirm password",
             isError = errorMessage.contains("password", true)
         )
 
@@ -142,8 +180,21 @@ fun RegistrationScreen(
             }
         )
 
-        TextButton(onClick = onNavigateToLogin) {
-            Text("Already have an account? Log In", color = Color.Gray)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = "Already have an account?",
+                textAlign = TextAlign.Center
+            )
+            LksClickableLabel(
+                text = "Log In",
+                onClick = {
+                    onNavigateToLogin()
+                }
+            )
         }
 
 
@@ -154,4 +205,13 @@ fun isPlateInvalid(plate: String): Boolean {
     if (plate.isEmpty()) return false // No marcamos error si está vacío al empezar
     val regex = Regex("^[0-9]{4}[A-Z]{3}$") // Ejemplo: 1234ABC
     return !regex.matches(plate) // Si NO coincide, devolvemos TRUE (es un error)
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun RegistrationScreenPreview() {
+    RegistrationScreen(
+        onRegisterSuccess = {},
+        onNavigateToLogin = {}
+    )
 }

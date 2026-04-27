@@ -2,6 +2,7 @@ package com.example.lksparking.ui.screens
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -19,17 +20,40 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.lksparking.ui.components.LksButton
+import com.example.lksparking.ui.components.LksTimePicker
 import com.example.lksparking.ui.theme.LksOrange
+import com.example.lksparking.ui.viewmodel.BookingViewModel
 
 @Composable
 fun BookingScreen(
-    onConfirmBooking: () -> Unit = {}
+    viewModel: BookingViewModel = viewModel(),
+    initialZone: String = "",
+    onConfirmBooking: () -> Unit = {},
+    onManageVehicles: () -> Unit = {}
 ) {
-    var startHour by remember { mutableStateOf(8) }
+    /*var startHour by remember { mutableStateOf(8) }
     var startMinute by remember { mutableStateOf(0) }
     var duration by remember { mutableStateOf(4f) }
     var selectedDate by remember { mutableStateOf(26) }
+    */
+    // Dialogo del timepicker
+    if (viewModel.showTimePicker) {
+        LksTimePicker(
+            onConfirm = { h, m ->
+                viewModel.onTimeChange(h, m) // Actualiza la hora en el ViewModel
+                viewModel.onShowTimePickerChange(false) // Cierra el diálogo
+            },
+            onDismiss = {
+                viewModel.onShowTimePickerChange(false) // Cierra el diálogo si cancelan
+            }
+        )
+    }
+
+    LaunchedEffect(initialZone) {
+        viewModel.setZone(initialZone)
+    }
 
     Column(
         modifier = Modifier
@@ -60,7 +84,7 @@ fun BookingScreen(
                         color = Color.White.copy(alpha = 0.8f)
                     )
                     Text(
-                        "Standard Zone",
+                        text = viewModel.parkingZone,
                         style = MaterialTheme.typography.titleLarge,
                         color = Color.White,
                         fontWeight = FontWeight.Bold
@@ -72,7 +96,11 @@ fun BookingScreen(
         Column(modifier = Modifier.padding(20.dp)) {
 
             // 2. SELECCIÓN DE VEHÍCULO
-            SectionHeader(title = "Select Vehicle", actionText = "Manage")
+            SectionHeader(
+                title = "Select Vehicle",
+                actionText = "Manage",
+                onActionClick = onManageVehicles
+            ) //MEJORAS: CUANDO HAMOS CLICK EN EL TEXTO MANAGE NOS TIENE QUE LLEVAR AL PERFIL
             OutlinedCard(
                 modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
                 border = BorderStroke(2.dp, LksOrange),
@@ -134,8 +162,8 @@ fun BookingScreen(
                     DateItem(
                         day = day.toString(),
                         label = label,
-                        isSelected = selectedDate == day,
-                        onClick = { selectedDate = day }
+                        isSelected = viewModel.selectedDay == day,
+                        onClick = { viewModel.onDateSelected(day) }
                     )
                 }
             }
@@ -153,8 +181,8 @@ fun BookingScreen(
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text("START TIME", style = MaterialTheme.typography.labelSmall, color = Color.Gray)
 
-                    // Simulador de Time Picker Field
                     OutlinedCard(
+                        onClick = { viewModel.onShowTimePickerChange(true) }, // ABRIMOS EL RELOJ
                         modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
                         shape = RoundedCornerShape(12.dp),
                         colors = CardDefaults.outlinedCardColors(containerColor = Color(0xFFF9F9F9)),
@@ -166,7 +194,7 @@ fun BookingScreen(
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
                             Text(
-                                String.format("%02d:00", startHour),
+                                String.format("%02d:%02d", viewModel.startHour, viewModel.startMinute),
                                 style = MaterialTheme.typography.titleLarge
                             )
                             Icon(Icons.Default.AccessTime, contentDescription = null, tint = Color.Gray)
@@ -179,11 +207,25 @@ fun BookingScreen(
                         verticalAlignment = Alignment.Bottom
                     ) {
                         Text("DURATION", style = MaterialTheme.typography.labelSmall, color = Color.Gray)
-                        Text(
-                            "ENDING AT ${String.format("%02d:00", (startHour + duration.toInt()) % 24)}",
-                            color = LksOrange,
-                            fontWeight = FontWeight.Bold
-                        )
+
+                        // USAMOS LAS FUNCIONES DEL VIEWMODEL
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = "ENDING AT ${viewModel.getEndTime()}", // <--- Aquí llamamos a getEndTime()
+                                color = LksOrange,
+                                fontWeight = FontWeight.Bold
+                            )
+
+                            // Si el ViewModel dice que es el día siguiente, añadimos el aviso
+                            if (viewModel.isNextDay()) {
+                                Text(
+                                    text = " (+1 day)",
+                                    color = Color.Gray,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    modifier = Modifier.padding(start = 4.dp)
+                                )
+                            }
+                        }
                     }
 
                     // Área de Duración estilo Premium
@@ -198,7 +240,7 @@ fun BookingScreen(
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Row(verticalAlignment = Alignment.Bottom) {
                                 Text(
-                                    text = duration.toInt().toString(),
+                                    text = viewModel.duration.toInt().toString(),
                                     style = MaterialTheme.typography.displayMedium,
                                     color = LksOrange,
                                     fontWeight = FontWeight.Bold
@@ -211,9 +253,9 @@ fun BookingScreen(
                                 )
                             }
                             Slider(
-                                value = duration,
-                                onValueChange = { duration = it },
-                                valueRange = 1f..12f,
+                                value = viewModel.duration,
+                                onValueChange = { viewModel.onDurationChange(it) },
+                                valueRange = 1f..9f,
                                 colors = SliderDefaults.colors(
                                     thumbColor = LksOrange,
                                     activeTrackColor = LksOrange,
@@ -239,18 +281,26 @@ fun BookingScreen(
 }
 
 @Composable
-fun SectionHeader(title: String, actionText: String? = null) {
+fun SectionHeader(
+    title: String,
+    actionText: String? = null,
+    onActionClick: () -> Unit = {} // Nuevo parámetro
+) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            // Icono opcional aquí si quieres
-            Text(title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
-        }
+        Text(title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+
         if (actionText != null) {
-            Text(actionText, color = LksOrange, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.labelMedium)
+            Text(
+                text = actionText,
+                color = LksOrange,
+                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.labelMedium,
+                modifier = Modifier.padding(8.dp).clickable { onActionClick() } // CLICABLE
+            )
         }
     }
 }

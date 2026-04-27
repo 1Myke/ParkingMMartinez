@@ -1,5 +1,7 @@
 package com.example.lksparking.model
 
+import java.util.UUID
+
 enum class VehicleType{
     STANDARD,
     ELECTRIC,
@@ -7,6 +9,7 @@ enum class VehicleType{
 }
 
 data class Vehicle(
+    val id: String = UUID.randomUUID().toString(),
     val name: String,
     val plate: String,
     val type: VehicleType,

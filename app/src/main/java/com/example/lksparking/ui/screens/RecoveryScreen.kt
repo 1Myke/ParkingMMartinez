@@ -12,21 +12,20 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.lksparking.ui.components.LksButton
 import com.example.lksparking.ui.components.LksTextField
 import com.example.lksparking.ui.theme.LksOrange
+import com.example.lksparking.ui.viewmodel.RecoveryViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
 fun RecoveryScreen(
-    onRecoverySuccess: () -> Unit ,
-    onNavigateToLogin: () -> Unit
+    viewModel: RecoveryViewModel = viewModel(),
+    onNavigateBack: () -> Unit
 ){
-    var email by remember { mutableStateOf("") }
-
-    var errorMessage by remember { mutableStateOf("") }
-
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -37,23 +36,24 @@ fun RecoveryScreen(
         Text(
             text = "Recover your password",
             style = MaterialTheme.typography.headlineLarge,
-            color = LksOrange
+            color = LksOrange,
+            textAlign = TextAlign.Center
         )
 
         Spacer(modifier = Modifier.height(32.dp))
 
         LksTextField(
-            value = email,
-            onValueChange = { email = it },
+            value = viewModel.email,
+            onValueChange = { viewModel.onEmailChange(it) },
             label = "Email",
             placeholder = "Use your registration email", //MEJORAS: Puedo hacer que cuando meta algo que no es el email, emplan el username se mande al email que hay asociado
-            isError = errorMessage.contains("email", ignoreCase = true) ||
-                        errorMessage.contains("user", ignoreCase = true)
+            isError = viewModel.errorMessage.contains("email", ignoreCase = true) ||
+                        viewModel.errorMessage.contains("user", ignoreCase = true)
         )
 
-        if (errorMessage.isNotEmpty()){
+        if (viewModel.errorMessage.isNotEmpty()){
             Text(
-                text = errorMessage,
+                text = viewModel.errorMessage,
                 color = Color.Red,
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier.padding(vertical = 8.dp)
@@ -64,18 +64,9 @@ fun RecoveryScreen(
 
         LksButton(
             text = "Continue",
-            enabled = email.isNotEmpty(),
+            enabled = viewModel.email.isNotEmpty(),
             onClick = {
-                errorMessage = ""
-                // MEJORAS: AQUI HAY QUE VALIDAR QUE ESTE EN LA BASE DE DATOS
-                // AL MIRAR EN LA BASE DE DATOS COMPROBAMOS AVER TANTO SI ES EL USERNAME O EL GMAIL PORQUE SE PUEDE ENTRAR CON AMBOS
-                // EN EL REGISTER HAY QUE HACER HASH
-                // EN EL REGISTER HAY QUE HACER LA VALIDACION DEL REGEX ANTES DE MANDARLO A LA BASE DE DATOS
-                if (!email.contains("@")) {
-                    errorMessage = "Please enter a valid email"
-                } else {
-                    onRecoverySuccess()
-                }
+                viewModel.validateAndSend(onSuccess = { onNavigateBack() })
             }
         )
     }
@@ -85,7 +76,6 @@ fun RecoveryScreen(
 @Composable
 fun RecoveryScreenPreview() {
     RecoveryScreen(
-        onRecoverySuccess = {},
-        onNavigateToLogin = {}
+        onNavigateBack = {}
     )
 }

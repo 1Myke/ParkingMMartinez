@@ -38,7 +38,11 @@ class MainActivity : ComponentActivity() {
                         }
                     )
 
-                    "recovery" -> RecoveryScreen()
+                    "recovery" -> RecoveryScreen(
+                        onNavigateBack = {
+                            currentScreen = "login"
+                        }
+                    )
 
                     "register" -> RegistrationScreen(
                         onRegisterSuccess = {
@@ -57,7 +61,9 @@ class MainActivity : ComponentActivity() {
                         }
                     )
 
-                    "booking" -> BookingScreen()
+                    "booking" -> BookingScreen(
+                        initialZone = "Super Vip zone"
+                    )
                 }
             }
         }

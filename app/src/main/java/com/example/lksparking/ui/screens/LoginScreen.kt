@@ -25,22 +25,25 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.lksparking.ui.components.LksButton
 import com.example.lksparking.ui.components.LksClickableLabel
 import com.example.lksparking.ui.components.LksPasswordField
 import com.example.lksparking.ui.components.LksTextField
 import com.example.lksparking.ui.theme.LksOrange
+import com.example.lksparking.ui.viewmodel.LoginViewModel
 
 @Composable
 fun LoginScreen(
+    viewModel: LoginViewModel = viewModel(),
     onLoginSuccess: () -> Unit,
     onNavigateToRegister: () -> Unit,
     onNavigateToPasswordRecovery: () -> Unit
 ){
-    var email by remember { mutableStateOf("") }
+    /*var email by remember { mutableStateOf("") }
     var pass by remember { mutableStateOf("") }
 
-    var errorMessage by remember { mutableStateOf("") }
+    var errorMessage by remember { mutableStateOf("") }*/
 
     Column(
         modifier = Modifier
@@ -58,26 +61,26 @@ fun LoginScreen(
         Spacer(modifier = Modifier.height(32.dp))
 
         LksTextField(
-            value = email,
-            onValueChange = { email = it },
+            value = viewModel.email,
+            onValueChange = { viewModel.onEmailChange(it) },
             label = "Username",
             //leadingIcon = Icons.Default.Email,
             // El text field se pondra en rojo si en el mensaje de error esta la palabra email o username
-            isError = errorMessage.contains("email", ignoreCase = true) ||
-                    errorMessage.contains("user", ignoreCase = true)
+            isError = viewModel.errorMessage.contains("email", ignoreCase = true) ||
+                    viewModel.errorMessage.contains("user", ignoreCase = true)
         )
 
         LksPasswordField(
-            value = pass,
-            onValueChange = { pass = it},
+            value = viewModel.password,
+            onValueChange = { viewModel.onPasswordChange(it) },
             label = "Password",
-            isError = errorMessage.contains("password", ignoreCase = true)//,
+            isError = viewModel.errorMessage.contains("password", ignoreCase = true)//,
             //leadingIcon = Icons.Default.Key
         )
 
-        if (errorMessage.isNotEmpty()){
+        if (viewModel.errorMessage.isNotEmpty()){
             Text(
-                text = errorMessage,
+                text = viewModel.errorMessage,
                 color = Color.Red,
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier.padding(vertical = 8.dp)
@@ -98,20 +101,9 @@ fun LoginScreen(
 
         LksButton(
             text = "LOG IN",
-            enabled = email.isNotEmpty() && pass.isNotEmpty(),
+            enabled = viewModel.email.isNotEmpty() && viewModel.password.isNotEmpty(),
             onClick = {
-                errorMessage = ""
-                // MEJORAS: AQUI HAY QUE VALIDAR QUE ESTE EN LA BASE DE DATOS
-                // AL MIRAR EN LA BASE DE DATOS COMPROBAMOS AVER TANTO SI ES EL USERNAME O EL GMAIL PORQUE SE PUEDE ENTRAR CON AMBOS
-                // EN EL REGISTER HAY QUE HACER HASH
-                // EN EL REGISTER HAY QUE HACER LA VALIDACION DEL REGEX ANTES DE MANDARLO A LA BASE DE DATOS
-                if (!email.contains("@")) {
-                    errorMessage = "Please enter a valid email"
-                } else if (pass.length < 6) {
-                    errorMessage = "Password must be at least 6 characters"
-                } else {
-                    onLoginSuccess()
-                }
+                viewModel.login{ onLoginSuccess() }
             }
             //modifier = Modifier.padding(top = 1.dp)
         )

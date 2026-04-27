@@ -29,17 +29,21 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.lksparking.ui.components.LksButton
 import com.example.lksparking.ui.components.LksClickableLabel
 import com.example.lksparking.ui.components.LksPasswordField
 import com.example.lksparking.ui.components.LksTextField
 import com.example.lksparking.ui.theme.LksOrange
+import com.example.lksparking.ui.viewmodel.RegistrationViewModel
 
 @Composable
 fun RegistrationScreen(
+    viewModel: RegistrationViewModel = viewModel(),
     onRegisterSuccess: () -> Unit,
     onNavigateToLogin: () -> Unit
 ) {
+    /*
     var name by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }
     var username by remember { mutableStateOf("") }
@@ -51,6 +55,7 @@ fun RegistrationScreen(
     var vehicleType by remember { mutableStateOf("Car") }
     
     var errorMessage by remember { mutableStateOf("") }
+    */
 
     Column(
         modifier = Modifier
@@ -69,24 +74,24 @@ fun RegistrationScreen(
         Spacer(modifier = Modifier.height(24.dp))
 
         LksTextField(
-            value = name,
-            onValueChange = { name = it; errorMessage = "" },
+            value = viewModel.name,
+            onValueChange = { viewModel.onNameChange(it) },
             label = "Name",
             isError = false //Simplemente es su nombre, no podemos saber si esta bien o mal
         )
 
         LksTextField(
-            value = lastName,
-            onValueChange = { lastName = it; errorMessage = "" },
+            value = viewModel.lastName,
+            onValueChange = { viewModel.onLastNameChange(it) },
             label = "Last name",
             isError = false //Simplemente es su apellido, no podemos saber si esta bien o mal
         )
 
         LksTextField(
-            value = username,
-            onValueChange = { username = it; errorMessage = "" },
+            value = viewModel.username,
+            onValueChange = { viewModel.onUsernameChange(it) },
             label = "Username",
-            isError = errorMessage.contains("username", true) //No puede haber usernames repetidos
+            isError = viewModel.errorMessage.contains("username", true) //No puede haber usernames repetidos
         )
 
         //Elegir el type
@@ -104,10 +109,10 @@ fun RegistrationScreen(
         ) {
             val vehicles = listOf("Car", "Motorcycle", "Electric Car", "Adapted Car")
             vehicles.forEach { type ->
-                val isSelected = vehicleType == type
+                val isSelected = viewModel.vehicleType == type
                 FilterChip(
                     selected = isSelected,
-                    onClick = { vehicleType = type },
+                    onClick = { viewModel.onVehicleTypeChange(type) },
                     label = { Text(type) },
                     colors = FilterChipDefaults.filterChipColors(
                         selectedContainerColor = LksOrange.copy(alpha = 0.2f),
@@ -119,38 +124,38 @@ fun RegistrationScreen(
         }
 
         LksTextField(
-            value = plate,
-            onValueChange = { plate = it.uppercase(); errorMessage = "" }, // Forzamos mayúsculas en la matrícula
+            value = viewModel.plate,
+            onValueChange = { viewModel.onPlateChange(it.uppercase()) }, // Forzamos mayúsculas en la matrícula
             label = "License Plate",
-            isError = isPlateInvalid(plate) //Da error, de momento lo he escrito asi, pero ayudame porfa
+            isError = isPlateInvalid(viewModel.plate) //Da error, de momento lo he escrito asi, pero ayudame porfa
         )
 
         LksTextField(
-            value = email,
-            onValueChange = { email = it; errorMessage = "" },
+            value = viewModel.email,
+            onValueChange = { viewModel.onEmailChange(it) },
             label = "Email",
-            isError = errorMessage.contains("email", true)
+            isError = viewModel.errorMessage.contains("email", true)
         )
 
         LksPasswordField(
-            value = pass,
-            onValueChange = { pass = it; errorMessage = "" },
+            value = viewModel.password,
+            onValueChange = { viewModel.onPasswordChange(it) },
             label = "Password",
-            isError = errorMessage.contains("password", true)
+            isError = viewModel.errorMessage.contains("password", true)
         )
 
         LksPasswordField(
-            value = passRepeat,
-            onValueChange = { passRepeat = it; errorMessage = "" },
+            value = viewModel.passwordRepeat,
+            onValueChange = { viewModel.onPasswordChange(it) },
             label = "Confirm password",
-            isError = errorMessage.contains("password", true)
+            isError = viewModel.errorMessage.contains("password", true)
         )
 
         //Comprobar que las dos passwords sean iguales y que tienen bien el regex que pedire
 
-        if (errorMessage.isNotEmpty()) {
+        if (viewModel.errorMessage.isNotEmpty()) {
             Text(
-                text = errorMessage,
+                text = viewModel.errorMessage,
                 color = Color.Red,
                 modifier = Modifier.padding(8.dp)
             )
@@ -160,23 +165,17 @@ fun RegistrationScreen(
 
         LksButton(
             text = "SIGN UP",
-            enabled = (name.isNotEmpty() &&
-                    lastName.isNotEmpty() &&
-                    username.isNotEmpty() &&
-                    email.isNotEmpty() &&
-                    pass.isNotEmpty() &&
-                    passRepeat.isNotEmpty() &&
-                    plate.isNotEmpty()),
-                    //vehicleType
+            enabled = (viewModel.name.isNotEmpty() &&
+                    viewModel.lastName.isNotEmpty() &&
+                    viewModel.username.isNotEmpty() &&
+                    viewModel.email.isNotEmpty() &&
+                    viewModel.password.isNotEmpty() &&
+                    viewModel.passwordRepeat.isNotEmpty() &&
+                    viewModel.plate.isNotEmpty() &&
+                    viewModel.vehicleType.isNotEmpty()
+                    ),
             onClick = {
-                // AQUÍ VALIDAMOS TODO ANTES DE "ENVIAR"
-                when {
-                    !email.contains("@") -> errorMessage = "Invalid email format"
-                    pass != passRepeat -> errorMessage = "Passwords do not match"
-                    pass.length < 6 -> errorMessage = "Password too short"
-                    isPlateInvalid(plate) -> errorMessage = "Invalid license plate (1234ABC)"
-                    else -> onRegisterSuccess()
-                }
+                viewModel.register { onRegisterSuccess() }
             }
         )
 

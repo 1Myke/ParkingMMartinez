@@ -7,5 +7,5 @@ data class ParkingZone(
     val availableSpots: Int,
     val totalSpots: Int,
     val iconRes: Int, // Para el icono de los vehiculos
-    val categoryColor: Color
+    val color: Color
 )

@@ -20,6 +20,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material3.Divider
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -32,19 +33,24 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.lksparking.model.VehicleType
 import com.example.lksparking.ui.components.ProfileHeaderSection
 import com.example.lksparking.ui.components.VehicleCard
 import com.example.lksparking.ui.theme.LksOrange
+import com.example.lksparking.ui.viewmodel.ProfileViewModel
 
 @Composable
 fun ProfileScreen(
+    viewModel: ProfileViewModel = viewModel(),
     onAddVehicleClick: () -> Unit
 ){
+    /*
     //DATOS DE PRUEBA
     val userName = "1Myke"
     val userRole = "Senior Operations Manager"
     val userEmail = "mikel@lksnext.com"
+     */
 
     Scaffold(
         // SOLO para el boton flotante naranja
@@ -68,9 +74,13 @@ fun ProfileScreen(
         ) {
             Spacer(modifier = Modifier.height(40.dp))
 
-            ProfileHeaderSection(userName, userRole, userEmail)
+            ProfileHeaderSection(
+                viewModel.userName,
+                viewModel.userRole,
+                viewModel.userEmail
+            )
 
-            Divider(modifier = Modifier.padding(vertical = 24.dp), thickness = 1.dp, color = Color(0xFFEEEEEE))
+            HorizontalDivider(modifier = Modifier.padding(vertical = 24.dp), thickness = 1.dp, color = Color(0xFFEEEEEE))
 
             Row(
                 modifier = Modifier.padding(horizontal = 24.dp),
@@ -92,12 +102,19 @@ fun ProfileScreen(
                 )
             }
 
+            // LISTA DINÁMICA
             Column(
                 modifier = Modifier.padding(24.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                VehicleCard(name = "My Car", plate = "1234 ABC", type = VehicleType.STANDARD)
-                VehicleCard(name = "Vespa", plate= "5678 XYZ", type = VehicleType.MOTORCYCLE)
+                // Iteramos sobre la lista del ViewModel
+                viewModel.vehicles.forEach { vehicle ->
+                    VehicleCard(
+                        name = vehicle.name,
+                        plate = vehicle.plate,
+                        type = vehicle.type
+                    )
+                }
             }
         }
     }

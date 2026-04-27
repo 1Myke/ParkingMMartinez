@@ -6,7 +6,10 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.*
 import com.example.lksparking.ui.screens.BookingScreen
+import com.example.lksparking.ui.screens.LoginScreen
+import com.example.lksparking.ui.screens.RegistrationScreen
 import com.example.lksparking.ui.screens.MapScreen
+import com.example.lksparking.ui.screens.RecoveryScreen
 import com.example.lksparking.ui.theme.LksParkingTheme
 
 class MainActivity : ComponentActivity() {
@@ -15,14 +18,45 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             LksParkingTheme {
-                // 1. Definimos la variable de estado para saber qué pantalla mostrar
-                var currentScreen by remember { mutableStateOf("map") }
+                // 1. Definimos la variable que controla qué pantalla se ve
+                // Valores posibles: "login", "register", "map"
+                var currentScreen by remember { mutableStateOf("login") }
 
-                // 2. El "conmutador" de pantallas
+                // 2. El "Selector" de pantallas
                 when (currentScreen) {
-                    "map" -> MapScreen(
-                        onZoneClick = { currentScreen = "booking" }
+                    "login" -> LoginScreen(
+                        onLoginSuccess = {
+                            // Si el login es correcto, vamos al mapa
+                            currentScreen = "map"
+                        },
+                        onNavigateToRegister = {
+                            // Si pulsa "Sign Up", vamos a registro
+                            currentScreen = "register"
+                        },
+                        onNavigateToPasswordRecovery = {
+                            currentScreen = "recovery"
+                        }
                     )
+
+                    "recovery" -> RecoveryScreen()
+
+                    "register" -> RegistrationScreen(
+                        onRegisterSuccess = {
+                            // Si se registra bien, le mandamos al login para que entre
+                            currentScreen = "login"
+                        },
+                        onNavigateToLogin = {
+                            // Si pulsa "Ya tengo cuenta", vuelve a login
+                            currentScreen = "login"
+                        }
+                    )
+
+                    "map" -> MapScreen(
+                        onZoneClick = {
+                            currentScreen = "booking"
+                        }
+                    )
+
                     "booking" -> BookingScreen()
                 }
             }

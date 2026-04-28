@@ -146,7 +146,7 @@ fun RegistrationScreen(
 
         LksPasswordField(
             value = viewModel.passwordRepeat,
-            onValueChange = { viewModel.onPasswordChange(it) },
+            onValueChange = { viewModel.onPasswordRepeatChange(it) },
             label = "Confirm password",
             isError = viewModel.errorMessage.contains("password", true)
         )

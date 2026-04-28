@@ -1,4 +1,10 @@
 package com.example.lksparking.ui.screens
 
-class NotificationScreen {
+import androidx.compose.runtime.Composable
+
+@Composable
+fun NotificationScreen(
+
+){
+
 }

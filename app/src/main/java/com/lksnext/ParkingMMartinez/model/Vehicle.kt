@@ -5,7 +5,8 @@ import java.util.UUID
 enum class VehicleType{
     STANDARD,
     ELECTRIC,
-    MOTORCYCLE
+    MOTORCYCLE,
+    ADAPTED
 }
 
 data class Vehicle(

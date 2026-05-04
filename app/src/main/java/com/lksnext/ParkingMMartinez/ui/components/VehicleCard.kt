@@ -38,7 +38,7 @@ fun VehicleCard(
         VehicleType.STANDARD -> Color(0xFFFFF4E6) to Color(0xFFD9480F) // Naranja suave
         VehicleType.MOTORCYCLE -> Color(0xFFE7F5FF) to Color(0xFF1971C2) // Azul suave
         VehicleType.ELECTRIC -> Color(0xFFEBFBEE) to Color(0xFF2F9E44) // Verde suave
-        else -> Color(0xFFF1F3F5) to Color(0xFF495057) // Gris para otros
+        VehicleType.ADAPTED -> Color(0xFFF1F3F5) to Color(0xFF495057) // Gris para otros
     }
 
     Card(

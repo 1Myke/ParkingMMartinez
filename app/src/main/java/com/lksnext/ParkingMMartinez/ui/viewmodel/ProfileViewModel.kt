@@ -15,6 +15,14 @@ class ProfileViewModel : ViewModel() {
     var userRole by mutableStateOf("Senior Operations Manager")
     var userEmail by mutableStateOf("mikel@lksnext.com")
 
+    var showAddVehicleDialog by mutableStateOf(false)
+        private set
+
+    var newVehicleName by mutableStateOf("")
+    var newVehiclePlate by mutableStateOf("")
+    var selectedVehicleType by mutableStateOf(VehicleType.STANDARD)
+
+
     // Lista de vehículos reactiva
     private val _vehicles = mutableStateListOf(
         Vehicle(name = "My Car", plate = "1234 ABC", type = VehicleType.STANDARD, isAdapted = false),
@@ -22,11 +30,31 @@ class ProfileViewModel : ViewModel() {
     )
     val vehicles: List<Vehicle> get() = _vehicles
 
-    fun addVehicle(vehicle: Vehicle) {
-        _vehicles.add(vehicle)
+    fun onOpenDialog() {
+        showAddVehicleDialog = true
     }
 
-    fun deleteVehicle(vehicle: Vehicle) {
-        _vehicles.remove(vehicle)
+    fun onCloseDialog() {
+        newVehicleName = ""
+        newVehiclePlate = ""
+        showAddVehicleDialog = false
+    }
+
+    fun onVehicleTypeChange(type: VehicleType) {
+        selectedVehicleType = type
+    }
+
+    fun addVehicle(){
+        if (newVehicleName.isNotBlank() && newVehiclePlate.isNotBlank()){
+            _vehicles.add(
+                Vehicle(
+                    name = newVehicleName,
+                    plate = newVehiclePlate,
+                    type = selectedVehicleType,
+                    isAdapted = false
+                )
+            )
+            onCloseDialog()
+        }
     }
 }

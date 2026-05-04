@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.lksparking"
+    namespace = "com.lksnext.ParkingMMartinez"
     compileSdk {
         version = release(36) {
             minorApiLevel = 1
@@ -12,7 +12,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.example.lksparking"
+        applicationId = "com.lksnext.ParkingMMartinez"
         minSdk = 24
         targetSdk = 36
         versionCode = 1

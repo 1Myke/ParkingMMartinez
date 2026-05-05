@@ -19,6 +19,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.DirectionsCar
+import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -53,7 +54,7 @@ import com.lksnext.ParkingMMartinez.ui.viewmodel.ProfileViewModel
 @Composable
 fun ProfileScreen(
     viewModel: ProfileViewModel = viewModel(),
-    onAddVehicleClick: () -> Unit
+    onLogoutClick: () -> Unit
 ){
     /*
     //DATOS DE PRUEBA
@@ -82,7 +83,22 @@ fun ProfileScreen(
                 .background(Color.White) //????HACE FALTA
                 .verticalScroll(rememberScrollState())
         ) {
-            Spacer(modifier = Modifier.height(40.dp))
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp, vertical = 8.dp),
+                horizontalArrangement = Arrangement.End
+            ) {
+                androidx.compose.material3.IconButton(onClick = onLogoutClick) {
+                    Icon(
+                        imageVector = Icons.Default.Logout,
+                        contentDescription = "Logout",
+                        tint = Color.Gray,
+                        modifier = Modifier.size(28.dp)
+                    )
+                }
+            }
 
             ProfileHeaderSection(
                 viewModel.userName,
@@ -260,6 +276,6 @@ fun ProfileScreen(
 @Composable
 fun ProfileScreenPreview() {
     ProfileScreen(
-        onAddVehicleClick = {}
+        onLogoutClick = {}
     )
 }

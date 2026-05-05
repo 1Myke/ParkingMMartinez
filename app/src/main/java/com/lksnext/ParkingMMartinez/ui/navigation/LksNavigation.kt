@@ -87,10 +87,16 @@ fun LksNavigation() {
 
             // --- PROFILE (PANTALLA PRINCIPAL) ---
             composable(Screen.Profile.route) {
-                ProfileScreen(onAddVehicleClick = { /* TODO */ })
+                ProfileScreen(
+                    onLogoutClick = {
+                        navController.navigate(Screen.Login.route) {
+                            popUpTo(0) { inclusive = true }
+                        }
+                    }
+                )
             }
 
-            // --- PRÓXIMAMENTE: ALERTS Y BOOKINGS LIST ---
+            // MEJORA: --- PRÓXIMAMENTE: ALERTS Y BOOKINGS LIST ---
             composable(Screen.BookingsList.route) { /* BookingsListScreen() */ }
             composable(Screen.Alerts.route) { /* AlertsScreen() */ }
         }

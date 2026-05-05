@@ -17,6 +17,10 @@ class ProfileViewModel : ViewModel() {
 
     var showAddVehicleDialog by mutableStateOf(false)
         private set
+    var showDeleteConfirmation by mutableStateOf(false)
+        private set
+    var vehicleToDelete by mutableStateOf<Vehicle?>(null)
+        private set
 
     var newVehicleName by mutableStateOf("")
     var newVehiclePlate by mutableStateOf("")
@@ -40,11 +44,21 @@ class ProfileViewModel : ViewModel() {
         showAddVehicleDialog = false
     }
 
+    fun askDeleteVehicle(vehicle: Vehicle) {
+        vehicleToDelete = vehicle
+        showDeleteConfirmation = true
+    }
+
+    fun dismissDeleteDialog() {
+        showDeleteConfirmation = false
+        vehicleToDelete = null
+    }
+
     fun onVehicleTypeChange(type: VehicleType) {
         selectedVehicleType = type
     }
 
-    fun addVehicle(){
+    fun addVehicle() {
         if (newVehicleName.isNotBlank() && newVehiclePlate.isNotBlank()){
             _vehicles.add(
                 Vehicle(
@@ -56,5 +70,12 @@ class ProfileViewModel : ViewModel() {
             )
             onCloseDialog()
         }
+    }
+
+    fun confirmDeleteVehicle() {
+        vehicleToDelete?.let {
+            _vehicles.remove(it)
+        }
+        dismissDeleteDialog()
     }
 }

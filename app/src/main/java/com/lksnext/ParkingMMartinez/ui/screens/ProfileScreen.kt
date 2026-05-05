@@ -122,7 +122,8 @@ fun ProfileScreen(
                     VehicleCard(
                         name = vehicle.name,
                         plate = vehicle.plate,
-                        type = vehicle.type
+                        type = vehicle.type,
+                        onDeleteClick = { viewModel.askDeleteVehicle(vehicle) }
                     )
                 }
             }
@@ -222,6 +223,32 @@ fun ProfileScreen(
                     }
                 }
             }
+        }
+
+        if (viewModel.showDeleteConfirmation) {
+            androidx.compose.material3.AlertDialog(
+                onDismissRequest = { viewModel.dismissDeleteDialog() },
+                title = { Text(text = "Confirm Delete") },
+                text = {
+                    Text("Are you sure you want to remove ${viewModel.vehicleToDelete?.name}? This action cannot be undone.")
+                },
+                confirmButton = {
+                    androidx.compose.material3.TextButton(
+                        onClick = { viewModel.confirmDeleteVehicle() }
+                    ) {
+                        Text("Delete", color = Color.Red, fontWeight = FontWeight.Bold)
+                    }
+                },
+                dismissButton = {
+                    androidx.compose.material3.TextButton(
+                        onClick = { viewModel.dismissDeleteDialog() }
+                    ) {
+                        Text("Cancel", color = Color.Gray)
+                    }
+                },
+                shape = RoundedCornerShape(16.dp),
+                containerColor = Color.White
+            )
         }
     }
 }

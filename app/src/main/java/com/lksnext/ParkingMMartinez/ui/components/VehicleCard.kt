@@ -31,20 +31,21 @@ import com.lksnext.ParkingMMartinez.model.VehicleType
 fun VehicleCard(
     name: String,
     plate: String,
-    type: VehicleType
+    type: VehicleType,
+    onDeleteClick: () -> Unit
 ) {
     // Definimos los colores dinámicos según el tipo
     val (containerColor, contentColor) = when (type) {
         VehicleType.STANDARD -> Color(0xFFFFF4E6) to Color(0xFFD9480F) // Naranja suave
         VehicleType.MOTORCYCLE -> Color(0xFFE7F5FF) to Color(0xFF1971C2) // Azul suave
         VehicleType.ELECTRIC -> Color(0xFFEBFBEE) to Color(0xFF2F9E44) // Verde suave
-        VehicleType.ADAPTED -> Color(0xFFF1F3F5) to Color(0xFF495057) // Gris para otros
+        VehicleType.ADAPTED -> Color(0xFFF1F3F5) to Color(0xFF495057) // Gris para vehiculos adaptados
     }
 
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(4.dp), // Un poco más de sombra para que "flote" como en Figma
+        elevation = CardDefaults.cardElevation(4.dp),
         shape = RoundedCornerShape(20.dp) // Esquinas un poco más redondeadas
     ) {
         Row(
@@ -58,7 +59,7 @@ fun VehicleCard(
                 shape = RoundedCornerShape(12.dp)
             ) {
                 Icon(
-                    // Podrías cambiar el icono según el tipo también
+                    // Cambiar el icono según el tipo también
                     imageVector = if (type == VehicleType.MOTORCYCLE) Icons.Default.TwoWheeler else Icons.Default.DirectionsCar,
                     contentDescription = null,
                     modifier = Modifier.padding(12.dp),
@@ -88,7 +89,7 @@ fun VehicleCard(
 
                     Spacer(modifier = Modifier.width(8.dp))
 
-                    // LA MEJORA: El Badge con colores bonitos
+                    // MEJORAS: El Badge con colores bonitos
                     Surface(
                         color = containerColor,
                         shape = RoundedCornerShape(4.dp)
@@ -104,10 +105,10 @@ fun VehicleCard(
                 }
             }
 
-            IconButton(onClick = { /* Borrar */ }) {
+            IconButton(onClick =  onDeleteClick ) {
                 Icon(
                     Icons.Default.Delete,
-                    contentDescription = null,
+                    contentDescription = "Delete vehicle",
                     tint = Color.Red.copy(alpha = 0.5f),
                     modifier = Modifier.size(20.dp)
                 )

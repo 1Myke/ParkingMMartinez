@@ -112,18 +112,21 @@ fun ProfileScreen(
                 )
             }
 
-            // LISTA DINÁMICA
+            // LISTA DINÁMICA <- de momento! Luego tendre que ver como hacerlo con Firebase
             Column(
                 modifier = Modifier.padding(24.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                // Iteramos sobre la lista del ViewModel
+                val canDelete = viewModel.vehicles.size > 1
+
                 viewModel.vehicles.forEach { vehicle ->
                     VehicleCard(
                         name = vehicle.name,
                         plate = vehicle.plate,
                         type = vehicle.type,
-                        onDeleteClick = { viewModel.askDeleteVehicle(vehicle) }
+                        onDeleteClick = if (canDelete) {
+                            { viewModel.askDeleteVehicle(vehicle) }
+                        } else null
                     )
                 }
             }

@@ -32,7 +32,7 @@ fun VehicleCard(
     name: String,
     plate: String,
     type: VehicleType,
-    onDeleteClick: () -> Unit
+    onDeleteClick: (() -> Unit)? = null
 ) {
     // Definimos los colores dinámicos según el tipo
     val (containerColor, contentColor) = when (type) {
@@ -104,14 +104,15 @@ fun VehicleCard(
                     }
                 }
             }
-
-            IconButton(onClick =  onDeleteClick ) {
-                Icon(
-                    Icons.Default.Delete,
-                    contentDescription = "Delete vehicle",
-                    tint = Color.Red.copy(alpha = 0.5f),
-                    modifier = Modifier.size(20.dp)
-                )
+            if (onDeleteClick != null) {
+                IconButton(onClick = onDeleteClick) {
+                    Icon(
+                        Icons.Default.Delete,
+                        contentDescription = "Delete vehicle",
+                        tint = Color.Red.copy(alpha = 0.5f),
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
             }
         }
     }

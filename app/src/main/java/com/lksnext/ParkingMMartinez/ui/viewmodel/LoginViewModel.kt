@@ -15,6 +15,9 @@ class LoginViewModel : ViewModel() {
     var isLoading by mutableStateOf(false)
         private set
 
+    var rememberMe by mutableStateOf(false)
+        private set
+
     fun onEmailChange(newValue: String) {
         email = newValue
         errorMessage = ""
@@ -25,7 +28,7 @@ class LoginViewModel : ViewModel() {
         errorMessage = ""
     }
 
-    fun login(onSuccess: () -> Unit) {
+    fun login(onSuccess: (Boolean) -> Unit) {
         isLoading = true
 
         //MEJORAS: Analizar que tdo este bien
@@ -35,9 +38,13 @@ class LoginViewModel : ViewModel() {
             errorMessage = "Password must be at least 6 characters"
         } else {
             // Simulamos éxito
-            onSuccess()
+            onSuccess(rememberMe)
         }
 
         isLoading = false
+    }
+
+    fun onRememberMeChange(newValue: Boolean) {
+        rememberMe = newValue
     }
 }

@@ -28,7 +28,7 @@ import com.lksnext.ParkingMMartinez.ui.viewmodel.LoginViewModel
 @Composable
 fun LoginScreen(
     viewModel: LoginViewModel = viewModel(),
-    onLoginSuccess: () -> Unit,
+    onLoginSuccess: (Boolean) -> Unit,
     onNavigateToRegister: () -> Unit,
     onNavigateToPasswordRecovery: () -> Unit
 ){
@@ -78,26 +78,41 @@ fun LoginScreen(
                 modifier = Modifier.padding(vertical = 8.dp)
             )
         }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            LksClickableLabel(
+                text = "Forgot Password?",
+                onClick = {
+                    onNavigateToPasswordRecovery()
+                }
+            )
 
-        LksClickableLabel(
-            text = "Forgot Password?",
-            onClick = {
-                onNavigateToPasswordRecovery()
-            },
-            modifier = Modifier
-                .align(Alignment.Start) // <--- ESTO lo empuja a la izquierda
-                .padding(start = 4.dp)
-        )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(text = "Remember me", style = MaterialTheme.typography.bodySmall)
+                androidx.compose.material3.Checkbox(
+                    checked = viewModel.rememberMe,
+                    onCheckedChange = { viewModel.onRememberMeChange(it) },
+                    colors = androidx.compose.material3.CheckboxDefaults.colors(
+                        checkedColor = LksOrange
+                    )
+                )
+            }
+        }
+
 
         Spacer(modifier = Modifier.padding(4.dp))
 
         LksButton(
             text = "LOG IN",
-            enabled = viewModel.email.isNotEmpty() && viewModel.password.isNotEmpty(),
+            enabled = !viewModel.isLoading && viewModel.email.isNotEmpty() && viewModel.password.isNotEmpty(),
             onClick = {
-                viewModel.login{ onLoginSuccess() }
+                viewModel.login { shouldRemember ->
+                    onLoginSuccess(shouldRemember)
+                }
             }
-            //modifier = Modifier.padding(top = 1.dp)
         )
 
         Row(

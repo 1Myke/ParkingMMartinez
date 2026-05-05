@@ -4,15 +4,25 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavType
 import androidx.navigation.compose.*
 import androidx.navigation.navArgument
+import com.lksnext.ParkingMMartinez.data.SessionManager
 import com.lksnext.ParkingMMartinez.ui.components.LksFooter
 import com.lksnext.ParkingMMartinez.ui.screens.*
 
 @Composable
 fun LksNavigation() {
+
+    //Verficiar si ya esta loggeado el usuario
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val sessionManager = remember { SessionManager(context) }
+
+    val startDestination = if (sessionManager.isLoggedIn()) Screen.Map.route
+    else Screen.Login.route
+
     val navController = rememberNavController()
 
     // Observamos en qué pantalla estamos actualmente
@@ -36,13 +46,16 @@ fun LksNavigation() {
         // El paddingValues es vital: evita que el contenido quede debajo del footer
         NavHost(
             navController = navController,
-            startDestination = Screen.Login.route,
+            startDestination = startDestination,
             modifier = Modifier.padding(paddingValues)
         ) {
             // --- LOGIN ---
             composable(Screen.Login.route) {
                 LoginScreen(
-                    onLoginSuccess = {
+                    onLoginSuccess = { shouldRemember ->
+                        if (shouldRemember) {
+                            sessionManager.saveSession(true)
+                        }
                         navController.navigate(Screen.Map.route) {
                             popUpTo(Screen.Login.route) { inclusive = true }
                         }
@@ -89,6 +102,7 @@ fun LksNavigation() {
             composable(Screen.Profile.route) {
                 ProfileScreen(
                     onLogoutClick = {
+                        sessionManager.clearSession()
                         navController.navigate(Screen.Login.route) {
                             popUpTo(0) { inclusive = true }
                         }

@@ -6,6 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import com.lksnext.ParkingMMartinez.data.BookingManager
+import com.lksnext.ParkingMMartinez.data.ParkingMock
 import com.lksnext.ParkingMMartinez.model.Reservation
 
 class BookingRegisterViewModel : ViewModel() {
@@ -22,6 +23,7 @@ class BookingRegisterViewModel : ViewModel() {
     // Borra la reserva y actualiza la lista inmediatamente
     fun cancelReservation(context: Context, reservationId: String) {
         val manager = BookingManager(context)
+
         manager.cancelReservation(reservationId)
         // Refrescar la lista local para que el cambio se vea al instante
         loadReservations(context)

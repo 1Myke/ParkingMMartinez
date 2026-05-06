@@ -16,12 +16,17 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.lksnext.ParkingMMartinez.ui.components.LksHeader
 import com.lksnext.ParkingMMartinez.ui.components.ZoneCard
 import com.lksnext.ParkingMMartinez.ui.viewmodel.MapViewModel
+import com.lksnext.ParkingMMartinez.model.*
 
 @Composable
 fun MapScreen(
     viewModel: MapViewModel = viewModel(),
     onZoneClick: (String) -> Unit
 ) {
+
+    // De momento vamos a hacer el import del mock para que tenga los datos
+    val parkingMock = com.lksnext.ParkingMMartinez.data.ParkingMock
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -39,8 +44,28 @@ fun MapScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             viewModel.zones.forEach { zone ->
+                val type: VehicleType = when (zone.name) {
+                    ZoneNames.DISABILITY -> VehicleType.ADAPTED
+                    ZoneNames.EV -> VehicleType.ELECTRIC
+                    ZoneNames.MOTORCYCLE -> VehicleType.MOTORCYCLE
+                    ZoneNames.STANDARD -> VehicleType.STANDARD
+                    else -> {
+                        android.util.Log.e("MAP_ERROR", "ZoneName no reconocido: ${zone.name}")
+                        VehicleType.STANDARD
+                    }
+                }
+
+                val available = parkingMock.getAvailableSpotsCount(type)
+                val total = parkingMock.getTotalSpotsCount(type)
+
+                // Creamos una copia de la zona con los datos actualizados para la Card
+                val updatedZone = zone.copy(
+                    availableSpots = available,
+                    totalSpots = total
+                )
+
                 ZoneCard(
-                    zone = zone,
+                    zone = updatedZone,
                     onClick = { onZoneClick(zone.name) }
                 )
             }

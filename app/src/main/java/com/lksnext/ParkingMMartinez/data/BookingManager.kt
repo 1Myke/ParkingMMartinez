@@ -31,8 +31,15 @@ class BookingManager(context: Context) {
     }
 
     fun cancelReservation(reservationId: String) {
-        val currentBookings = getAllBookings().filter { it.id != reservationId }
-        val json = gson.toJson(currentBookings)
+        val allBookings = getAllBookings().toMutableList()
+
+        val reservationToDelete = allBookings.find { it.id == reservationId }
+        reservationToDelete?.let {
+            ParkingMock.releaseSpot(it.spotNumber)
+        }
+
+        val updatedBookings = allBookings.filter { it.id != reservationId }
+        val json = gson.toJson(updatedBookings)
         prefs.edit().putString("bookings_list", json).apply()
     }
 }

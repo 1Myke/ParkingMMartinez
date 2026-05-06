@@ -36,7 +36,7 @@ fun BookingScreen(
     val context = androidx.compose.ui.platform.LocalContext.current
 
     LaunchedEffect(Unit) {
-        viewModel.canUserReserve(context)
+        viewModel.checkUserReservationStatus(context)
     }
 
     // Dialogo del timepicker

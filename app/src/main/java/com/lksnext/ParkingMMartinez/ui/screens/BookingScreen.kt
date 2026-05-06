@@ -25,6 +25,7 @@ import com.lksnext.ParkingMMartinez.ui.components.LksButton
 import com.lksnext.ParkingMMartinez.ui.components.LksTimePicker
 import com.lksnext.ParkingMMartinez.ui.theme.LksOrange
 import com.lksnext.ParkingMMartinez.ui.viewmodel.BookingViewModel
+import com.lksnext.ParkingMMartinez.data.ParkingMock
 
 @Composable
 fun BookingScreen(
@@ -285,18 +286,18 @@ fun BookingScreen(
                 text = "Confirm Reservation",
                 enabled = !viewModel.hasActiveReservation,
                 onClick = {
-                    // MEJORA: COGER LOS DATOS REALES Y NO USAR DATOS DUMMY
-                    val zoneToSave = com.lksnext.ParkingMMartinez.model.ParkingZone(
-                        name = viewModel.parkingZone,
-                        availableSpots = 10, // Dato inventado de momento
-                        totalSpots = 20, //Igual
-                        iconRes = android.R.drawable.ic_menu_directions, // Un icono random de momento, tengo que MEJORA
-                        color = LksOrange
+                    // Buscamos la zona real en el Mock para que tenga el color e icono correctos
+                    val realZone = ParkingMock.zones.find {
+                        it.name == viewModel.parkingZone
+                    } ?: ParkingMock.zones.first()
+
+                    // Vehículo seleccionado (más adelante vendrá de un estado)
+                    val selectedVehicle = com.lksnext.ParkingMMartinez.model.Vehicle(
+                        "1", "My Car", "1234 ABC",
+                        com.lksnext.ParkingMMartinez.model.VehicleType.STANDARD, false
                     )
 
-                    val defaultVehicle = com.lksnext.ParkingMMartinez.model.Vehicle("1", "My Car", "1234 ABC", com.lksnext.ParkingMMartinez.model.VehicleType.STANDARD, false)
-
-                    viewModel.confirmReservation(context, defaultVehicle, zoneToSave) {
+                    viewModel.confirmReservation(context, selectedVehicle, realZone) {
                         onConfirmBooking()
                     }
                 }

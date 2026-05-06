@@ -9,6 +9,7 @@ import com.lksnext.ParkingMMartinez.data.BookingManager
 import com.lksnext.ParkingMMartinez.model.ParkingZone
 import com.lksnext.ParkingMMartinez.model.Vehicle
 import com.lksnext.ParkingMMartinez.model.ZoneNames
+import com.lksnext.ParkingMMartinez.model.VehicleType
 import java.util.*
 import java.text.SimpleDateFormat
 import java.time.LocalTime
@@ -91,15 +92,18 @@ class BookingViewModel: ViewModel() {
     ) {
         val bookingManager = BookingManager(context)
 
+        val start = java.time.LocalTime.of(startHour, startMinute)
+        val end = start.plusHours(duration.toLong())
+
         val zoneType = when (parkingZone) {
-            ZoneNames.DISABILITY -> com.lksnext.ParkingMMartinez.model.VehicleType.ADAPTED
-            ZoneNames.EV -> com.lksnext.ParkingMMartinez.model.VehicleType.ELECTRIC
-            ZoneNames.MOTORCYCLE -> com.lksnext.ParkingMMartinez.model.VehicleType.MOTORCYCLE
-            ZoneNames .STANDARD-> com.lksnext.ParkingMMartinez.model.VehicleType.STANDARD
+            ZoneNames.DISABILITY -> VehicleType.ADAPTED
+            ZoneNames.EV -> VehicleType.ELECTRIC
+            ZoneNames.MOTORCYCLE -> VehicleType.MOTORCYCLE
+            ZoneNames .STANDARD-> VehicleType.STANDARD
             else -> {
                 // Por si llega algo rarete
                 android.util.Log.e("MAP_ERROR", "Nombre de zona no reconocido: $parkingZone")
-                com.lksnext.ParkingMMartinez.model.VehicleType.STANDARD
+                VehicleType.STANDARD
             }
         }
 
@@ -109,11 +113,12 @@ class BookingViewModel: ViewModel() {
         calendar.set(Calendar.DAY_OF_MONTH, selectedDay)
 
         val newReservation = com.lksnext.ParkingMMartinez.model.Reservation(
+            id = UUID.randomUUID().toString(),
             vehicle = vehicle,
             zone = zone,
             date = calendar.time,
-            startTime = LocalTime.of(startHour, startMinute),
-            endTime = LocalTime.parse(getEndTime()),
+            startTime = start,
+            endTime = end,
             isCheckedIn = false,
             spotNumber = assignedSpot
         )

@@ -8,7 +8,18 @@ import com.google.gson.reflect.TypeToken
 
 class BookingManager(context: Context) {
     private val prefs = context.getSharedPreferences("parking_prefs", Context.MODE_PRIVATE)
-    private val gson = Gson()
+    private val gson = com.google.gson.GsonBuilder()
+        .registerTypeAdapter(java.time.LocalTime::class.java, object : com.google.gson.JsonSerializer<java.time.LocalTime> {
+            override fun serialize(src: java.time.LocalTime, typeOfSrc: java.lang.reflect.Type, context: com.google.gson.JsonSerializationContext): com.google.gson.JsonElement {
+                return com.google.gson.JsonPrimitive(src.toString()) // Guarda como "HH:mm"
+            }
+        })
+        .registerTypeAdapter(java.time.LocalTime::class.java, object : com.google.gson.JsonDeserializer<java.time.LocalTime> {
+            override fun deserialize(json: com.google.gson.JsonElement, typeOfT: java.lang.reflect.Type, context: com.google.gson.JsonDeserializationContext): java.time.LocalTime {
+                return java.time.LocalTime.parse(json.asString) // Lee el String y lo vuelve a hacer LocalTime
+            }
+        })
+        .create()
 
     fun saveReservation(reservation: Reservation) {
         val currentBookings = getAllBookings().toMutableList()

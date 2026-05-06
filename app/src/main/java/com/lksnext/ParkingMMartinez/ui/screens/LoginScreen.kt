@@ -37,6 +37,8 @@ fun LoginScreen(
 
     var errorMessage by remember { mutableStateOf("") }*/
 
+    val context = androidx.compose.ui.platform.LocalContext.current
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -109,7 +111,7 @@ fun LoginScreen(
             text = "LOG IN",
             enabled = !viewModel.isLoading && viewModel.email.isNotEmpty() && viewModel.password.isNotEmpty(),
             onClick = {
-                viewModel.login { shouldRemember ->
+                viewModel.login(context) { shouldRemember ->
                     onLoginSuccess(shouldRemember)
                 }
             }

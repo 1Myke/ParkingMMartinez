@@ -50,6 +50,8 @@ fun RegistrationScreen(
     var errorMessage by remember { mutableStateOf("") }
     */
 
+    val context = androidx.compose.ui.platform.LocalContext.current
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -168,7 +170,7 @@ fun RegistrationScreen(
                     viewModel.vehicleType.isNotEmpty()
                     ),
             onClick = {
-                viewModel.register { onRegisterSuccess() }
+                viewModel.register(context) { onRegisterSuccess() }
             }
         )
 

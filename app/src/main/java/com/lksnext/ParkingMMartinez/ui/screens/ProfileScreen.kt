@@ -34,6 +34,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -56,12 +57,17 @@ fun ProfileScreen(
     viewModel: ProfileViewModel = viewModel(),
     onLogoutClick: () -> Unit
 ){
-    /*
-    //DATOS DE PRUEBA
-    val userName = "1Myke"
-    val userRole = "Senior Operations Manager"
-    val userEmail = "mikel@lksnext.com"
-     */
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val sessionManager = com.lksnext.ParkingMMartinez.data.SessionManager(context)
+
+    val currentUserId = sessionManager.getActiveUserId()
+
+    androidx.compose.runtime.LaunchedEffect(currentUserId) {
+        android.util.Log.d("DEBUG_SESSION", "ID actual en Perfil: $currentUserId")
+        if (currentUserId != null) {
+            viewModel.loadUserVehicles(context)
+        }
+    }
     
     Scaffold(
         // SOLO para el boton flotante naranja
@@ -90,7 +96,10 @@ fun ProfileScreen(
                     .padding(horizontal = 8.dp, vertical = 8.dp),
                 horizontalArrangement = Arrangement.End
             ) {
-                androidx.compose.material3.IconButton(onClick = onLogoutClick) {
+                androidx.compose.material3.IconButton(onClick = {
+                    com.lksnext.ParkingMMartinez.data.SessionManager(context).clearSession()
+                    onLogoutClick()
+                }) {
                     Icon(
                         imageVector = Icons.Default.Logout,
                         contentDescription = "Logout",
@@ -235,7 +244,7 @@ fun ProfileScreen(
 
                             LksButton(
                                 text = "Save Vehicle",
-                                onClick = { viewModel.addVehicle() },
+                                onClick = { viewModel.addVehicle(context) },
                                 modifier = Modifier.weight(1.3f) // Un poco más de peso para que no corte el texto
                             )
                         }
@@ -253,7 +262,7 @@ fun ProfileScreen(
                 },
                 confirmButton = {
                     androidx.compose.material3.TextButton(
-                        onClick = { viewModel.confirmDeleteVehicle() }
+                        onClick = { viewModel.confirmDeleteVehicle(context) }
                     ) {
                         Text("Delete", color = Color.Red, fontWeight = FontWeight.Bold)
                     }

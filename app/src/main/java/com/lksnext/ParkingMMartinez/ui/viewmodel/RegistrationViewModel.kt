@@ -4,6 +4,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import com.lksnext.ParkingMMartinez.model.VehicleType
 import com.lksnext.ParkingMMartinez.ui.screens.isPlateInvalid
 
 class RegistrationViewModel: ViewModel() {
@@ -70,8 +71,11 @@ class RegistrationViewModel: ViewModel() {
         errorMessage = ""
     }
 
-    fun register(onSuccess: () -> Unit) {
+    fun register(context: android.content.Context, onSuccess: () -> Unit) {
         isLoading = true
+
+        val userManager = com.lksnext.ParkingMMartinez.data.UserManager(context)
+        val sessionManager = com.lksnext.ParkingMMartinez.data.SessionManager(context)
 
         when {
             email.isBlank() || !email.contains("@") -> errorMessage = "Invalid email format"
@@ -79,7 +83,26 @@ class RegistrationViewModel: ViewModel() {
             password.length < 6 -> errorMessage = "Password too short"
             isPlateInvalid(plate) -> errorMessage = "Invalid license plate (1234ABC)"
             else -> {
-                // Aquí mañana crearemos el usuario en Firebase
+                val newUser = com.lksnext.ParkingMMartinez.model.User(
+                    name = name,
+                    lastName = lastName,
+                    username = username,
+                    email = email,
+                    pass = password
+                )
+
+                userManager.registerUser(newUser)
+
+                sessionManager.saveSession(true, newUser.id)
+
+                val firstVehicle = com.lksnext.ParkingMMartinez.model.Vehicle(
+                    name = "My Vehicle",
+                    plate = plate,
+                    type = VehicleType.STANDARD,
+                    isAdapted = false
+                )
+                com.lksnext.ParkingMMartinez.data.VehicleManager(context).addVehicle(newUser.id, firstVehicle)
+
                 onSuccess()
             }
         }

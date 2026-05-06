@@ -15,9 +15,17 @@ class BookingRegisterViewModel : ViewModel() {
         private set
 
     // Carga las reservas desde la memoria local
-    fun loadReservations(context: Context) {
+    fun loadReservations(context: android.content.Context) {
         val manager = BookingManager(context)
-        reservations = manager.getAllBookings()
+        val sessionManager = com.lksnext.ParkingMMartinez.data.SessionManager(context)
+        val currentUserId = sessionManager.getActiveUserId()
+
+        if (currentUserId == null) {
+            reservations = emptyList()
+            return
+        }
+
+        reservations = manager.getAllBookings().filter { it.vehicle.id == currentUserId }
     }
 
     // Borra la reserva y actualiza la lista inmediatamente

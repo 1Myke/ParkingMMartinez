@@ -25,7 +25,7 @@ class BookingManager(context: Context) {
         val currentBookings = getAllBookings().toMutableList()
         currentBookings.add(reservation)
         val json = gson.toJson(currentBookings)
-        prefs.edit().putString("bookings_list", json).apply()
+        prefs.edit().putString("bookings_list", json).commit()
     }
 
     fun getAllBookings(): List<Reservation> {
@@ -52,5 +52,11 @@ class BookingManager(context: Context) {
         val updatedBookings = allBookings.filter { it.id != reservationId }
         val json = gson.toJson(updatedBookings)
         prefs.edit().putString("bookings_list", json).apply()
+    }
+
+    fun getUserBookings(userId: String): List<Reservation> {
+        val all = getAllBookings()
+        return all.filter { it.vehicle.id == userId }
+        // OJO: Asegúrate de que al crear la reserva, el vehicle.id coincida con el userId
     }
 }

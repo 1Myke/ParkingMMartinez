@@ -91,6 +91,8 @@ class BookingViewModel: ViewModel() {
         onComplete: () -> Unit
     ) {
         val bookingManager = BookingManager(context)
+        val userId = com.lksnext.ParkingMMartinez.data.SessionManager(context).getActiveUserId() ?: ""
+        val vehicleWithId = vehicle.copy(id = userId) // Nos aseguramos de que lleve el ID del dueño
 
         val start = java.time.LocalTime.of(startHour, startMinute)
         val end = start.plusHours(duration.toLong())
@@ -114,7 +116,7 @@ class BookingViewModel: ViewModel() {
 
         val newReservation = com.lksnext.ParkingMMartinez.model.Reservation(
             id = UUID.randomUUID().toString(),
-            vehicle = vehicle,
+            vehicle = vehicleWithId,
             zone = zone,
             date = calendar.time,
             startTime = start,
@@ -132,10 +134,17 @@ class BookingViewModel: ViewModel() {
     }
 
     fun checkUserReservationStatus(context: Context) {
-        val bookings = BookingManager(context).getAllBookings()
-        // Si hay alguna reserva cuyo tiempo de fin es posterior a "ahora", bloqueamos
-        // De momento, si la lista no está vacía, bloqueamos pero esto solo es para probar
-        hasActiveReservation = bookings.isNotEmpty()
+        val sessionManager = com.lksnext.ParkingMMartinez.data.SessionManager(context)
+        val currentUserId = sessionManager.getActiveUserId()
+
+        if (currentUserId == null) {
+            hasActiveReservation = false
+            return
+        }
+
+        val allBookings = BookingManager(context).getAllBookings()
+
+        hasActiveReservation = allBookings.any { it.vehicle.id == currentUserId }
     }
 
 }

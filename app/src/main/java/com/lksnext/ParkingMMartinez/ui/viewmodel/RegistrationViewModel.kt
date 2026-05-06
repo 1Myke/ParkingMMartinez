@@ -95,10 +95,18 @@ class RegistrationViewModel: ViewModel() {
 
                 sessionManager.saveSession(true, newUser.id)
 
+                val selectedType = when (vehicleType) {
+                    "Motorcycle" -> com.lksnext.ParkingMMartinez.model.VehicleType.MOTORCYCLE
+                    "Electric Car" -> com.lksnext.ParkingMMartinez.model.VehicleType.ELECTRIC
+                    "Adapted Car" -> com.lksnext.ParkingMMartinez.model.VehicleType.ADAPTED
+                    else -> com.lksnext.ParkingMMartinez.model.VehicleType.STANDARD
+                }
+
                 val firstVehicle = com.lksnext.ParkingMMartinez.model.Vehicle(
+                    id = newUser.id, //MEJORAS: Cuando use firebase añadir un campo al vehiculo que sea ownerID para distinguir de quien es el vehiculo
                     name = "My Vehicle",
                     plate = plate,
-                    type = VehicleType.STANDARD,
+                    type = selectedType,
                     isAdapted = false
                 )
                 com.lksnext.ParkingMMartinez.data.VehicleManager(context).addVehicle(newUser.id, firstVehicle)

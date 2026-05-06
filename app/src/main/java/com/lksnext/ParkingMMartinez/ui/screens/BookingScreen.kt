@@ -34,6 +34,11 @@ fun BookingScreen(
     onManageVehicles: () -> Unit = {}
 ) {
     val context = androidx.compose.ui.platform.LocalContext.current
+
+    LaunchedEffect(Unit) {
+        viewModel.canUserReserve(context)
+    }
+
     // Dialogo del timepicker
     if (viewModel.showTimePicker) {
         LksTimePicker(
@@ -266,8 +271,19 @@ fun BookingScreen(
             Spacer(Modifier.height(32.dp))
 
             // 5. CONFIRM BUTTON
+
+            if (viewModel.hasActiveReservation) {
+                Text(
+                    text = "You already have an active reservation.",
+                    color = Color.Red,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+            }
+
             LksButton(
                 text = "Confirm Reservation",
+                enabled = !viewModel.hasActiveReservation,
                 onClick = {
                     // MEJORA: COGER LOS DATOS REALES Y NO USAR DATOS DUMMY
                     val zoneToSave = com.lksnext.ParkingMMartinez.model.ParkingZone(

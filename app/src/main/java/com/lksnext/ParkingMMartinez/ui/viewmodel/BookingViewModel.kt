@@ -26,6 +26,8 @@ class BookingViewModel: ViewModel() {
         private set
     var parkingZone by mutableStateOf("Standard Zone")
         private set
+    var hasActiveReservation by mutableStateOf(false)
+        private set
 
     // Logica para los proximos 7 dias
     val availableDates: List<Pair<Int, String>> by lazy {
@@ -112,11 +114,11 @@ class BookingViewModel: ViewModel() {
         onComplete()
     }
 
-    fun canUserReserve(context: Context): Boolean {
+    fun canUserReserve(context: Context) {
         val bookings = BookingManager(context).getAllBookings()
         // Si hay alguna reserva cuyo tiempo de fin es posterior a "ahora", bloqueamos
         // De momento, si la lista no está vacía, bloqueamos pero esto solo es para probar
-        return bookings.isEmpty()
+        hasActiveReservation = bookings.isNotEmpty()
     }
 
 }

@@ -1,11 +1,17 @@
 package com.lksnext.ParkingMMartinez.ui.viewmodel
 
+import android.content.Context
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import com.lksnext.ParkingMMartinez.data.BookingManager
+import com.lksnext.ParkingMMartinez.model.ParkingZone
+import com.lksnext.ParkingMMartinez.model.Vehicle
+import com.lksnext.ParkingMMartinez.ui.theme.LksOrange
 import java.util.*
 import java.text.SimpleDateFormat
+import java.time.LocalTime
 
 class BookingViewModel: ViewModel() {
     var startHour by mutableStateOf(8)
@@ -74,4 +80,43 @@ class BookingViewModel: ViewModel() {
     fun setZone(name: String) {
         parkingZone = name
     }
+
+    fun confirmReservation(
+        context: android.content.Context,
+        vehicle: Vehicle,
+        zone: ParkingZone,
+        onComplete: () -> Unit
+    ) {
+        val bookingManager = BookingManager(context)
+
+        val calendar = Calendar.getInstance()
+        calendar.set(Calendar.DAY_OF_MONTH, selectedDay)
+
+        // MEJORA: Que el spot sea de dentro de la zona de parking, y que no se repita ese random
+        // Puede que sea mejor ir asignando en orden de reserva, el primero que reserve 1 el segundo 2, elprimero de motos 17 el segundo 18 etc
+        val assignedSpot = (1..50).random()
+
+        val newReservation = com.lksnext.ParkingMMartinez.model.Reservation(
+            vehicle = vehicle,
+            zone = zone,
+            date = calendar.time,
+            startTime = LocalTime.of(startHour, startMinute),
+            endTime = LocalTime.parse(getEndTime()),
+            isCheckedIn = false,
+            spotNumber = assignedSpot
+        )
+
+        bookingManager.saveReservation(newReservation)
+        val jsonTest = com.google.gson.Gson().toJson(newReservation)
+        android.util.Log.d("RESERVA", "Guardando reserva: $jsonTest")
+        onComplete()
+    }
+
+    fun canUserReserve(context: Context): Boolean {
+        val bookings = BookingManager(context).getAllBookings()
+        // Si hay alguna reserva cuyo tiempo de fin es posterior a "ahora", bloqueamos
+        // De momento, si la lista no está vacía, bloqueamos pero esto solo es para probar
+        return bookings.isEmpty()
+    }
+
 }

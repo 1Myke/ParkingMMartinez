@@ -6,6 +6,7 @@ import java.util.Date
 
 data class Reservation(
     val id: String = UUID.randomUUID().toString(),
+    val spotNumber: Int,
     val vehicle: Vehicle,
     val zone: ParkingZone,
     val date: Date,

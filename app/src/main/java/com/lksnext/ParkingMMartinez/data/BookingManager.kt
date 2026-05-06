@@ -18,8 +18,21 @@ class BookingManager(context: Context) {
     }
 
     fun getAllBookings(): List<Reservation> {
-        val json = prefs.getString("booking_list", null) ?: return emptyList()
-        val type = object : TypeToken<List<Reservation>>() {}.type
-        return gson.fromJson(json, type)
+        val json = prefs.getString("bookings_list", null)
+        if (json.isNullOrEmpty()) return emptyList()
+
+        return try {
+            val type = object : TypeToken<List<Reservation>>() {}.type
+            gson.fromJson(json, type)
+        } catch (e: Exception) {
+            android.util.Log.e("GSON_ERROR", "Error parseando reservas: ${e.message}")
+            emptyList()
+        }
+    }
+
+    fun cancelReservation(reservationId: String) {
+        val currentBookings = getAllBookings().filter { it.id != reservationId }
+        val json = gson.toJson(currentBookings)
+        prefs.edit().putString("bookings_list", json).apply()
     }
 }

@@ -33,11 +33,7 @@ fun BookingScreen(
     onConfirmBooking: () -> Unit = {},
     onManageVehicles: () -> Unit = {}
 ) {
-    /*var startHour by remember { mutableStateOf(8) }
-    var startMinute by remember { mutableStateOf(0) }
-    var duration by remember { mutableStateOf(4f) }
-    var selectedDate by remember { mutableStateOf(26) }
-    */
+    val context = androidx.compose.ui.platform.LocalContext.current
     // Dialogo del timepicker
     if (viewModel.showTimePicker) {
         LksTimePicker(
@@ -208,10 +204,9 @@ fun BookingScreen(
                     ) {
                         Text("DURATION", style = MaterialTheme.typography.labelSmall, color = Color.Gray)
 
-                        // USAMOS LAS FUNCIONES DEL VIEWMODEL
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(
-                                text = "ENDING AT ${viewModel.getEndTime()}", // <--- Aquí llamamos a getEndTime()
+                                text = "ENDING AT ${viewModel.getEndTime()}",
                                 color = LksOrange,
                                 fontWeight = FontWeight.Bold
                             )
@@ -228,7 +223,7 @@ fun BookingScreen(
                         }
                     }
 
-                    // Área de Duración estilo Premium
+                    // Área de Duración
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -273,7 +268,22 @@ fun BookingScreen(
             // 5. CONFIRM BUTTON
             LksButton(
                 text = "Confirm Reservation",
-                onClick = { onConfirmBooking() }
+                onClick = {
+                    // MEJORA: COGER LOS DATOS REALES Y NO USAR DATOS DUMMY
+                    val zoneToSave = com.lksnext.ParkingMMartinez.model.ParkingZone(
+                        name = viewModel.parkingZone,
+                        availableSpots = 10, // Dato inventado de momento
+                        totalSpots = 20, //Igual
+                        iconRes = android.R.drawable.ic_menu_directions, // Un icono random de momento, tengo que MEJORA
+                        color = LksOrange
+                    )
+
+                    val defaultVehicle = com.lksnext.ParkingMMartinez.model.Vehicle("1", "My Car", "1234 ABC", com.lksnext.ParkingMMartinez.model.VehicleType.STANDARD, false)
+
+                    viewModel.confirmReservation(context, defaultVehicle, zoneToSave) {
+                        onConfirmBooking()
+                    }
+                }
             )
 
             Spacer(Modifier.height(24.dp))

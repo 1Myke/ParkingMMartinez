@@ -98,6 +98,11 @@ fun LksNavigation() {
                 )
             }
 
+            // --- BOOKING RESERVATION ---
+            composable(Screen.BookingsList.route) {
+                BookingRegisterScreen()
+            }
+
             // --- PROFILE (PANTALLA PRINCIPAL) ---
             composable(Screen.Profile.route) {
                 ProfileScreen(
@@ -111,7 +116,6 @@ fun LksNavigation() {
             }
 
             // MEJORA: --- PRÓXIMAMENTE: ALERTS Y BOOKINGS LIST ---
-            composable(Screen.BookingsList.route) { /* BookingsListScreen() */ }
             composable(Screen.Alerts.route) { /* AlertsScreen() */ }
         }
     }

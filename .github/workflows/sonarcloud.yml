@@ -64,4 +64,4 @@ jobs:
       - name: Build and analyze
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: ./gradlew build sonar --info
+        run: ./gradlew build sonar --info -Dsonar.organization=1myke -Dsonar.projectKey=1Myke_ParkingMMartinez

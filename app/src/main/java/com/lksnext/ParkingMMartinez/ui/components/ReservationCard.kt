@@ -22,7 +22,8 @@ import com.lksnext.ParkingMMartinez.ui.theme.LksOrange
 fun ReservationCard(
     reservation: Reservation,
     onCancelClick: () -> Unit,
-    onCheckInClick: () -> Unit
+    onCheckInClick: () -> Unit,
+    onEditClick: () -> Unit
 ) {
     Card(
         modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
@@ -96,6 +97,14 @@ fun ReservationCard(
                     border = BorderStroke(1.dp, Color.LightGray)
                 ) {
                     Text("Cancel", color = Color.DarkGray, fontWeight = FontWeight.Bold)
+                }
+                OutlinedButton(
+                    onClick = onEditClick,
+                    modifier = Modifier.weight(1f).height(48.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    border = BorderStroke(1.dp, Color.LightGray)
+                ) {
+                    Text("Edit", color = LksOrange, fontWeight = FontWeight.Bold)
                 }
                 Button(
                     onClick = onCheckInClick,

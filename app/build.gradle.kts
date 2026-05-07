@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+    id("org.sonarqube") version "7.3.0.8198"
 }
 
 android {
@@ -59,4 +60,11 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
+}
+
+sonar {
+    properties {
+        property("sonar.projectKey", "1Myke_ParkingMMartinez")
+        property("sonar.organization", "1myke")
+    }
 }

@@ -19,10 +19,13 @@ import com.lksnext.ParkingMMartinez.data.BookingManager
 import com.lksnext.ParkingMMartinez.model.Reservation
 import com.lksnext.ParkingMMartinez.ui.components.ReservationCard
 import com.lksnext.ParkingMMartinez.ui.viewmodel.BookingRegisterViewModel
+import com.lksnext.ParkingMMartinez.ui.viewmodel.BookingViewModel
 
 @Composable
 fun BookingRegisterScreen(
-    viewModel: BookingRegisterViewModel = viewModel() // Necesitas el import de lifecycle-viewmodel-compose
+    viewModel: BookingRegisterViewModel = viewModel(),
+    bookingViewModel: BookingViewModel = viewModel(),
+    onNavigateToEdit: (String) -> Unit
 ) {
     val context = LocalContext.current
 
@@ -54,6 +57,10 @@ fun BookingRegisterScreen(
                         },
                         onCheckInClick = {
                             viewModel.doCheckIn(reservation.id)
+                        },
+                        onEditClick = {
+                            bookingViewModel.loadReservationForEditing(reservation)
+                            onNavigateToEdit(reservation.zone.name)
                         }
                     )
                 }
@@ -66,6 +73,6 @@ fun BookingRegisterScreen(
 @Composable
 fun BookingRegisterScreenPreview() {
     BookingRegisterScreen(
-
+        onNavigateToEdit = { }
     )
 }

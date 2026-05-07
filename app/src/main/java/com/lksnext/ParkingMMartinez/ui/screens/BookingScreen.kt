@@ -42,10 +42,17 @@ fun BookingScreen(
     val context = androidx.compose.ui.platform.LocalContext.current
     val isValidTime = viewModel.isDateTimeValid()
 
-    LaunchedEffect(Unit) {
-        viewModel.checkUserReservationStatus(context)
+    LaunchedEffect(initialZone) {
         viewModel.setZone(initialZone)
         viewModel.loadAndFilterVehicles(context)
+        viewModel.checkUserReservationStatus(context)
+
+    }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            viewModel.cancelEditing()
+        }
     }
 
     // Dialogo del timepicker
@@ -59,10 +66,6 @@ fun BookingScreen(
                 viewModel.onShowTimePickerChange(false) // Cierra el diálogo si cancelan
             }
         )
-    }
-
-    LaunchedEffect(initialZone) {
-        viewModel.setZone(initialZone)
     }
 
     val vehicleIcon = when (viewModel.selectedVehicle?.type) {
@@ -304,7 +307,7 @@ fun BookingScreen(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                if (viewModel.hasActiveReservation) {
+                if (viewModel.editingReservationId == null && viewModel.hasActiveReservation) {
                     Text(
                         text = "You already have an active reservation.",
                         color = Color.Red,
@@ -312,7 +315,6 @@ fun BookingScreen(
                         modifier = Modifier.padding(bottom = 8.dp)
                     )
                 } else if (!isValidTime) {
-                    // Si no tiene reserva pero la hora es pasada
                     Text(
                         text = "Cannot book in the past. Select a future time.",
                         color = Color.Red,
@@ -322,9 +324,10 @@ fun BookingScreen(
                 }
 
                 LksButton(
-                    text = "Confirm Reservation",
-                    // Habilitado solo si no hay reserva activa Y hay un vehículo compatible
-                    enabled = !viewModel.hasActiveReservation && viewModel.selectedVehicle != null && isValidTime,
+                    text = if (viewModel.editingReservationId != null) "Update Reservation" else "Confirm Reservation",                    // Habilitado solo si no hay reserva activa Y hay un vehículo compatible
+                    enabled = (viewModel.editingReservationId != null || !viewModel.hasActiveReservation) &&
+                            viewModel.selectedVehicle != null &&
+                            isValidTime,
                     onClick = {
                         val realZone = ParkingMock.zones.find { it.name == viewModel.parkingZone }
                             ?: ParkingMock.zones.first()

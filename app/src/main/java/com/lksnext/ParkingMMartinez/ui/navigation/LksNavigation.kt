@@ -6,12 +6,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.*
 import androidx.navigation.navArgument
 import com.lksnext.ParkingMMartinez.data.SessionManager
 import com.lksnext.ParkingMMartinez.ui.components.LksFooter
 import com.lksnext.ParkingMMartinez.ui.screens.*
+import com.lksnext.ParkingMMartinez.ui.viewmodel.BookingViewModel
 
 @Composable
 fun LksNavigation() {
@@ -34,6 +36,8 @@ fun LksNavigation() {
             currentRoute != Screen.Login.route &&
             currentRoute != Screen.Register.route &&
             currentRoute != Screen.Recovery.route
+
+    val sharedBookingViewModel: BookingViewModel = viewModel()
 
     Scaffold(
         bottomBar = {
@@ -85,6 +89,7 @@ fun LksNavigation() {
                 })
             }
 
+            /*
             // --- BOOKING (PANTALLA DE DETALLE) ---
             composable(
                 route = Screen.Booking.route,
@@ -100,7 +105,36 @@ fun LksNavigation() {
 
             // --- BOOKING RESERVATION ---
             composable(Screen.BookingsList.route) {
-                BookingRegisterScreen()
+                BookingRegisterScreen(
+                    onNavigateToEdit = { zoneName ->
+                        navController.navigate(Screen.Booking.createRoute(zoneName))
+                    }
+                )
+            }
+             */
+
+            // --- BOOKING (La pantalla de reservar) ---
+            composable(
+                route = Screen.Booking.route,
+                arguments = listOf(navArgument("zoneName") { type = NavType.StringType })
+            ) { backStackEntry ->
+                val zoneName = backStackEntry.arguments?.getString("zoneName") ?: "Standard Zone"
+                BookingScreen(
+                    viewModel = sharedBookingViewModel, // <--- USAMOS EL COMPARTIDO
+                    initialZone = zoneName,
+                    onConfirmBooking = { navController.popBackStack() },
+                    onManageVehicles = { navController.navigate(Screen.Profile.route) }
+                )
+            }
+
+            // --- BOOKING REGISTER (La lista) ---
+            composable(Screen.BookingsList.route) {
+                BookingRegisterScreen(
+                    bookingViewModel = sharedBookingViewModel, // <--- USAMOS EL MISMO AQUÍ
+                    onNavigateToEdit = { zoneName ->
+                        navController.navigate(Screen.Booking.createRoute(zoneName))
+                    }
+                )
             }
 
             // --- PROFILE (PANTALLA PRINCIPAL) ---
@@ -116,7 +150,7 @@ fun LksNavigation() {
             }
 
             // MEJORA: --- PRÓXIMAMENTE: ALERTS Y BOOKINGS LIST ---
-            composable(Screen.Alerts.route) { /* AlertsScreen() */ }
+            composable(Screen.Alerts.route) { NotificationScreen() }
         }
     }
 }

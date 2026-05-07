@@ -7,6 +7,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import com.lksnext.ParkingMMartinez.data.BookingManager
 import com.lksnext.ParkingMMartinez.model.ParkingZone
+import com.lksnext.ParkingMMartinez.model.Reservation
 import com.lksnext.ParkingMMartinez.model.Vehicle
 import com.lksnext.ParkingMMartinez.model.ZoneNames
 import com.lksnext.ParkingMMartinez.model.VehicleType
@@ -34,6 +35,9 @@ class BookingViewModel: ViewModel() {
         private set
 
     var selectedVehicle by mutableStateOf<Vehicle?>(null)
+
+    var editingReservationId by mutableStateOf<String?>(null)
+        private set
 
     // Logica para los proximos 7 dias
     val availableDates: List<Pair<Int, String>> by lazy {
@@ -98,6 +102,11 @@ class BookingViewModel: ViewModel() {
         onComplete: () -> Unit
     ) {
         val bookingManager = BookingManager(context)
+
+        editingReservationId?.let { oldId ->
+            bookingManager.cancelReservation(oldId)
+        }
+
         val userId = com.lksnext.ParkingMMartinez.data.SessionManager(context).getActiveUserId() ?: ""
         val vehicleWithId = vehicle.copy(id = userId) // Nos aseguramos de que lleve el ID del dueño
 
@@ -134,22 +143,20 @@ class BookingViewModel: ViewModel() {
 
         bookingManager.saveReservation(newReservation)
 
+        editingReservationId = null
         hasActiveReservation = true
         onComplete()
     }
 
     fun checkUserReservationStatus(context: Context) {
-        val sessionManager = com.lksnext.ParkingMMartinez.data.SessionManager(context)
-        val currentUserId = sessionManager.getActiveUserId()
-
+        val currentUserId = com.lksnext.ParkingMMartinez.data.SessionManager(context).getActiveUserId()
         if (currentUserId == null) {
             hasActiveReservation = false
             return
         }
-
         val allBookings = BookingManager(context).getAllBookings()
 
-        hasActiveReservation = allBookings.any { it.vehicle.id == currentUserId }
+        hasActiveReservation = allBookings.any { it.vehicle.id == currentUserId && it.id != editingReservationId }
     }
 
     fun loadAndFilterVehicles(context: Context) {
@@ -183,5 +190,23 @@ class BookingViewModel: ViewModel() {
         // Si es un día futuro (dentro de los 7 permitidos), siempre es válido
         return selected.after(now)
     }
+
+    fun loadReservationForEditing(reservation: Reservation) {
+        editingReservationId = reservation.id
+        parkingZone = reservation.zone.name
+        startHour = reservation.startTime.hour
+        startMinute = reservation.startTime.minute
+        selectedDay = Calendar.getInstance().apply { time = reservation.date }.get(Calendar.DAY_OF_MONTH)
+
+        // Calculamos la duración más o menos
+        val diff = java.time.Duration.between(reservation.startTime, reservation.endTime).toHours()
+        duration = diff.toFloat().coerceIn(1f, 8f)
+    }
+
+    fun cancelEditing() {
+        editingReservationId = null
+
+    }
+
 
 }

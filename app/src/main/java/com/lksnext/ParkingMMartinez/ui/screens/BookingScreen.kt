@@ -11,6 +11,9 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material.icons.filled.AccessTime
+import androidx.compose.material.icons.filled.Accessible
+import androidx.compose.material.icons.filled.ElectricCar
+import androidx.compose.material.icons.filled.TwoWheeler
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -26,6 +29,8 @@ import com.lksnext.ParkingMMartinez.ui.components.LksTimePicker
 import com.lksnext.ParkingMMartinez.ui.theme.LksOrange
 import com.lksnext.ParkingMMartinez.ui.viewmodel.BookingViewModel
 import com.lksnext.ParkingMMartinez.data.ParkingMock
+import com.lksnext.ParkingMMartinez.model.Vehicle
+import com.lksnext.ParkingMMartinez.model.VehicleType
 
 @Composable
 fun BookingScreen(
@@ -38,6 +43,8 @@ fun BookingScreen(
 
     LaunchedEffect(Unit) {
         viewModel.checkUserReservationStatus(context)
+        viewModel.setZone(initialZone)
+        viewModel.loadAndFilterVehicles(context)
     }
 
     // Dialogo del timepicker
@@ -55,6 +62,13 @@ fun BookingScreen(
 
     LaunchedEffect(initialZone) {
         viewModel.setZone(initialZone)
+    }
+
+    val vehicleIcon = when (viewModel.selectedVehicle?.type) {
+        VehicleType.MOTORCYCLE -> Icons.Default.TwoWheeler
+        VehicleType.ELECTRIC -> Icons.Default.ElectricCar
+        VehicleType.ADAPTED -> Icons.Default.Accessible
+        else -> Icons.Default.DirectionsCar
     }
 
     Column(
@@ -103,31 +117,43 @@ fun BookingScreen(
                 actionText = "Manage",
                 onActionClick = onManageVehicles
             ) //MEJORAS: CUANDO HAMOS CLICK EN EL TEXTO MANAGE NOS TIENE QUE LLEVAR AL PERFIL
-            OutlinedCard(
-                modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
-                border = BorderStroke(2.dp, LksOrange),
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.outlinedCardColors(containerColor = Color.White)
-            ) {
-                Row(
-                    modifier = Modifier.padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically
+            //MEJORAS: SI HAY MAS DE UN VEHICULO DE LA MISMA CLASE NOS TIENE QUE DAR LA OPCION PARA SELECCIONAR EL QUE QUERAMOS
+            // POR DEFECTO SIEMPRE NOS VA A PONER EL PRIMERO QUE ENCUENTRE EN LA LISTA
+            if (viewModel.selectedVehicle != null) {
+                OutlinedCard(
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                    border = BorderStroke(2.dp, LksOrange),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.outlinedCardColors(containerColor = Color.White)
                 ) {
-                    Surface(
-                        color = LksOrange.copy(alpha = 0.1f),
-                        shape = RoundedCornerShape(8.dp)
+                    Row(
+                        modifier = Modifier.padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(
-                            Icons.Default.DirectionsCar,
-                            contentDescription = null,
-                            tint = LksOrange,
-                            modifier = Modifier.padding(8.dp)
-                        )
+                        Icon(vehicleIcon, null, tint = LksOrange)
+                        Spacer(Modifier.width(16.dp))
+                        Column {
+                            Text(viewModel.selectedVehicle!!.name, fontWeight = FontWeight.Bold)
+                            Text(viewModel.selectedVehicle!!.plate, color = Color.Gray)
+                        }
                     }
-                    Spacer(Modifier.width(16.dp))
-                    Column {
-                        Text("My Car", fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                        Text("1234 ABC", color = Color.Gray, style = MaterialTheme.typography.bodySmall)
+                }
+            } else { // En caso de que no tenga vehiculo compatible
+                Card(
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFFFFF1F1)), // Fondo rojizo suave
+                    border = BorderStroke(1.dp, Color.Red.copy(alpha = 0.5f))
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text(
+                            "No compatible vehicles found for ${viewModel.parkingZone}.",
+                            color = Color.Red,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            "Please add a vehicle of this type in 'Manage' to continue.",
+                            style = MaterialTheme.typography.bodySmall
+                        )
                     }
                 }
             }
@@ -282,6 +308,7 @@ fun BookingScreen(
                 )
             }
 
+            /*
             LksButton(
                 text = "Confirm Reservation",
                 enabled = !viewModel.hasActiveReservation,
@@ -299,6 +326,24 @@ fun BookingScreen(
 
                     viewModel.confirmReservation(context, selectedVehicle, realZone) {
                         onConfirmBooking()
+                    }
+                }
+            )
+             */
+
+            LksButton(
+                text = "Confirm Reservation",
+                // Habilitado solo si no hay reserva activa Y hay un vehículo compatible
+                enabled = !viewModel.hasActiveReservation && viewModel.selectedVehicle != null,
+                onClick = {
+                    val realZone = ParkingMock.zones.find { it.name == viewModel.parkingZone }
+                        ?: ParkingMock.zones.first()
+
+                    // Usamos el vehículo que el ViewModel ha filtrado
+                    viewModel.selectedVehicle?.let { vehicle ->
+                        viewModel.confirmReservation(context, vehicle, realZone) {
+                            onConfirmBooking()
+                        }
                     }
                 }
             )

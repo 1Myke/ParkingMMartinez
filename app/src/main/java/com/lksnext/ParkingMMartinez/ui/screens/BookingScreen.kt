@@ -40,6 +40,7 @@ fun BookingScreen(
     onManageVehicles: () -> Unit = {}
 ) {
     val context = androidx.compose.ui.platform.LocalContext.current
+    val isValidTime = viewModel.isDateTimeValid()
 
     LaunchedEffect(Unit) {
         viewModel.checkUserReservationStatus(context)
@@ -299,54 +300,45 @@ fun BookingScreen(
 
             // 5. CONFIRM BUTTON
 
-            if (viewModel.hasActiveReservation) {
-                Text(
-                    text = "You already have an active reservation.",
-                    color = Color.Red,
-                    style = MaterialTheme.typography.bodySmall,
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
-            }
-
-            /*
-            LksButton(
-                text = "Confirm Reservation",
-                enabled = !viewModel.hasActiveReservation,
-                onClick = {
-                    // Buscamos la zona real en el Mock para que tenga el color e icono correctos
-                    val realZone = ParkingMock.zones.find {
-                        it.name == viewModel.parkingZone
-                    } ?: ParkingMock.zones.first()
-
-                    // Vehículo seleccionado (más adelante vendrá de un estado)
-                    val selectedVehicle = com.lksnext.ParkingMMartinez.model.Vehicle(
-                        "1", "My Car", "1234 ABC",
-                        com.lksnext.ParkingMMartinez.model.VehicleType.STANDARD, false
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                if (viewModel.hasActiveReservation) {
+                    Text(
+                        text = "You already have an active reservation.",
+                        color = Color.Red,
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.padding(bottom = 8.dp)
                     )
-
-                    viewModel.confirmReservation(context, selectedVehicle, realZone) {
-                        onConfirmBooking()
-                    }
+                } else if (!isValidTime) {
+                    // Si no tiene reserva pero la hora es pasada
+                    Text(
+                        text = "Cannot book in the past. Select a future time.",
+                        color = Color.Red,
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
                 }
-            )
-             */
 
-            LksButton(
-                text = "Confirm Reservation",
-                // Habilitado solo si no hay reserva activa Y hay un vehículo compatible
-                enabled = !viewModel.hasActiveReservation && viewModel.selectedVehicle != null,
-                onClick = {
-                    val realZone = ParkingMock.zones.find { it.name == viewModel.parkingZone }
-                        ?: ParkingMock.zones.first()
+                LksButton(
+                    text = "Confirm Reservation",
+                    // Habilitado solo si no hay reserva activa Y hay un vehículo compatible
+                    enabled = !viewModel.hasActiveReservation && viewModel.selectedVehicle != null && isValidTime,
+                    onClick = {
+                        val realZone = ParkingMock.zones.find { it.name == viewModel.parkingZone }
+                            ?: ParkingMock.zones.first()
 
-                    // Usamos el vehículo que el ViewModel ha filtrado
-                    viewModel.selectedVehicle?.let { vehicle ->
-                        viewModel.confirmReservation(context, vehicle, realZone) {
-                            onConfirmBooking()
+                        // Usamos el vehículo que el ViewModel ha filtrado
+                        viewModel.selectedVehicle?.let { vehicle ->
+                            viewModel.confirmReservation(context, vehicle, realZone) {
+                                onConfirmBooking()
+                            }
                         }
                     }
-                }
-            )
+                )
+
+            }
 
             Spacer(Modifier.height(24.dp))
         }

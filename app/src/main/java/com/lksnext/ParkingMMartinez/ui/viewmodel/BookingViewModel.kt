@@ -54,7 +54,9 @@ class BookingViewModel: ViewModel() {
     }
 
     fun onDurationChange(newDuration: Float) {
-        duration = if (newDuration > 9f) 9f else newDuration
+        // duration = if (newDuration > 9f) 9f else newDuration
+        // Para forzar que nunca pase de 8.0f aunque el slider se mueva raro (Por si acaso)
+        duration = newDuration.coerceIn(1.0f, 8.0f)
     }
 
     fun onDateSelected(day: Int) {
@@ -166,6 +168,20 @@ class BookingViewModel: ViewModel() {
 
         userVehicles = filtered
         selectedVehicle = if (filtered.isNotEmpty()) filtered[0] else null
+    }
+
+    fun isDateTimeValid(): Boolean {
+        val now = Calendar.getInstance()
+        val selected = Calendar.getInstance()
+
+        // Configuramos el calendario con lo seleccionado por el usuario
+        selected.set(Calendar.DAY_OF_MONTH, selectedDay)
+        selected.set(Calendar.HOUR_OF_DAY, startHour)
+        selected.set(Calendar.MINUTE, startMinute)
+
+        // Si el día seleccionado es hoy, comparamos con la hora actual
+        // Si es un día futuro (dentro de los 7 permitidos), siempre es válido
+        return selected.after(now)
     }
 
 }

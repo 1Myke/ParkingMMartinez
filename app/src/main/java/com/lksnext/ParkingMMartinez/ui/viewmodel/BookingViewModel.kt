@@ -30,6 +30,11 @@ class BookingViewModel: ViewModel() {
     var hasActiveReservation by mutableStateOf(false)
         private set
 
+    var userVehicles by mutableStateOf<List<Vehicle>>(emptyList())
+        private set
+
+    var selectedVehicle by mutableStateOf<Vehicle?>(null)
+
     // Logica para los proximos 7 dias
     val availableDates: List<Pair<Int, String>> by lazy {
         val calendar = Calendar.getInstance()
@@ -128,8 +133,6 @@ class BookingViewModel: ViewModel() {
         bookingManager.saveReservation(newReservation)
 
         hasActiveReservation = true
-//        val jsonTest = com.google.gson.Gson().toJson(newReservation)
-//        android.util.Log.d("RESERVA", "Guardando reserva: $jsonTest")
         onComplete()
     }
 
@@ -145,6 +148,24 @@ class BookingViewModel: ViewModel() {
         val allBookings = BookingManager(context).getAllBookings()
 
         hasActiveReservation = allBookings.any { it.vehicle.id == currentUserId }
+    }
+
+    fun loadAndFilterVehicles(context: Context) {
+        val userId = com.lksnext.ParkingMMartinez.data.SessionManager(context).getActiveUserId() ?: ""
+        val allVehicles = com.lksnext.ParkingMMartinez.data.VehicleManager(context).getVehicles(userId)
+
+        val requiredType = when (parkingZone) {
+            "Disability", ZoneNames.DISABILITY -> VehicleType.ADAPTED
+            "EV", ZoneNames.EV -> VehicleType.ELECTRIC
+            "Motorcycle", ZoneNames.MOTORCYCLE -> VehicleType.MOTORCYCLE
+            "Standard", ZoneNames.STANDARD -> VehicleType.STANDARD
+            else -> VehicleType.STANDARD
+        }
+
+        val filtered = allVehicles.filter { it.type == requiredType }
+
+        userVehicles = filtered
+        selectedVehicle = if (filtered.isNotEmpty()) filtered[0] else null
     }
 
 }

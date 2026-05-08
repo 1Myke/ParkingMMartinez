@@ -1,18 +1,23 @@
 package com.lksnext.ParkingMMartinez.ui.navigation
 
+import android.se.omapi.Session
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.*
 import androidx.navigation.navArgument
 import com.lksnext.ParkingMMartinez.data.SessionManager
+import com.lksnext.ParkingMMartinez.data.repository.LocalBookingRepository
 import com.lksnext.ParkingMMartinez.ui.components.LksFooter
 import com.lksnext.ParkingMMartinez.ui.screens.*
+import com.lksnext.ParkingMMartinez.ui.viewmodel.BookingRegisterViewModel
 import com.lksnext.ParkingMMartinez.ui.viewmodel.BookingViewModel
 
 @Composable
@@ -20,14 +25,28 @@ fun LksNavigation() {
 
     //Verficiar si ya esta loggeado el usuario
     val context = androidx.compose.ui.platform.LocalContext.current
-    val sessionManager = remember { SessionManager(context) }
 
-    val startDestination = if (sessionManager.isLoggedIn()) Screen.Map.route
-    else Screen.Login.route
-
+    val repository = LocalBookingRepository(context)
+    val session = SessionManager(context)
     val navController = rememberNavController()
 
-    // Observamos en qué pantalla estamos actualmente
+    val sharedBookingViewModel: BookingViewModel = viewModel(
+        factory = object : ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                return BookingViewModel(repository, session) as T
+            }
+        }
+    )
+
+    val registerViewModel: BookingRegisterViewModel = viewModel(
+        factory = object: ViewModelProvider.Factory {
+            override fun <T: ViewModel> create(moduleClass: Class<T>): T {
+                return BookingRegisterViewModel(repository, session) as T
+            }
+        }
+    )
+
+    val startDestination = if (session.isLoggedIn()) Screen.Map.route else Screen.Login.route
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
@@ -37,7 +56,8 @@ fun LksNavigation() {
             currentRoute != Screen.Register.route &&
             currentRoute != Screen.Recovery.route
 
-    val sharedBookingViewModel: BookingViewModel = viewModel()
+    //MEJORAS: Lo del shared Booking View model puede ser lo que me la este liando (Lo que hace que se pueda reservar dos veces)
+    //val sharedBookingViewModel: BookingViewModel = viewModel()
 
     Scaffold(
         bottomBar = {
@@ -58,7 +78,7 @@ fun LksNavigation() {
                 LoginScreen(
                     onLoginSuccess = { shouldRemember ->
                         if (shouldRemember) {
-                            sessionManager.saveSession(true)
+                            session.saveSession(true)
                         }
                         navController.navigate(Screen.Map.route) {
                             popUpTo(Screen.Login.route) { inclusive = true }
@@ -89,31 +109,7 @@ fun LksNavigation() {
                 })
             }
 
-            /*
-            // --- BOOKING (PANTALLA DE DETALLE) ---
-            composable(
-                route = Screen.Booking.route,
-                arguments = listOf(navArgument("zoneName") { type = NavType.StringType })
-            ) { backStackEntry ->
-                val zoneName = backStackEntry.arguments?.getString("zoneName") ?: "Standard Zone"
-                BookingScreen(
-                    initialZone = zoneName,
-                    onConfirmBooking = { navController.popBackStack() },
-                    onManageVehicles = { navController.navigate(Screen.Profile.route) }
-                )
-            }
-
-            // --- BOOKING RESERVATION ---
-            composable(Screen.BookingsList.route) {
-                BookingRegisterScreen(
-                    onNavigateToEdit = { zoneName ->
-                        navController.navigate(Screen.Booking.createRoute(zoneName))
-                    }
-                )
-            }
-             */
-
-            // --- BOOKING (La pantalla de reservar) ---
+            // --- BOOKING (RESERVAR/EDITAR) ---
             composable(
                 route = Screen.Booking.route,
                 arguments = listOf(navArgument("zoneName") { type = NavType.StringType })
@@ -130,6 +126,7 @@ fun LksNavigation() {
             // --- BOOKING REGISTER (La lista) ---
             composable(Screen.BookingsList.route) {
                 BookingRegisterScreen(
+                    viewModel = registerViewModel,
                     bookingViewModel = sharedBookingViewModel, // <--- USAMOS EL MISMO AQUÍ
                     onNavigateToEdit = { zoneName ->
                         navController.navigate(Screen.Booking.createRoute(zoneName))
@@ -141,7 +138,7 @@ fun LksNavigation() {
             composable(Screen.Profile.route) {
                 ProfileScreen(
                     onLogoutClick = {
-                        sessionManager.clearSession()
+                        session.clearSession()
                         navController.navigate(Screen.Login.route) {
                             popUpTo(0) { inclusive = true }
                         }

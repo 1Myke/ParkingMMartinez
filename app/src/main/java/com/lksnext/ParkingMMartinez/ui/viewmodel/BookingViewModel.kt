@@ -6,6 +6,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import com.lksnext.ParkingMMartinez.data.BookingManager
+import com.lksnext.ParkingMMartinez.data.SessionManager
+import com.lksnext.ParkingMMartinez.data.repository.BookingRepository
 import com.lksnext.ParkingMMartinez.model.ParkingZone
 import com.lksnext.ParkingMMartinez.model.Reservation
 import com.lksnext.ParkingMMartinez.model.Vehicle
@@ -15,7 +17,10 @@ import java.util.*
 import java.text.SimpleDateFormat
 import java.time.LocalTime
 
-class BookingViewModel: ViewModel() {
+class BookingViewModel (
+    private val repository: BookingRepository,
+    private val sessionManager: SessionManager
+): ViewModel() {
     var startHour by mutableStateOf(8)
         private set
     var startMinute by mutableStateOf(0)
@@ -96,21 +101,19 @@ class BookingViewModel: ViewModel() {
     }
 
     fun confirmReservation(
-        context: Context,
         vehicle: Vehicle,
         zone: ParkingZone,
         onComplete: () -> Unit
     ) {
-        val bookingManager = BookingManager(context)
 
         editingReservationId?.let { oldId ->
-            bookingManager.cancelReservation(oldId)
+            repository.cancelReservation(oldId)
         }
 
-        val userId = com.lksnext.ParkingMMartinez.data.SessionManager(context).getActiveUserId() ?: ""
-        val vehicleWithId = vehicle.copy(id = userId) // Nos aseguramos de que lleve el ID del dueño
+        val userId = sessionManager.getActiveUserId() ?: ""
+        val vehicleWithId = vehicle.copy(id = userId) // Nos aseguramos de que lleve el ID del dueño. MEJORAS: Darle un id unico al vehiculo
 
-        val start = java.time.LocalTime.of(startHour, startMinute)
+        val start = LocalTime.of(startHour, startMinute)
         val end = start.plusHours(duration.toLong())
 
         val zoneType = when (parkingZone) {
@@ -130,7 +133,7 @@ class BookingViewModel: ViewModel() {
         val calendar = Calendar.getInstance()
         calendar.set(Calendar.DAY_OF_MONTH, selectedDay)
 
-        val newReservation = com.lksnext.ParkingMMartinez.model.Reservation(
+        val newReservation = Reservation(
             id = UUID.randomUUID().toString(),
             vehicle = vehicleWithId,
             zone = zone,
@@ -141,20 +144,20 @@ class BookingViewModel: ViewModel() {
             spotNumber = assignedSpot
         )
 
-        bookingManager.saveReservation(newReservation)
+        repository.saveReservation(newReservation)
 
         editingReservationId = null
         hasActiveReservation = true
         onComplete()
     }
 
-    fun checkUserReservationStatus(context: Context) {
-        val currentUserId = com.lksnext.ParkingMMartinez.data.SessionManager(context).getActiveUserId()
+    fun checkUserReservationStatus() {
+        val currentUserId = sessionManager.getActiveUserId()
         if (currentUserId == null) {
             hasActiveReservation = false
             return
         }
-        val allBookings = BookingManager(context).getAllBookings()
+        val allBookings = repository.getAllReservations()
 
         hasActiveReservation = allBookings.any { it.vehicle.id == currentUserId && it.id != editingReservationId }
     }

@@ -1,3 +1,27 @@
 <resources>
     <string name="app_name">lksParking</string>
+
+    <!-- TEXTO BOOKING_SCREEN EN INGLES -->
+    <string name ="booking_header_label">YOU ARE BOOKING A SPOT IN</string>
+    <string name="booking_select_vehicle">Select Vehicle</string>
+    <string name="booking_manage">Manage</string>
+    <string name="booking_error_active">You already have an active reservation.</string>
+    <string name="booking_error_past">Cannot book in the past. Select a future time.</string>
+    <string name="booking_btn_confirm">Confirm Reservation</string>
+    <string name="booking_btn_update">Update Reservation</string>
+    <string name="booking_no_vehicles">No compatible vehicles found for %1$s.</string>
+    <string name="booking_add_vehicle_hint">Please add a vehicle of this type in \'Manage\' to continue.</string>
+    <string name="booking_select_date">Select Date</string>
+    <string name="booking_time_duration">Time &amp; Duration</string>
+    <string name="booking_start_time">START TIME</string>
+    <string name="booking_duration_label">DURATION</string>
+    <string name="booking_ending_at">ENDING AT %1$s</string>
+    <string name="booking_next_day_warning">(+1 day)</string>
+    <string name="booking_hours_unit">hours</string>
+    <string name="booking_today">TODAY</string>
+
+    <!-- TEXTO BOOKING_REGISTER_SCREEN EN INGLES -->
+    <string name="register_title">My Reservations</string>
+    <string name="register_empty">No active reservations</string>
+
 </resources>

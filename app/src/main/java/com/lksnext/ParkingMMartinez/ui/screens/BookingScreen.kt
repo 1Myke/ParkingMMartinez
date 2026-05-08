@@ -19,6 +19,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -31,10 +32,36 @@ import com.lksnext.ParkingMMartinez.ui.viewmodel.BookingViewModel
 import com.lksnext.ParkingMMartinez.data.ParkingMock
 import com.lksnext.ParkingMMartinez.model.Vehicle
 import com.lksnext.ParkingMMartinez.model.VehicleType
+import com.lksnext.ParkingMMartinez.R
+
+@Composable
+fun SectionHeader(
+    title: String,
+    actionText: String? = null,
+    onActionClick: () -> Unit = {} // Nuevo parámetro
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+
+        if (actionText != null) {
+            Text(
+                text = actionText,
+                color = LksOrange,
+                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.labelMedium,
+                modifier = Modifier.padding(8.dp).clickable { onActionClick() } // CLICABLE
+            )
+        }
+    }
+}
 
 @Composable
 fun BookingScreen(
-    viewModel: BookingViewModel = viewModel(),
+    viewModel: BookingViewModel,
     initialZone: String = "",
     onConfirmBooking: () -> Unit = {},
     onManageVehicles: () -> Unit = {}
@@ -42,11 +69,12 @@ fun BookingScreen(
     val context = androidx.compose.ui.platform.LocalContext.current
     val isValidTime = viewModel.isDateTimeValid()
 
+    val todayStr = stringResource(R.string.booking_today)
+
     LaunchedEffect(initialZone) {
         viewModel.setZone(initialZone)
         viewModel.loadAndFilterVehicles(context)
-        viewModel.checkUserReservationStatus(context)
-
+        viewModel.checkUserReservationStatus()
     }
 
     DisposableEffect(Unit) {
@@ -99,7 +127,8 @@ fun BookingScreen(
                 Spacer(Modifier.width(16.dp))
                 Column {
                     Text(
-                        "YOU ARE BOOKING A SPOT IN",
+                        stringResource(R.string.booking_header_label),
+                        //"YOU ARE BOOKING A SPOT IN",
                         style = MaterialTheme.typography.labelSmall,
                         color = Color.White.copy(alpha = 0.8f)
                     )
@@ -117,8 +146,8 @@ fun BookingScreen(
 
             // 2. SELECCIÓN DE VEHÍCULO
             SectionHeader(
-                title = "Select Vehicle",
-                actionText = "Manage",
+                title = stringResource(R.string.booking_select_vehicle) /*"Select Vehicle"*/,
+                actionText = stringResource(R.string.booking_manage) /*"Manage"*/,
                 onActionClick = onManageVehicles
             ) //MEJORAS: CUANDO HAMOS CLICK EN EL TEXTO MANAGE NOS TIENE QUE LLEVAR AL PERFIL
             //MEJORAS: SI HAY MAS DE UN VEHICULO DE LA MISMA CLASE NOS TIENE QUE DAR LA OPCION PARA SELECCIONAR EL QUE QUERAMOS
@@ -150,12 +179,14 @@ fun BookingScreen(
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Text(
-                            "No compatible vehicles found for ${viewModel.parkingZone}.",
+                            text = stringResource(R.string.booking_no_vehicles, viewModel.parkingZone),
+                            //"No compatible vehicles found for ${viewModel.parkingZone}.",
                             color = Color.Red,
                             fontWeight = FontWeight.Bold
                         )
                         Text(
-                            "Please add a vehicle of this type in 'Manage' to continue.",
+                            text = stringResource(R.string.booking_add_vehicle_hint),
+                            //"Please add a vehicle of this type in 'Manage' to continue.",
                             style = MaterialTheme.typography.bodySmall
                         )
                     }
@@ -165,35 +196,36 @@ fun BookingScreen(
             Spacer(Modifier.height(16.dp))
 
             // 3. SELECT DATE (Carrusel dinámico de 8 días)
-            SectionHeader(title = "Select Date")
+            SectionHeader(title = stringResource(R.string.booking_select_date))
 
-            // Necesitamos importar java.time.* para manejar fechas fácilmente
-            // Si te da error, asegúrate de tener habilitado "desugaring" o usa Calendar
-            val calendar = java.util.Calendar.getInstance()
-            val dates = (0..7).map { offset ->
-                val tempCal = calendar.clone() as java.util.Calendar
-                tempCal.add(java.util.Calendar.DAY_OF_YEAR, offset)
-
-                val dayNum = tempCal.get(java.util.Calendar.DAY_OF_MONTH)
-                val dayName = when (offset) {
-                    0 -> "TODAY"
-                    else -> java.text.SimpleDateFormat("EEE", java.util.Locale.ENGLISH)
-                        .format(tempCal.time).uppercase()
-                }
-                dayNum to dayName
-            }
+//            // Necesitamos importar java.time.* para manejar fechas fácilmente
+//            // Si te da error, asegúrate de tener habilitado "desugaring" o usa Calendar
+//            val calendar = java.util.Calendar.getInstance()
+//            val dates = (0..7).map { offset ->
+//                val tempCal = calendar.clone() as java.util.Calendar
+//                tempCal.add(java.util.Calendar.DAY_OF_YEAR, offset)
+//
+//                val dayNum = tempCal.get(java.util.Calendar.DAY_OF_MONTH)
+//                val dayName = when (offset) {
+//                    0 -> "TODAY"
+//                    else -> java.text.SimpleDateFormat("EEE", java.util.Locale.ENGLISH)
+//                        .format(tempCal.time).uppercase()
+//                }
+//                dayNum to dayName
+//            }
 
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 8.dp)
-                    .horizontalScroll(rememberScrollState()), // Añadimos scroll para que quepan los 8
+                    .horizontalScroll(rememberScrollState()),
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                dates.forEach { (day, label) ->
+                viewModel.availableDates.forEach { (day, label) ->
+                    val displayLabel = if (label == "TODAY") todayStr else label
                     DateItem(
                         day = day.toString(),
-                        label = label,
+                        label = displayLabel,
                         isSelected = viewModel.selectedDay == day,
                         onClick = { viewModel.onDateSelected(day) }
                     )
@@ -203,7 +235,7 @@ fun BookingScreen(
             Spacer(Modifier.height(24.dp))
 
             // 4. TIME & DURATION
-            SectionHeader(title = "Time & Duration")
+            SectionHeader(title = stringResource(R.string.booking_time_duration))
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(containerColor = Color.White),
@@ -211,7 +243,7 @@ fun BookingScreen(
                 shape = RoundedCornerShape(16.dp)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Text("START TIME", style = MaterialTheme.typography.labelSmall, color = Color.Gray)
+                    Text(stringResource(R.string.booking_start_time), style = MaterialTheme.typography.labelSmall, color = Color.Gray)
 
                     OutlinedCard(
                         onClick = { viewModel.onShowTimePickerChange(true) }, // ABRIMOS EL RELOJ
@@ -238,19 +270,21 @@ fun BookingScreen(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.Bottom
                     ) {
-                        Text("DURATION", style = MaterialTheme.typography.labelSmall, color = Color.Gray)
-
+                        Text(stringResource(
+                            R.string.booking_duration_label),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = Color.Gray
+                        )
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(
-                                text = "ENDING AT ${viewModel.getEndTime()}",
-                                color = LksOrange,
+                                text = stringResource(R.string.booking_ending_at, viewModel.getEndTime()),                                color = LksOrange,
                                 fontWeight = FontWeight.Bold
                             )
 
                             // Si el ViewModel dice que es el día siguiente, añadimos el aviso
                             if (viewModel.isNextDay()) {
                                 Text(
-                                    text = " (+1 day)",
+                                    text = stringResource(R.string.booking_next_day_warning),
                                     color = Color.Gray,
                                     style = MaterialTheme.typography.bodySmall,
                                     modifier = Modifier.padding(start = 4.dp)
@@ -277,7 +311,7 @@ fun BookingScreen(
                                     fontWeight = FontWeight.Bold
                                 )
                                 Text(
-                                    " hours",
+                                    stringResource(R.string.booking_hours_unit),
                                     modifier = Modifier.padding(bottom = 12.dp),
                                     color = LksOrange,
                                     fontWeight = FontWeight.Medium
@@ -309,14 +343,14 @@ fun BookingScreen(
             ) {
                 if (viewModel.editingReservationId == null && viewModel.hasActiveReservation) {
                     Text(
-                        text = "You already have an active reservation.",
+                        text = stringResource(R.string.booking_error_active),//"You already have an active reservation."
                         color = Color.Red,
                         style = MaterialTheme.typography.bodySmall,
                         modifier = Modifier.padding(bottom = 8.dp)
                     )
                 } else if (!isValidTime) {
                     Text(
-                        text = "Cannot book in the past. Select a future time.",
+                        text = stringResource(R.string.booking_error_past),//"Cannot book in the past. Select a future time."
                         color = Color.Red,
                         style = MaterialTheme.typography.bodySmall,
                         modifier = Modifier.padding(bottom = 8.dp)
@@ -324,7 +358,11 @@ fun BookingScreen(
                 }
 
                 LksButton(
-                    text = if (viewModel.editingReservationId != null) "Update Reservation" else "Confirm Reservation",                    // Habilitado solo si no hay reserva activa Y hay un vehículo compatible
+                    text =  if (viewModel.editingReservationId != null)
+                                stringResource(R.string.booking_btn_update)//"Update Reservation"
+                            else
+                                stringResource(R.string.booking_btn_confirm),//"Confirm Reservation"
+                                // Habilitado solo si no hay reserva activa Y hay un vehículo compatible
                     enabled = (viewModel.editingReservationId != null || !viewModel.hasActiveReservation) &&
                             viewModel.selectedVehicle != null &&
                             isValidTime,
@@ -334,7 +372,7 @@ fun BookingScreen(
 
                         // Usamos el vehículo que el ViewModel ha filtrado
                         viewModel.selectedVehicle?.let { vehicle ->
-                            viewModel.confirmReservation(context, vehicle, realZone) {
+                            viewModel.confirmReservation(vehicle, realZone) {
                                 onConfirmBooking()
                             }
                         }
@@ -344,31 +382,6 @@ fun BookingScreen(
             }
 
             Spacer(Modifier.height(24.dp))
-        }
-    }
-}
-
-@Composable
-fun SectionHeader(
-    title: String,
-    actionText: String? = null,
-    onActionClick: () -> Unit = {} // Nuevo parámetro
-) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
-
-        if (actionText != null) {
-            Text(
-                text = actionText,
-                color = LksOrange,
-                fontWeight = FontWeight.Bold,
-                style = MaterialTheme.typography.labelMedium,
-                modifier = Modifier.padding(8.dp).clickable { onActionClick() } // CLICABLE
-            )
         }
     }
 }
@@ -392,8 +405,10 @@ fun DateItem(day: String, label: String, isSelected: Boolean, onClick: () -> Uni
     }
 }
 
+/*
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun BookingScreenPreview() {
     BookingScreen()
 }
+ */

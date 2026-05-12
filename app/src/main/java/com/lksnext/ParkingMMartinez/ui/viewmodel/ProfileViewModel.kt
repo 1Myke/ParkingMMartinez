@@ -5,15 +5,22 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import com.lksnext.ParkingMMartinez.data.SessionManager
+import com.lksnext.ParkingMMartinez.data.repository.UserRepository
+import com.lksnext.ParkingMMartinez.data.repository.VehicleRepository
 import com.lksnext.ParkingMMartinez.model.Vehicle
 import com.lksnext.ParkingMMartinez.model.VehicleType
 
-class ProfileViewModel : ViewModel() {
+class ProfileViewModel(
+    private val vehicleRepository: VehicleRepository,
+    private val userRepository: UserRepository,
+    private val sessionManager: SessionManager
+) : ViewModel() {
 
     // Datos del usuario (luego vendrán de Firebase/Repository)
-    var userName by mutableStateOf("1Myke")
-    var userRole by mutableStateOf("Senior Operations Manager")
-    var userEmail by mutableStateOf("mikel@lksnext.com")
+    var userName by mutableStateOf("")
+    var userRole by mutableStateOf("")
+    var userEmail by mutableStateOf("")
 
     var showAddVehicleDialog by mutableStateOf(false)
         private set
@@ -28,34 +35,22 @@ class ProfileViewModel : ViewModel() {
 
 
     // Lista de vehículos reactiva
-    private val _vehicles = mutableStateListOf<Vehicle>(
-//        Vehicle(name = "My Car", plate = "1234 ABC", type = VehicleType.STANDARD, isAdapted = false),
-//        Vehicle(name = "Vespa", plate = "5678 XYZ", type = VehicleType.MOTORCYCLE, isAdapted = false)
-    )
+    private val _vehicles = mutableStateListOf<Vehicle>()
     val vehicles: List<Vehicle> get() = _vehicles
 
-    fun loadUserVehicles(context: android.content.Context) {
-        val userId = com.lksnext.ParkingMMartinez.data.SessionManager(context).getActiveUserId()
+    fun loadUserData() {
+        val userId = sessionManager.getActiveUserId() ?: return
 
-        if (userId == null) return
-
-        // 1. Cargamos los coches
-        val vManager = com.lksnext.ParkingMMartinez.data.VehicleManager(context)
+        val userVehicles = vehicleRepository.getVehicles(userId)
         _vehicles.clear()
-        _vehicles.addAll(vManager.getVehicles(userId))
+        _vehicles.addAll(userVehicles)
 
-        // 2. BUSCAMOS LOS DATOS DEL USUARIO (Para que cambie el nombre en la UI)
-        val uManager = com.lksnext.ParkingMMartinez.data.UserManager(context)
-        val userMock = com.lksnext.ParkingMMartinez.data.UserMock
 
-        // Buscamos en SharedPreferences o en el Mock
-        val user = uManager.getAllUsers().find { it.id == userId }
-            ?: userMock.users.find { it.id == userId }
-
+        val user = userRepository.getUserById(userId)
         user?.let {
             userName = it.username
             userEmail = it.email
-            userRole = "User" // MEJORA: Lo que venga de ajustes en un futuro
+            userRole = "LKS Next Member" // MEJORAS: AÑADIR AJUSTES PARA PODER AÑADIR EL ROL ESPECIFICO
         }
     }
 
@@ -85,34 +80,28 @@ class ProfileViewModel : ViewModel() {
         selectedVehicleType = type
     }
 
-    fun addVehicle(context: android.content.Context) {
-        val userId = com.lksnext.ParkingMMartinez.data.SessionManager(context).getActiveUserId()
-
-        // Si el botón no hace nada, es porque entra aquí y hace el return
-        if (userId == null) {
-            android.util.Log.e("PROFILE_ERROR", "No puedo añadir coche sin ID de usuario")
-            return
-        }
+    fun addVehicle() {
+        val userId = sessionManager.getActiveUserId() ?: return
 
         if (newVehicleName.isNotBlank() && newVehiclePlate.isNotBlank()) {
-            val newVehicle = com.lksnext.ParkingMMartinez.model.Vehicle(
+            val newVehicle = Vehicle(
                 name = newVehicleName,
                 plate = newVehiclePlate,
                 type = selectedVehicleType,
-                isAdapted = if (selectedVehicleType == VehicleType.ADAPTED) true else false
+                isAdapted = selectedVehicleType == VehicleType.ADAPTED
             )
 
-            com.lksnext.ParkingMMartinez.data.VehicleManager(context).addVehicle(userId, newVehicle)
+            vehicleRepository.addVehicle(userId, newVehicle)
             _vehicles.add(newVehicle)
             onCloseDialog()
         }
     }
 
-    fun confirmDeleteVehicle(context: android.content.Context) {
-        val userId = com.lksnext.ParkingMMartinez.data.SessionManager(context).getActiveUserId() ?: return
+    fun confirmDeleteVehicle() {
+        val userId = sessionManager.getActiveUserId() ?: return
         vehicleToDelete?.let { vehicle ->
+            vehicleRepository.deleteVehicle(userId, vehicle)
             _vehicles.remove(vehicle)
-            com.lksnext.ParkingMMartinez.data.VehicleManager(context).deleteVehicle(userId, vehicle)
         }
         dismissDeleteDialog()
     }

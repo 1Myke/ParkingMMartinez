@@ -28,4 +28,20 @@
     <string name="map_header_title">LKS Next Parking</string>
     <string name="map_header_subtitle">Select a zone to book instantly</string>
 
+    <!-- TEXTO PROFILE SCREEN EN INGLES -->
+    <string name="profile_vehicles">My Vehicles</string>
+    <string name="profile_add_vehicle_title">+ Add New Vehicle</string>
+    <string name="profile_label_nickname">NICKNAME</string>
+    <string name="profile_hint_nickname">Nickname</string>
+    <string name="profile_placeholder_nickname">e.g. Work Car</string>
+    <string name="profile_label_plate">LICENSE PLATE</string>
+    <string name="profile_hint_plate">License Plate</string>
+    <string name="profile_placeholder_plate">1234 ABC</string>
+    <string name="profile_label_type">VEHICLE TYPE</string>
+    <string name="profile_btn_save">Save Vehicle</string>
+    <string name="profile_delete_title">Confirm Delete</string>
+    <string name="profile_delete_msg">Are you sure you want to remove %1$s? This action cannot be undone.</string>
+    <string name="btn_cancel">Cancel</string>
+    <string name="btn_delete">Delete</string>
+
 </resources>

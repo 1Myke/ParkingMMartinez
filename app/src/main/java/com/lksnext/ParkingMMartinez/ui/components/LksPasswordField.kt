@@ -16,12 +16,14 @@ import androidx.compose.ui.text.input.KeyboardType
 import com.lksnext.ParkingMMartinez.ui.theme.LksOrange
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
+import com.lksnext.ParkingMMartinez.R
 
 @Composable
 fun LksPasswordField(
     value: String,
     onValueChange: (String) -> Unit,
-    label: String = "Password",
+    label: String = stringResource(R.string.login_password),
     isError: Boolean = false,
     leadingIcon: ImageVector? = null
 ) {

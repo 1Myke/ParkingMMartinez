@@ -72,6 +72,26 @@
     <string name="err_invalid_plate">License plate format is invalid (1234ABC)</string>
     <string name="err_user_exists">This username is already taken</string>
 
+    <!-- TEXTO DE LOS COMPONENTES EN INGLES -->
+    <string name="footer_map">Map</string>
+    <string name="footer_bookings">Bookings</string>
+    <string name="footer_alerts">Alerts</string>
+    <string name="footer_profile">Profile</string>
+
+    <string name="timepick_confirm">Confirm</string>
+    <string name="timepick_cancel">Cancel</string>
+    <string name="timepick_selecttime">Select Time</string>
+
+    <string name="label_location">Level 1</string>
+    <string name="label_date">DATE</string>
+    <string name="label_time">TIME</string>
+    <string name="label_vehicle">VEHICLE</string>
+    <string name="label_available">AVAILABLE</string>
+    <string name="status_active">ACTIVE</string>
+    <string name="btn_edit">Edit</string>
+    <string name="btn_check_in">Check-in Now</string>
+
+
 
 
 </resources>

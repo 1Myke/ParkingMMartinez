@@ -20,8 +20,11 @@ import com.lksnext.ParkingMMartinez.ui.components.LksFooter
 import com.lksnext.ParkingMMartinez.ui.screens.*
 import com.lksnext.ParkingMMartinez.ui.viewmodel.BookingRegisterViewModel
 import com.lksnext.ParkingMMartinez.ui.viewmodel.BookingViewModel
+import com.lksnext.ParkingMMartinez.ui.viewmodel.LoginViewModel
 import com.lksnext.ParkingMMartinez.ui.viewmodel.MapViewModel
 import com.lksnext.ParkingMMartinez.ui.viewmodel.ProfileViewModel
+import com.lksnext.ParkingMMartinez.ui.viewmodel.RecoveryViewModel
+import com.lksnext.ParkingMMartinez.ui.viewmodel.RegistrationViewModel
 
 @Composable
 fun LksNavigation() {
@@ -36,6 +39,24 @@ fun LksNavigation() {
     val navController = rememberNavController()
 
     // --- FACTORY PARA LOS VIEWMODELS ---
+
+    val loginViewModel: LoginViewModel = viewModel(
+        factory = object : ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                return LoginViewModel(userRepository, session) as T
+            }
+        }
+    )
+
+    val registrationViewModel: RegistrationViewModel = viewModel(
+        factory = object : ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                return RegistrationViewModel(userRepository, vehicleRepository, session) as T
+            }
+        }
+    )
+
+    val recoveryViewModel: RecoveryViewModel = viewModel()
 
     val sharedBookingViewModel: BookingViewModel = viewModel(
         factory = object : ViewModelProvider.Factory {
@@ -94,6 +115,7 @@ fun LksNavigation() {
             // --- LOGIN ---
             composable(Screen.Login.route) {
                 LoginScreen(
+                    viewModel = loginViewModel,
                     onLoginSuccess = { shouldRemember ->
                         if (shouldRemember) session.saveSession(true)
                         navController.navigate(Screen.Map.route) {
@@ -108,14 +130,22 @@ fun LksNavigation() {
             // --- REGISTER ---
             composable(Screen.Register.route) {
                 RegistrationScreen(
-                    onRegisterSuccess = { navController.navigate(Screen.Map.route) },
+                    viewModel = registrationViewModel,
+                    onRegisterSuccess = {
+                        navController.navigate(Screen.Map.route) {
+                            popUpTo(Screen.Register.route) { inclusive = true }
+                        }
+                    },
                     onNavigateToLogin = { navController.popBackStack() }
                 )
             }
 
             // --- RECOVERY ---
             composable(Screen.Recovery.route) {
-                RecoveryScreen(onNavigateBack = { navController.popBackStack() })
+                RecoveryScreen(
+                    viewModel = recoveryViewModel,
+                    onNavigateBack = { navController.popBackStack() }
+                )
             }
 
             // --- MAPA ---

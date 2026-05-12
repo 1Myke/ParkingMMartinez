@@ -44,4 +44,34 @@
     <string name="btn_cancel">Cancel</string>
     <string name="btn_delete">Delete</string>
 
+    <!-- TEXTO LOGIN/REGISTER/RECOVERY EN INGLES -->
+    <string name="login_welcome">Welcome Back</string>
+    <string name="login_username">Username</string>
+    <string name="login_password">Password</string>
+    <string name="login_remember">Remember me</string>
+    <string name="login_forgot">Forgot Password?</string>
+    <string name="login_btn">LOG IN</string>
+    <string name="login_no_account">Don\'t have an account?</string>
+    <string name="login_register_link">Register here!</string>
+    <string name="login_email_label">Email</string>
+
+    <string name="reg_title">Register</string>
+    <string name="reg_label_name">Name</string>
+    <string name="reg_label_plate">License Plate</string>
+    <string name="reg_vehicle_type">Vehicle Type</string>
+    <string name="reg_btn">SIGN UP</string>
+
+    <string name="rec_title">Recover your password</string>
+    <string name="rec_placeholder">Use your registration email</string>
+    <string name="rec_btn_continue">Continue</string>
+
+    <string name="err_login_failed">Invalid email or password</string>
+    <string name="err_invalid_email">Please enter a valid email address</string>
+    <string name="err_password_short">Password must be at least 6 characters</string>
+    <string name="err_password_mismatch">Passwords do not match</string>
+    <string name="err_invalid_plate">License plate format is invalid (1234ABC)</string>
+    <string name="err_user_exists">This username is already taken</string>
+
+
+
 </resources>

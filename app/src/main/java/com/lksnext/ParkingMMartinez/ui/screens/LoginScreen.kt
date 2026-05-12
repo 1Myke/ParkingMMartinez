@@ -8,12 +8,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -24,6 +27,7 @@ import com.lksnext.ParkingMMartinez.ui.components.LksPasswordField
 import com.lksnext.ParkingMMartinez.ui.components.LksTextField
 import com.lksnext.ParkingMMartinez.ui.theme.LksOrange
 import com.lksnext.ParkingMMartinez.ui.viewmodel.LoginViewModel
+import com.lksnext.ParkingMMartinez.R
 
 @Composable
 fun LoginScreen(
@@ -32,12 +36,10 @@ fun LoginScreen(
     onNavigateToRegister: () -> Unit,
     onNavigateToPasswordRecovery: () -> Unit
 ){
-    /*var email by remember { mutableStateOf("") }
-    var pass by remember { mutableStateOf("") }
-
-    var errorMessage by remember { mutableStateOf("") }*/
-
-    val context = androidx.compose.ui.platform.LocalContext.current
+    val errorMessage = when (viewModel.errorCode) {
+        "error_invalid_credentials" -> stringResource(R.string.err_login_failed)
+        else -> null
+    }
 
     Column(
         modifier = Modifier
@@ -47,7 +49,7 @@ fun LoginScreen(
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "Welcome Back",
+            text = stringResource(R.string.login_welcome),//"Welcome Back",
             style = MaterialTheme.typography.headlineLarge,
             color = LksOrange
         )
@@ -57,49 +59,47 @@ fun LoginScreen(
         LksTextField(
             value = viewModel.email,
             onValueChange = { viewModel.onEmailChange(it) },
-            label = "Username",
-            //leadingIcon = Icons.Default.Email,
-            // El text field se pondra en rojo si en el mensaje de error esta la palabra email o username
-            isError = viewModel.errorMessage.contains("email", ignoreCase = true) ||
-                    viewModel.errorMessage.contains("user", ignoreCase = true)
+            label = stringResource(R.string.login_username),
+            isError = viewModel.errorCode != null
         )
 
         LksPasswordField(
             value = viewModel.password,
             onValueChange = { viewModel.onPasswordChange(it) },
-            label = "Password",
-            isError = viewModel.errorMessage.contains("password", ignoreCase = true)//,
-            //leadingIcon = Icons.Default.Key
+            label = stringResource(R.string.login_password),
+            isError = viewModel.errorCode != null
         )
 
-        if (viewModel.errorMessage.isNotEmpty()){
+        if (errorMessage != null) {
             Text(
-                text = viewModel.errorMessage,
+                text = errorMessage,
                 color = Color.Red,
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier.padding(vertical = 8.dp)
             )
         }
+
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             LksClickableLabel(
-                text = "Forgot Password?",
+                text = stringResource(R.string.login_forgot),//"Forgot Password?",
                 onClick = {
                     onNavigateToPasswordRecovery()
                 }
             )
 
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(text = "Remember me", style = MaterialTheme.typography.bodySmall)
-                androidx.compose.material3.Checkbox(
+                Text(
+                    text = stringResource(R.string.login_remember),
+                    style = MaterialTheme.typography.bodySmall
+                )
+                Checkbox(
                     checked = viewModel.rememberMe,
                     onCheckedChange = { viewModel.onRememberMeChange(it) },
-                    colors = androidx.compose.material3.CheckboxDefaults.colors(
-                        checkedColor = LksOrange
-                    )
+                    colors = CheckboxDefaults.colors(checkedColor = LksOrange)
                 )
             }
         }
@@ -108,10 +108,10 @@ fun LoginScreen(
         Spacer(modifier = Modifier.padding(4.dp))
 
         LksButton(
-            text = "LOG IN",
+            text = stringResource(R.string.login_btn),
             enabled = !viewModel.isLoading && viewModel.email.isNotEmpty() && viewModel.password.isNotEmpty(),
             onClick = {
-                viewModel.login(context) { shouldRemember ->
+                viewModel.login { shouldRemember ->
                     onLoginSuccess(shouldRemember)
                 }
             }
@@ -123,11 +123,11 @@ fun LoginScreen(
             horizontalArrangement = Arrangement.Center
         ) {
             Text(
-                text = "Don't have an account?",
+                text = stringResource(R.string.login_no_account),//"Don't have an account?",
                 textAlign = TextAlign.Center
             )
             LksClickableLabel(
-                text = "Register here!",
+                text = stringResource(R.string.login_register_link), //"Register here!",
                 onClick = {
                     onNavigateToRegister()
                 }

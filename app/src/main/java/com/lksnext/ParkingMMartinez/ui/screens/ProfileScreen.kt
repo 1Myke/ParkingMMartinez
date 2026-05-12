@@ -56,6 +56,9 @@ import com.lksnext.ParkingMMartinez.ui.components.LksTextField
 import com.lksnext.ParkingMMartinez.ui.components.ProfileHeaderSection
 import com.lksnext.ParkingMMartinez.ui.components.VehicleCard
 import com.lksnext.ParkingMMartinez.ui.theme.LksOrange
+import com.lksnext.ParkingMMartinez.ui.theme.bookingCardColor
+import com.lksnext.ParkingMMartinez.ui.theme.lightGray
+import com.lksnext.ParkingMMartinez.ui.theme.navyBlue
 import com.lksnext.ParkingMMartinez.ui.viewmodel.ProfileViewModel
 
 @Composable
@@ -108,7 +111,7 @@ fun ProfileScreen(
                 viewModel.userEmail
             )
 
-            HorizontalDivider(modifier = Modifier.padding(vertical = 24.dp), thickness = 1.dp, color = Color(0xFFEEEEEE))
+            HorizontalDivider(modifier = Modifier.padding(vertical = 24.dp), thickness = 1.dp, color = lightGray)
 
             Row(
                 modifier = Modifier.padding(horizontal = 24.dp),
@@ -183,7 +186,7 @@ fun AddVehicleDialog(viewModel: ProfileViewModel) {
                     text = stringResource(R.string.profile_add_vehicle_title), // "+ Add New Vehicle"
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF1A2C42)
+                    color = navyBlue
                 )
 
                 Spacer(modifier = Modifier.height(24.dp))

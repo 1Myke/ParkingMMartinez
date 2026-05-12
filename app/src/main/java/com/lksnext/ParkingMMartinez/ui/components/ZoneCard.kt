@@ -16,6 +16,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.lksnext.ParkingMMartinez.model.ParkingZone
 import com.lksnext.ParkingMMartinez.R
+import com.lksnext.ParkingMMartinez.ui.theme.LksGreen
+import com.lksnext.ParkingMMartinez.ui.theme.verdePino
 
 
 @Composable
@@ -57,7 +59,7 @@ fun ZoneCard(
                         text = "${zone.availableSpots}",
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.ExtraBold,
-                        color = Color(0xFF1B5E20)
+                        color = verdePino
                     )
                     Text(" / ${zone.totalSpots} free", color = Color.Gray)
                 }
@@ -65,7 +67,7 @@ fun ZoneCard(
 
             // Etiqueta "AVAILABLE" de Figma
             Surface(
-                color = Color(0xFF00C853),
+                color = LksGreen,
                 shape = RoundedCornerShape(8.dp)
             ) {
                 Text(

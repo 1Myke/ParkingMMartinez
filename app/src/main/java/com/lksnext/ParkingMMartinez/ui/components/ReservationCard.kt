@@ -20,6 +20,10 @@ import androidx.compose.ui.unit.sp
 import com.lksnext.ParkingMMartinez.model.Reservation
 import com.lksnext.ParkingMMartinez.ui.theme.LksOrange
 import com.lksnext.ParkingMMartinez.R
+import com.lksnext.ParkingMMartinez.ui.theme.activeYelow
+import com.lksnext.ParkingMMartinez.ui.theme.LksGreen
+import com.lksnext.ParkingMMartinez.ui.theme.cremaSuave
+import com.lksnext.ParkingMMartinez.ui.theme.mistGray
 
 @Composable
 fun ReservationCard(
@@ -61,13 +65,13 @@ fun ReservationCard(
                 }
 
                 Surface(
-                    color = Color(0xFFFFF8E1),
+                    color = cremaSuave,
                     shape = RoundedCornerShape(12.dp)
                 ) {
                     Text(
                         text = stringResource(R.string.status_active), // "ACTIVE"
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                        color = Color(0xFFFBC02D),
+                        color = activeYelow,
                         fontWeight = FontWeight.Bold,
                         fontSize = 10.sp
                     )
@@ -76,7 +80,7 @@ fun ReservationCard(
 
             Surface(
                 modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp),
-                color = Color(0xFFF8F9FA),
+                color = mistGray,
                 shape = RoundedCornerShape(12.dp)
             ) {
                 Column(modifier = Modifier.padding(12.dp)) {
@@ -158,7 +162,7 @@ fun ReservationCard(
                         .weight(1.4f) // Le damos más peso para que el texto quepa bien
                         .height(48.dp),
                     shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00A650)),
+                    colors = ButtonDefaults.buttonColors(containerColor = LksGreen),
                     contentPadding = PaddingValues(horizontal = 8.dp)
                 ) {
                     Text(

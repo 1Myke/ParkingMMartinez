@@ -20,6 +20,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.lksnext.ParkingMMartinez.R
 import com.lksnext.ParkingMMartinez.ui.theme.LksOrange
+import com.lksnext.ParkingMMartinez.ui.theme.mistGray
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -64,7 +65,7 @@ fun LksTimePicker(
                 TimePicker(
                     state = state,
                     colors = TimePickerDefaults.colors(
-                        clockDialColor = Color(0xFFF1F3F5),
+                        clockDialColor = mistGray,
                         selectorColor = LksOrange,
                         containerColor = Color.White,
                         periodSelectorSelectedContainerColor = LksOrange.copy(alpha = 0.2f),

@@ -12,7 +12,6 @@ import com.lksnext.ParkingMMartinez.ui.theme.LksOrange
 
 @Composable
 fun LksHeader(title: String, subtitle: String){
-    // El lienzo sobre el que vamos a dibujar todo
     Surface(
         modifier = Modifier.fillMaxWidth(),
         color = LksOrange

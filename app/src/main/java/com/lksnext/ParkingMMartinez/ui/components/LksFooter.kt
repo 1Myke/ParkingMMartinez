@@ -6,11 +6,13 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.lksnext.ParkingMMartinez.ui.navigation.Screen
 import com.lksnext.ParkingMMartinez.ui.theme.LksOrange
+import com.lksnext.ParkingMMartinez.R
 
 
 @Composable
@@ -19,10 +21,10 @@ fun LksFooter(navController: NavController) {
     val currentRoute = navBackStackEntry?.destination?.route
 
     val items = listOf(
-        Triple(Screen.Map.route, Icons.Default.Map, "Map"),
-        Triple(Screen.BookingsList.route, Icons.Default.CalendarMonth, "Bookings"),
-        Triple(Screen.Alerts.route, Icons.Default.Notifications, "Alerts"),
-        Triple(Screen.Profile.route, Icons.Default.Person, "Profile")
+        Triple(Screen.Map.route, Icons.Default.Map, stringResource(R.string.footer_map)),
+        Triple(Screen.BookingsList.route, Icons.Default.CalendarMonth, stringResource(R.string.footer_bookings)),
+        Triple(Screen.Alerts.route, Icons.Default.Notifications, stringResource(R.string.footer_alerts)),
+        Triple(Screen.Profile.route, Icons.Default.Person, stringResource(R.string.footer_profile))
     )
 
     NavigationBar(

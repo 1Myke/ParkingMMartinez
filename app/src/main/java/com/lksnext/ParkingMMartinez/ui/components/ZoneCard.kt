@@ -11,9 +11,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.lksnext.ParkingMMartinez.model.ParkingZone
+import com.lksnext.ParkingMMartinez.R
 
 
 @Composable
@@ -67,7 +69,7 @@ fun ZoneCard(
                 shape = RoundedCornerShape(8.dp)
             ) {
                 Text(
-                    "AVAILABLE",
+                    stringResource(R.string.label_available),
                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                     color = Color.White,
                     style = MaterialTheme.typography.labelSmall,

@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -19,6 +20,7 @@ import com.lksnext.ParkingMMartinez.ui.components.LksHeader
 import com.lksnext.ParkingMMartinez.ui.components.ZoneCard
 import com.lksnext.ParkingMMartinez.ui.viewmodel.MapViewModel
 import com.lksnext.ParkingMMartinez.model.*
+import com.lksnext.ParkingMMartinez.R
 
 @Composable
 fun MapScreen(
@@ -27,10 +29,9 @@ fun MapScreen(
 ) {
 
     // De momento vamos a hacer el import del mock para que tenga los datos
-    val context = androidx.compose.ui.platform.LocalContext.current
 
     LaunchedEffect(Unit) {
-        viewModel.refreshParkingStatus(context)
+        viewModel.refreshParkingStatus()
     }
 
     Column(
@@ -39,8 +40,8 @@ fun MapScreen(
             .background(Color(0xFFF8F9FA))
     ) {
         LksHeader(
-            title = "LKS Next Parking",
-            subtitle = "Select a zone to book instantly"
+            title = stringResource(R.string.map_header_title),//"LKS Next Parking",
+            subtitle = stringResource(R.string.map_header_subtitle)//"Select a zone to book instantly"
         )
 
         Column(
@@ -50,6 +51,7 @@ fun MapScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             viewModel.zones.forEach { zone ->
+                /*
                 val type: VehicleType = when (zone.name) {
                     ZoneNames.DISABILITY -> VehicleType.ADAPTED
                     ZoneNames.EV -> VehicleType.ELECTRIC
@@ -70,8 +72,10 @@ fun MapScreen(
                     totalSpots = total
                 )
 
+                 */
+
                 ZoneCard(
-                    zone = updatedZone,
+                    zone = zone,//updatedZone,
                     onClick = { onZoneClick(zone.name) }
                 )
             }

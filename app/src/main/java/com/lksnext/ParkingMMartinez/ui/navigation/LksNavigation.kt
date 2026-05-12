@@ -19,6 +19,7 @@ import com.lksnext.ParkingMMartinez.ui.components.LksFooter
 import com.lksnext.ParkingMMartinez.ui.screens.*
 import com.lksnext.ParkingMMartinez.ui.viewmodel.BookingRegisterViewModel
 import com.lksnext.ParkingMMartinez.ui.viewmodel.BookingViewModel
+import com.lksnext.ParkingMMartinez.ui.viewmodel.MapViewModel
 
 @Composable
 fun LksNavigation() {
@@ -42,6 +43,14 @@ fun LksNavigation() {
         factory = object: ViewModelProvider.Factory {
             override fun <T: ViewModel> create(moduleClass: Class<T>): T {
                 return BookingRegisterViewModel(repository, session) as T
+            }
+        }
+    )
+
+    val mapViewModel: MapViewModel = viewModel(
+        factory = object : ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                return MapViewModel(repository) as T
             }
         }
     )
@@ -104,7 +113,8 @@ fun LksNavigation() {
 
             // --- MAPA (PANTALLA PRINCIPAL) ---
             composable(Screen.Map.route) {
-                MapScreen(onZoneClick = { zoneName ->
+                MapScreen(viewModel = mapViewModel,
+                    onZoneClick = { zoneName ->
                     navController.navigate(Screen.Booking.createRoute(zoneName))
                 })
             }

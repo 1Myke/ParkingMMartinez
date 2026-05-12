@@ -11,10 +11,10 @@ object  ParkingMock {
 
     val zones: List<ParkingZone>
         get() = listOf(
-            ParkingZone(ZoneNames.DISABILITY, getTotalSpotsCount(VehicleType.ADAPTED), getAvailableSpotsCount(VehicleType.ADAPTED), 0, Color(0xFF2D5AF0)),
-            ParkingZone(ZoneNames.EV, getTotalSpotsCount(VehicleType.ELECTRIC), getAvailableSpotsCount(VehicleType.ELECTRIC), 0, Color(0xFF00C853)),
-            ParkingZone(ZoneNames.STANDARD, getTotalSpotsCount(VehicleType.STANDARD), getAvailableSpotsCount(VehicleType.STANDARD), 0, Color(0xFF455A64)),
-            ParkingZone(ZoneNames.MOTORCYCLE, getTotalSpotsCount(VehicleType.MOTORCYCLE), getAvailableSpotsCount(VehicleType.MOTORCYCLE), 0, Color(0xFFA66FB5))
+            ParkingZone(ZoneNames.DISABILITY, getAvailableSpotsCount(VehicleType.ADAPTED), getTotalSpotsCount(VehicleType.ADAPTED), 0, Color(0xFF2D5AF0)),
+            ParkingZone(ZoneNames.EV, getAvailableSpotsCount(VehicleType.ELECTRIC), getTotalSpotsCount(VehicleType.ELECTRIC), 0, Color(0xFF00C853)),
+            ParkingZone(ZoneNames.STANDARD, getAvailableSpotsCount(VehicleType.STANDARD), getTotalSpotsCount(VehicleType.STANDARD), 0, Color(0xFF455A64)),
+            ParkingZone(ZoneNames.MOTORCYCLE, getAvailableSpotsCount(VehicleType.MOTORCYCLE), getTotalSpotsCount(VehicleType.MOTORCYCLE), 0, Color(0xFFA66FB5))
         )
 
     private val spots = mutableListOf<ParkingSpot>().apply {

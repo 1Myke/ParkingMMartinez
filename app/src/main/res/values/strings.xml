@@ -24,4 +24,8 @@
     <string name="register_title">My Reservations</string>
     <string name="register_empty">No active reservations</string>
 
+    <!-- TEXTO MAP SCREEN EN INGLES -->
+    <string name="map_header_title">LKS Next Parking</string>
+    <string name="map_header_subtitle">Select a zone to book instantly</string>
+
 </resources>

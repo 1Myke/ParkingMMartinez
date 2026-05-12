@@ -21,6 +21,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lksnext.ParkingMMartinez.ui.theme.LksOrange
+import com.lksnext.ParkingMMartinez.ui.theme.cremaSuave
 
 @Composable
 fun ProfileHeaderSection(
@@ -35,7 +36,7 @@ fun ProfileHeaderSection(
         Surface(
             modifier = Modifier.size(120.dp),
             shape = CircleShape,
-            border = BorderStroke(4.dp, Color(0xFFFFF5E9)), // Un naranja muy clarito
+            border = BorderStroke(4.dp, cremaSuave),
             color = Color.White,
             shadowElevation = 4.dp
         ) {
@@ -48,7 +49,7 @@ fun ProfileHeaderSection(
         }
 
         Spacer(modifier = Modifier.height(16.dp))
-        Text(name, fontSize = 24.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF1A1C1E))
+        Text(name, fontSize = 24.sp, fontWeight = FontWeight.ExtraBold, color = Color.Black)
         Text(role, fontSize = 16.sp, fontWeight = FontWeight.Bold, color = LksOrange)
         Text(email, fontSize = 14.sp, color = Color.Gray)
     }

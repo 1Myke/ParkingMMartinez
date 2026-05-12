@@ -21,6 +21,7 @@ import com.lksnext.ParkingMMartinez.ui.components.ZoneCard
 import com.lksnext.ParkingMMartinez.ui.viewmodel.MapViewModel
 import com.lksnext.ParkingMMartinez.model.*
 import com.lksnext.ParkingMMartinez.R
+import com.lksnext.ParkingMMartinez.ui.theme.mistGray
 
 @Composable
 fun MapScreen(
@@ -37,7 +38,7 @@ fun MapScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFF8F9FA))
+            .background(mistGray)
     ) {
         LksHeader(
             title = stringResource(R.string.map_header_title),//"LKS Next Parking",

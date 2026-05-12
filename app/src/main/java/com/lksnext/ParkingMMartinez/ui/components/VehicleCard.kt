@@ -56,7 +56,7 @@ fun VehicleCard(
             // Icono del vehículo con fondo gris circular
             Surface(
                 modifier = Modifier.size(48.dp),
-                color = Color(0xFFF1F3F5),
+                color = mistGray,
                 shape = RoundedCornerShape(12.dp)
             ) {
                 Icon(
@@ -64,7 +64,7 @@ fun VehicleCard(
                     imageVector = if (type == VehicleType.MOTORCYCLE) Icons.Default.TwoWheeler else Icons.Default.DirectionsCar,
                     contentDescription = null,
                     modifier = Modifier.padding(12.dp),
-                    tint = Color(0xFF495057)
+                    tint = grisPizarra
                 )
             }
 
@@ -76,7 +76,7 @@ fun VehicleCard(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     // La matrícula con fondo gris suave para que destaque
                     Surface(
-                        color = Color(0xFFF1F3F5),
+                        color = mistGray,
                         shape = RoundedCornerShape(4.dp)
                     ) {
                         Text(

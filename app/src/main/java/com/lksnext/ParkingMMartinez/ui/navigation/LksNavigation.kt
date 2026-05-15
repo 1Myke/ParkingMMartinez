@@ -25,6 +25,8 @@ import com.lksnext.ParkingMMartinez.ui.viewmodel.MapViewModel
 import com.lksnext.ParkingMMartinez.ui.viewmodel.ProfileViewModel
 import com.lksnext.ParkingMMartinez.ui.viewmodel.RecoveryViewModel
 import com.lksnext.ParkingMMartinez.ui.viewmodel.RegistrationViewModel
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 
 @Composable
 fun LksNavigation() {
@@ -41,17 +43,17 @@ fun LksNavigation() {
     // --- FACTORY PARA LOS VIEWMODELS ---
 
     val loginViewModel: LoginViewModel = viewModel(
-        factory = object : ViewModelProvider.Factory {
-            override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                return LoginViewModel(userRepository, session) as T
+        factory = viewModelFactory {
+            addInitializer(LoginViewModel::class) {
+                LoginViewModel(userRepository, session)
             }
         }
     )
 
     val registrationViewModel: RegistrationViewModel = viewModel(
-        factory = object : ViewModelProvider.Factory {
-            override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                return RegistrationViewModel(userRepository, vehicleRepository, session) as T
+        factory = viewModelFactory {
+            addInitializer(RegistrationViewModel::class) {
+                RegistrationViewModel(userRepository, vehicleRepository, session)
             }
         }
     )
@@ -59,33 +61,33 @@ fun LksNavigation() {
     val recoveryViewModel: RecoveryViewModel = viewModel()
 
     val sharedBookingViewModel: BookingViewModel = viewModel(
-        factory = object : ViewModelProvider.Factory {
-            override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                return BookingViewModel(bookingRepository, session) as T
+        factory = viewModelFactory {
+            addInitializer(BookingViewModel::class) {
+                BookingViewModel(bookingRepository, session)
             }
         }
     )
 
     val registerViewModel: BookingRegisterViewModel = viewModel(
-        factory = object : ViewModelProvider.Factory {
-            override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                return BookingRegisterViewModel(bookingRepository, session) as T
+        factory = viewModelFactory {
+            addInitializer(BookingRegisterViewModel::class) {
+                BookingRegisterViewModel(bookingRepository, session)
             }
         }
     )
 
     val mapViewModel: MapViewModel = viewModel(
-        factory = object : ViewModelProvider.Factory {
-            override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                return MapViewModel(bookingRepository) as T
+        factory = viewModelFactory {
+            addInitializer(MapViewModel::class) {
+                MapViewModel(bookingRepository)
             }
         }
     )
 
     val profileViewModel: ProfileViewModel = viewModel(
-        factory = object : ViewModelProvider.Factory {
-            override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                return ProfileViewModel(vehicleRepository, userRepository, session) as T
+        factory = viewModelFactory {
+            addInitializer(ProfileViewModel::class) {
+                ProfileViewModel(vehicleRepository, userRepository, session)
             }
         }
     )

@@ -4,6 +4,15 @@ plugins {
     id("org.sonarqube")
 }
 
+val appVersionCode = 1
+val appVersionName = "v1.0.0"
+val targetSdkVersion = 36
+
+// Versiones de paquetes
+val lifecycleVersion = "2.6.2"
+val navigationVersion = "2.8.0"
+val gsonVersion = "2.11.0"
+
 android {
     namespace = "com.lksnext.ParkingMMartinez"
     compileSdk {
@@ -15,9 +24,9 @@ android {
     defaultConfig {
         applicationId = "com.lksnext.ParkingMMartinez"
         minSdk = 26
-        targetSdk = 36
-        versionCode = 1
-        versionName = "v1.0.0"
+        targetSdk = targetSdkVersion
+        versionCode = appVersionCode
+        versionName = appVersionName
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -50,9 +59,9 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
     implementation("androidx.compose.material:material-icons-extended")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")
-    implementation("androidx.navigation:navigation-compose:2.8.0")
-    implementation("com.google.code.gson:gson:2.11.0")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycleVersion")
+    implementation("androidx.navigation:navigation-compose:$navigationVersion")
+    implementation("com.google.code.gson:gson:$gsonVersion")
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

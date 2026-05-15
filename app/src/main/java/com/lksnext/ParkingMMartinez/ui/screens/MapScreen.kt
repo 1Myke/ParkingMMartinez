@@ -52,29 +52,6 @@ fun MapScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             viewModel.zones.forEach { zone ->
-                /*
-                val type: VehicleType = when (zone.name) {
-                    ZoneNames.DISABILITY -> VehicleType.ADAPTED
-                    ZoneNames.EV -> VehicleType.ELECTRIC
-                    ZoneNames.MOTORCYCLE -> VehicleType.MOTORCYCLE
-                    ZoneNames.STANDARD -> VehicleType.STANDARD
-                    else -> {
-                        android.util.Log.e("MAP_ERROR", "ZoneName no reconocido: ${zone.name}")
-                        VehicleType.STANDARD
-                    }
-                }
-
-                val available = ParkingMock.getAvailableSpotsCount(type)
-                val total = ParkingMock.getTotalSpotsCount(type)
-
-                // Creamos una copia de la zona con los datos actualizados para la Card
-                val updatedZone = zone.copy(
-                    availableSpots = available,
-                    totalSpots = total
-                )
-
-                 */
-
                 ZoneCard(
                     zone = zone,//updatedZone,
                     onClick = { onZoneClick(zone.name) }

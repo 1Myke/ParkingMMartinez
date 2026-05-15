@@ -96,7 +96,7 @@ fun VehicleCard(
                         shape = RoundedCornerShape(4.dp)
                     ) {
                         Text(
-                            text = type.toString().lowercase().capitalize(),
+                            text = type.toString().lowercase().replaceFirstChar { it.uppercase() },
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
                             style = MaterialTheme.typography.labelSmall,
                             color = contentColor,

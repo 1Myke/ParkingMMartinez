@@ -68,13 +68,3 @@ fun BookingRegisterScreen(
         }
     }
 }
-
-/*
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun BookingRegisterScreenPreview() {
-    BookingRegisterScreen(
-        onNavigateToEdit = { }
-    )
-}
- */

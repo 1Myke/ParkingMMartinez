@@ -16,6 +16,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.DirectionsCar
@@ -98,7 +99,7 @@ fun ProfileScreen(
                 horizontalArrangement = Arrangement.End
             ) {
                 IconButton(onClick = onLogoutClick) {
-                    Icon(Icons.Default.Logout,
+                    Icon(Icons.AutoMirrored.Default.Logout,
                         null,
                         tint = Color.Gray,
                         modifier = Modifier.size(28.dp))

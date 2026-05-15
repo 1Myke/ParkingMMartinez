@@ -4,6 +4,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Accessible
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -87,7 +88,7 @@ fun getIconForZone(zoneName: String): ImageVector {
     return when {
         zoneName.contains("Standard", ignoreCase = true) -> Icons.Default.DirectionsCar
         zoneName.contains("EV", ignoreCase = true) || zoneName.contains("Charging", ignoreCase = true) -> Icons.Default.ElectricCar
-        zoneName.contains("Disability", ignoreCase = true) || zoneName.contains("Accessible", ignoreCase = true) -> Icons.Default.Accessible
+        zoneName.contains("Disability", ignoreCase = true) || zoneName.contains("Accessible", ignoreCase = true) -> Icons.AutoMirrored.Default.Accessible
         zoneName.contains("Motorcycle", ignoreCase = true) -> Icons.Default.TwoWheeler
         else -> Icons.Default.LocalParking // Icono por defecto si no coincide ninguno
     }

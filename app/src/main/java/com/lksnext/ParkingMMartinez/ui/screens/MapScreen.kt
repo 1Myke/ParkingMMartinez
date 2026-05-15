@@ -60,11 +60,3 @@ fun MapScreen(
         }
     }
 }
-
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun MapScreenPreview() {
-    MapScreen(
-        onZoneClick = {zoneName -> }
-    )
-}

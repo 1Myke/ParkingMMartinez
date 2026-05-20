@@ -70,8 +70,8 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x gradlew
 
-      - name: Build and analyze
+      - name: Run Tests and Analyze
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Generado automáticamente por GitHub
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}    # El que tú creaste en SonarCloud
-        run: ./gradlew assembleDebug sonar --info
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}    # Tu token secreto de SonarCloud
+        run: ./gradlew testDebugUnitTest sonar

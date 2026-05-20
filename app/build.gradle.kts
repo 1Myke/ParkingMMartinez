@@ -12,6 +12,7 @@ val targetSdkVersion = 36
 val lifecycleVersion = "2.6.2"
 val navigationVersion = "2.8.0"
 val gsonVersion = "2.11.0"
+val mockitoVersion = "5.11.0"
 
 android {
     namespace = "com.lksnext.ParkingMMartinez"
@@ -62,6 +63,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycleVersion")
     implementation("androidx.navigation:navigation-compose:$navigationVersion")
     implementation("com.google.code.gson:gson:$gsonVersion")
+    testImplementation("org.mockito:mockito-core:$mockitoVersion")
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

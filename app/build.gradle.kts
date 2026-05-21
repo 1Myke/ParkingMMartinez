@@ -1,6 +1,8 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.google.services)
+    alias(libs.plugins.firebase.crashlytics)
     id("org.sonarqube")
 }
 
@@ -64,6 +66,10 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycleVersion")
     implementation("androidx.navigation:navigation-compose:$navigationVersion")
     implementation("com.google.code.gson:gson:$gsonVersion")
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.analytics)
+    implementation(libs.firebase.crashlytics)
+    implementation(libs.firebase.auth)
     testImplementation("org.mockito:mockito-core:$mockitoVersion")
     testImplementation("androidx.arch.core:core-testing:$archVersion")
     testImplementation(libs.junit)

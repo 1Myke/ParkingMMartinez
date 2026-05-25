@@ -3,7 +3,8 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.google.services)
     alias(libs.plugins.firebase.crashlytics)
-    id("org.sonarqube")
+    //id("org.sonarqube")
+    jacoco
 }
 
 val appVersionCode = 1
@@ -43,6 +44,9 @@ android {
                 "proguard-rules.pro"
             )
         }
+        getByName("debug") {
+            enableUnitTestCoverage = true
+        }
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
@@ -50,6 +54,12 @@ android {
     }
     buildFeatures {
         compose = true
+    }
+}
+
+sonar {
+    properties {
+        property("sonar.coverage.jacoco.xmlReportPaths", "build/reports/coverage/test/debug/report.xml")
     }
 }
 

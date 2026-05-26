@@ -132,12 +132,17 @@ class BookingViewModel (
 
         val calendar = Calendar.getInstance()
         calendar.set(Calendar.DAY_OF_MONTH, selectedDay)
+        // Ponemos a cero las horas en la fecha para que no interfieran con los LocalTime
+        calendar.set(Calendar.HOUR_OF_DAY, 0)
+        calendar.set(Calendar.MINUTE, 0)
+        calendar.set(Calendar.SECOND, 0)
+        calendar.set(Calendar.MILLISECOND, 0)
 
         val newReservation = Reservation(
             id = UUID.randomUUID().toString(),
             vehicle = vehicleWithId,
             zone = zone,
-            date = calendar.time,
+            date = calendar.time, // Ahora va una fecha "limpia" de residuos horarios
             startTime = start,
             endTime = end,
             isCheckedIn = false,
@@ -182,15 +187,23 @@ class BookingViewModel (
 
     fun isDateTimeValid(): Boolean {
         val now = Calendar.getInstance()
+
+        // 🎯 MARGEN DE CORTESÍA: Le restamos 5 minutos a la hora actual
+        // para que si el usuario reserva en el mismo minuto exacto (o se retrasa unos segundos),
+        // el sistema no lo tome como una reserva en el pasado.
+        now.add(Calendar.MINUTE, -5)
+
         val selected = Calendar.getInstance()
 
         // Configuramos el calendario con lo seleccionado por el usuario
         selected.set(Calendar.DAY_OF_MONTH, selectedDay)
         selected.set(Calendar.HOUR_OF_DAY, startHour)
         selected.set(Calendar.MINUTE, startMinute)
+        // Limpiamos segundos y milisegundos para una comparación limpia
+        selected.set(Calendar.SECOND, 0)
+        selected.set(Calendar.MILLISECOND, 0)
 
-        // Si el día seleccionado es hoy, comparamos con la hora actual
-        // Si es un día futuro (dentro de los 7 permitidos), siempre es válido
+        // Si el momento seleccionado es posterior al "ahora con margen", es válido
         return selected.after(now)
     }
 

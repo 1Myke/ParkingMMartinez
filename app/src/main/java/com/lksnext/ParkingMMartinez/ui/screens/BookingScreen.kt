@@ -31,6 +31,7 @@ import com.lksnext.ParkingMMartinez.ui.viewmodel.BookingViewModel
 import com.lksnext.ParkingMMartinez.data.ParkingMock
 import com.lksnext.ParkingMMartinez.model.VehicleType
 import com.lksnext.ParkingMMartinez.R
+import com.lksnext.ParkingMMartinez.ui.components.DateItem
 import com.lksnext.ParkingMMartinez.ui.theme.lightGray
 import com.lksnext.ParkingMMartinez.ui.theme.bookingCardColor
 import com.lksnext.ParkingMMartinez.ui.theme.cremaSuave
@@ -293,25 +294,6 @@ fun SectionHeader(
                 style = MaterialTheme.typography.labelMedium,
                 modifier = Modifier.padding(8.dp).clickable { onActionClick() }
             )
-        }
-    }
-}
-
-@Composable
-fun DateItem(day: String, label: String, isSelected: Boolean, onClick: () -> Unit) {
-    Surface(
-        onClick = onClick,
-        color = if (isSelected) LksOrange else Color.White,
-        shape = RoundedCornerShape(12.dp),
-        border = if (isSelected) null else BorderStroke(1.dp, Color.LightGray),
-        modifier = Modifier.size(width = 62.dp, height = 75.dp)
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Text(label, fontSize = 10.sp, color = if (isSelected) Color.White else Color.Gray, fontWeight = FontWeight.Bold)
-            Text(day, fontSize = 20.sp, color = if (isSelected) Color.White else Color.Black, fontWeight = FontWeight.ExtraBold)
         }
     }
 }

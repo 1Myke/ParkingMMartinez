@@ -6,21 +6,87 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import com.lksnext.ParkingMMartinez.data.ParkingMock
 import com.lksnext.ParkingMMartinez.data.repository.BookingRepository
+import java.text.SimpleDateFormat
+import java.time.LocalTime
+import java.util.*
 
 class MapViewModel(
     private val repository: BookingRepository
 ) : ViewModel() {
-//    val zones: List<ParkingZone> = ParkingMock.zones
+
+    var selectedDate by mutableStateOf(Date())
+        private set
+
+    var selectedStartTime by mutableStateOf(LocalTime.now())
+        private set
+
+    val selectedEndTime: LocalTime
+        get() = selectedStartTime.plusHours(1)
 
     var zones by mutableStateOf(ParkingMock.zones)
         private set
 
+    var showTimePicker by mutableStateOf(false)
+
+    var availableDates by mutableStateOf<List<Pair<Int, String>>>(emptyList())
+        private set
+
+    var selectedDayNumber by mutableStateOf(0)
+        private set
+
+    init {
+        generateAvailableDates()
+        refreshParkingStatus()
+    }
+
+    private fun generateAvailableDates() {
+        val list = mutableListOf<Pair<Int, String>>()
+        val calendar = Calendar.getInstance()
+
+        selectedDayNumber = calendar.get(Calendar.DAY_OF_MONTH)
+        list.add(Pair(selectedDayNumber, "TODAY"))
+
+        val dateFormat = SimpleDateFormat("EEE", Locale.getDefault())
+        for (i in 1..7) {
+            calendar.add(Calendar.DAY_OF_MONTH, 1)
+            val dayNum = calendar.get(Calendar.DAY_OF_MONTH)
+            val label = dateFormat.format(calendar.time)
+            list.add(Pair(dayNum, label))
+        }
+        availableDates = list
+    }
+
+    fun onDateSelected(dayNumber: Int) {
+        selectedDayNumber = dayNumber
+
+        val calendar = Calendar.getInstance()
+        val currentDay = calendar.get(Calendar.DAY_OF_MONTH)
+
+        if (dayNumber >= currentDay) {
+            calendar.set(Calendar.DAY_OF_MONTH, dayNumber)
+        } else {
+            calendar.add(Calendar.MONTH, 1)
+            calendar.set(Calendar.DAY_OF_MONTH, dayNumber)
+        }
+
+        selectedDate = calendar.time
+        refreshParkingStatus()
+    }
+
+    fun onTimeChange(hour: Int, minute: Int) {
+        selectedStartTime = LocalTime.of(hour, minute)
+        refreshParkingStatus()
+    }
+
     fun refreshParkingStatus() {
         val allBookings = repository.getAllReservations()
 
-        android.util.Log.d("DEBUG_MAP", "Reservas leídas del disco: ${allBookings.size}")
-
-        ParkingMock.syncWithReservations(allBookings)
+        ParkingMock.syncWithReservationsForTimeSlot(
+            allBookings = allBookings,
+            selectedDate = selectedDate,
+            slotStart = selectedStartTime,
+            slotEnd = selectedEndTime
+        )
 
         zones = ParkingMock.zones.toList()
     }

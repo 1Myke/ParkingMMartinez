@@ -44,6 +44,15 @@ class BookingViewModel (
     var editingReservationId by mutableStateOf<String?>(null)
         private set
 
+    var nextCollisionTime by mutableStateOf<String?>(null)
+        private set
+
+    var maxAllowedHours by mutableStateOf(0)
+        private set
+
+    var isOverlapConflict by mutableStateOf(false)
+        private set
+
     // Logica para los proximos 7 dias
     val availableDates: List<Pair<Int, String>> by lazy {
         val calendar = Calendar.getInstance()
@@ -225,18 +234,60 @@ class BookingViewModel (
     }
 
     fun canUserConfirmBooking(): Boolean {
+        // Resetear estados de conflicto al empezar la validación
+        isOverlapConflict = false
+        nextCollisionTime = null
+        maxAllowedHours = 0
+
         if (!isDateTimeValid()) return false
-
         if (selectedVehicle == null) return false
-
         if (editingReservationId != null) return true
 
         val currentUserId = sessionManager.getActiveUserId() ?: return false
         val allBookings = repository.getAllReservations()
 
         val hasAnyActive = allBookings.any { it.vehicle.id == currentUserId }
+        if (hasAnyActive) return false
 
-        return !hasAnyActive
+        val proposedStart = LocalTime.of(startHour, startMinute)
+        val proposedEnd = proposedStart.plusHours(duration.toLong())
+
+        val mockZone = com.lksnext.ParkingMMartinez.data.ParkingMock.zones.find { it.name == parkingZone }
+        val maxSpotsInZone = mockZone?.totalSpots ?: 4
+
+        val conflictingBookings = allBookings.filter { booking ->
+            val calendar = Calendar.getInstance().apply { time = booking.date }
+            val isSameDay = calendar.get(Calendar.DAY_OF_MONTH) == selectedDay
+            isSameDay && booking.zone.name == parkingZone
+        }
+
+        var tempTime = proposedStart
+        var earliestCollision: LocalTime? = null
+
+        while (tempTime.isBefore(proposedEnd)) {
+            val carsAtThisHour = conflictingBookings.count { booking ->
+                val startsBeforeOrAt = booking.startTime.isBefore(tempTime) || booking.startTime == tempTime
+                val endsAfter = booking.endTime.isAfter(tempTime)
+                startsBeforeOrAt && endsAfter
+            }
+
+            if (carsAtThisHour >= maxSpotsInZone && earliestCollision == null) {
+                earliestCollision = tempTime
+            }
+            tempTime = tempTime.plusMinutes(30)
+        }
+
+        if (earliestCollision != null) {
+            isOverlapConflict = true
+            nextCollisionTime = String.format("%02d:%02d", earliestCollision.hour, earliestCollision.minute)
+
+            val minutesAvailable = java.time.Duration.between(proposedStart, earliestCollision).toMinutes()
+            maxAllowedHours = (minutesAvailable / 60).toInt()
+
+            return false
+        }
+
+        return true
     }
 
 }

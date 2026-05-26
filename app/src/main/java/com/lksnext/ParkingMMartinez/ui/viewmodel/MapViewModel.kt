@@ -35,6 +35,14 @@ class MapViewModel(
         private set
 
     init {
+        val cleanCalendar = Calendar.getInstance().apply {
+            set(Calendar.HOUR_OF_DAY, 0)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }
+        selectedDate = cleanCalendar.time
+
         generateAvailableDates()
         refreshParkingStatus()
     }
@@ -68,6 +76,11 @@ class MapViewModel(
             calendar.add(Calendar.MONTH, 1)
             calendar.set(Calendar.DAY_OF_MONTH, dayNumber)
         }
+
+        calendar.set(Calendar.HOUR_OF_DAY, 0)
+        calendar.set(Calendar.MINUTE, 0)
+        calendar.set(Calendar.SECOND, 0)
+        calendar.set(Calendar.MILLISECOND, 0)
 
         selectedDate = calendar.time
         refreshParkingStatus()

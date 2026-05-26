@@ -28,6 +28,7 @@ import com.lksnext.ParkingMMartinez.ui.theme.bookingCardColor
 import com.lksnext.ParkingMMartinez.ui.theme.lightGray
 import com.lksnext.ParkingMMartinez.ui.theme.mistGray
 import com.lksnext.ParkingMMartinez.ui.viewmodel.MapViewModel
+import androidx.lifecycle.compose.LifecycleResumeEffect
 
 @Composable
 fun MapScreen(
@@ -36,8 +37,12 @@ fun MapScreen(
 ) {
     val todayStr = stringResource(R.string.booking_today)
 
-    LaunchedEffect(Unit) {
+    LifecycleResumeEffect(Unit) {
         viewModel.refreshParkingStatus()
+
+        onPauseOrDispose {
+            // Por si hiciera falta limpiar recursos
+        }
     }
 
     // Diálogo emergente nativo para seleccionar la hora

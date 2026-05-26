@@ -155,7 +155,14 @@ fun LksNavigation() {
                 MapScreen(
                     viewModel = mapViewModel,
                     onZoneClick = { zoneName ->
-                        navController.navigate(Screen.Booking.createRoute(zoneName))
+                        navController.navigate(
+                            Screen.Booking.createRoute(
+                                zoneName = zoneName,
+                                day = mapViewModel.selectedDayNumber,
+                                hour = mapViewModel.selectedStartTime.hour,
+                                minute = mapViewModel.selectedStartTime.minute
+                            )
+                        )
                     }
                 )
             }
@@ -163,12 +170,24 @@ fun LksNavigation() {
             // --- BOOKING ---
             composable(
                 route = Screen.Booking.route,
-                arguments = listOf(navArgument("zoneName") { type = NavType.StringType })
+                arguments = listOf(
+                    navArgument("zoneName") { type = NavType.StringType },
+                    navArgument("day") { type = NavType.IntType },
+                    navArgument("hour") { type = NavType.IntType },
+                    navArgument("minute") { type = NavType.IntType }
+                )
             ) { backStackEntry ->
                 val zoneName = backStackEntry.arguments?.getString("zoneName") ?: "Standard Zone"
+                val day = backStackEntry.arguments?.getInt("day") ?: 0
+                val hour = backStackEntry.arguments?.getInt("hour") ?: 8
+                val minute = backStackEntry.arguments?.getInt("minute") ?: 0
+
                 BookingScreen(
                     viewModel = sharedBookingViewModel,
                     initialZone = zoneName,
+                    initialDay = day,
+                    initialHour = hour,
+                    initialMinute = minute,
                     onConfirmBooking = { navController.popBackStack() },
                     onManageVehicles = { navController.navigate(Screen.Profile.route) }
                 )

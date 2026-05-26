@@ -41,6 +41,9 @@ import com.lksnext.ParkingMMartinez.ui.theme.palePink
 fun BookingScreen(
     viewModel: BookingViewModel,
     initialZone: String = "",
+    initialDay: Int = 0,
+    initialHour: Int = 8,
+    initialMinute: Int = 0,
     onConfirmBooking: () -> Unit = {},
     onManageVehicles: () -> Unit = {}
 ) {
@@ -48,8 +51,14 @@ fun BookingScreen(
     val isValidTime = viewModel.isDateTimeValid()
     val todayStr = stringResource(R.string.booking_today)
 
-    LaunchedEffect(initialZone) {
+    LaunchedEffect(initialZone, initialDay, initialHour, initialMinute) {
         viewModel.setZone(initialZone)
+
+        if (viewModel.editingReservationId == null && initialDay != -1) {
+            viewModel.onDateSelected(initialDay)
+            viewModel.onTimeChange(initialHour, initialMinute)
+        }
+
         viewModel.loadAndFilterVehicles(context)
         viewModel.checkUserReservationStatus()
     }
@@ -73,54 +82,52 @@ fun BookingScreen(
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
     ) {
-        // --- HEADER ---
         BookingTopHeader(zone = viewModel.parkingZone)
 
         Column(modifier = Modifier.padding(20.dp)) {
 
             // --- VEHÍCULO ---
-            VehicleSection(
-                viewModel = viewModel,
-                onManageVehicles = onManageVehicles
-            )
+            VehicleSection(viewModel = viewModel, onManageVehicles = onManageVehicles)
 
             Spacer(Modifier.height(16.dp))
 
-            // --- FECHAS ---
-            SectionHeader(title = stringResource(R.string.booking_select_date))
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp)
-                    .horizontalScroll(rememberScrollState()),
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                viewModel.availableDates.forEach { (day, label) ->
-                    val displayLabel = if (label == "TODAY") todayStr else label
-                    DateItem(
-                        day = day.toString(),
-                        label = displayLabel,
-                        isSelected = viewModel.selectedDay == day,
-                        onClick = { viewModel.onDateSelected(day) }
-                    )
+            // --- FECHAS (SOLO MOSTRAR EN PANTALLA DE EDICION) ---
+            if (viewModel.editingReservationId != null) {
+                SectionHeader(title = stringResource(R.string.booking_select_date))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp)
+                        .horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    viewModel.availableDates.forEach { (day, label) ->
+                        val displayLabel = if (label == "TODAY") todayStr else label
+                        DateItem(
+                            day = day.toString(),
+                            label = displayLabel,
+                            isSelected = viewModel.selectedDay == day,
+                            onClick = { viewModel.onDateSelected(day) }
+                        )
+                    }
                 }
+                Spacer(Modifier.height(24.dp))
             }
 
-            Spacer(Modifier.height(24.dp))
-
-            // --- TIEMPO ---
-            TimeAndDurationSection(viewModel = viewModel)
+            // --- TIEMPO Y DURACIÓN ---
+            // Modificamos el interior pasándole si debe estar congelado o no
+            TimeAndDurationSection(
+                viewModel = viewModel,
+                isReadOnly = viewModel.editingReservationId == null
+            )
 
             Spacer(Modifier.height(32.dp))
 
             // --- CONFIRMACIÓN ---
-            BookingActionSection(
-                viewModel = viewModel,
-                isValidTime = isValidTime,
-                onConfirmBooking = onConfirmBooking
-            )
+            BookingActionSection(viewModel = viewModel, isValidTime = isValidTime, onConfirmBooking = onConfirmBooking)
 
             Spacer(Modifier.height(24.dp))
+
         }
     }
 }
@@ -193,7 +200,7 @@ fun VehicleSection(viewModel: BookingViewModel, onManageVehicles: () -> Unit) {
 }
 
 @Composable
-fun TimeAndDurationSection(viewModel: BookingViewModel) {
+fun TimeAndDurationSection(viewModel: BookingViewModel, isReadOnly: Boolean) {
     SectionHeader(title = stringResource(R.string.booking_time_duration))
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -202,22 +209,40 @@ fun TimeAndDurationSection(viewModel: BookingViewModel) {
         shape = RoundedCornerShape(16.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Text(stringResource(R.string.booking_start_time), style = MaterialTheme.typography.labelSmall, color = Color.Gray)
+            Text(
+                text = if (isReadOnly) "Selected Start Time" else stringResource(R.string.booking_start_time),
+                style = MaterialTheme.typography.labelSmall,
+                color = Color.Gray
+            )
 
-            OutlinedCard(
-                onClick = { viewModel.onShowTimePickerChange(true) },
-                modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
-                shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.outlinedCardColors(containerColor = bookingCardColor),
-                border = BorderStroke(1.dp, lightGray)
-            ) {
-                Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
-                    Text(String.format("%02d:%02d", viewModel.startHour, viewModel.startMinute), style = MaterialTheme.typography.titleLarge)
-                    Icon(Icons.Default.AccessTime, null, tint = Color.Gray)
+            // Si es ReadOnly, cambiamos el OutlinedCard por una fila simple sin click
+            if (isReadOnly) {
+                Surface(
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    color = bookingCardColor,
+                    border = BorderStroke(1.dp, lightGray)
+                ) {
+                    Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
+                        Text(String.format("%02d:%02d", viewModel.startHour, viewModel.startMinute), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                        Icon(Icons.Default.AccessTime, null, tint = LksOrange) // Un toque de color para indicar que está fijado
+                    }
+                }
+            } else {
+                OutlinedCard(
+                    onClick = { viewModel.onShowTimePickerChange(true) },
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = CardDefaults.outlinedCardColors(containerColor = bookingCardColor),
+                    border = BorderStroke(1.dp, lightGray)
+                ) {
+                    Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
+                        Text(String.format("%02d:%02d", viewModel.startHour, viewModel.startMinute), style = MaterialTheme.typography.titleLarge)
+                        Icon(Icons.Default.AccessTime, null, tint = Color.Gray)
+                    }
                 }
             }
 
-            // Bloque de duración y slider
             DurationBlock(viewModel)
         }
     }

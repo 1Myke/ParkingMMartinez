@@ -12,7 +12,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Accessible
 import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material.icons.filled.AccessTime
-import androidx.compose.material.icons.filled.Accessible
 import androidx.compose.material.icons.filled.ElectricCar
 import androidx.compose.material.icons.filled.TwoWheeler
 import androidx.compose.material3.*
@@ -23,7 +22,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.lksnext.ParkingMMartinez.ui.components.LksButton
 import com.lksnext.ParkingMMartinez.ui.components.LksTimePicker
 import com.lksnext.ParkingMMartinez.ui.theme.LksOrange
@@ -48,19 +46,20 @@ fun BookingScreen(
     onManageVehicles: () -> Unit = {}
 ) {
     val context = androidx.compose.ui.platform.LocalContext.current
-    val isValidTime = viewModel.isDateTimeValid()
     val todayStr = stringResource(R.string.booking_today)
+
+    val isButtonEnabled = viewModel.canUserConfirmBooking()
 
     LaunchedEffect(initialZone, initialDay, initialHour, initialMinute) {
         viewModel.setZone(initialZone)
 
         if (viewModel.editingReservationId == null && initialDay != -1) {
+            viewModel.cancelEditing()
             viewModel.onDateSelected(initialDay)
             viewModel.onTimeChange(initialHour, initialMinute)
         }
-
-        viewModel.loadAndFilterVehicles(context)
         viewModel.checkUserReservationStatus()
+        viewModel.loadAndFilterVehicles(context)
     }
 
     DisposableEffect(Unit) {
@@ -115,7 +114,6 @@ fun BookingScreen(
             }
 
             // --- TIEMPO Y DURACIÓN ---
-            // Modificamos el interior pasándole si debe estar congelado o no
             TimeAndDurationSection(
                 viewModel = viewModel,
                 isReadOnly = viewModel.editingReservationId == null
@@ -123,11 +121,14 @@ fun BookingScreen(
 
             Spacer(Modifier.height(32.dp))
 
-            // --- CONFIRMACIÓN ---
-            BookingActionSection(viewModel = viewModel, isValidTime = isValidTime, onConfirmBooking = onConfirmBooking)
+            // --- CONFIRMACIÓN (PASANDO LA COHERENCIA CORREGIDA) ---
+            BookingActionSection(
+                viewModel = viewModel,
+                isButtonEnabled = isButtonEnabled,
+                onConfirmBooking = onConfirmBooking
+            )
 
             Spacer(Modifier.height(24.dp))
-
         }
     }
 }
@@ -215,7 +216,6 @@ fun TimeAndDurationSection(viewModel: BookingViewModel, isReadOnly: Boolean) {
                 color = Color.Gray
             )
 
-            // Si es ReadOnly, cambiamos el OutlinedCard por una fila simple sin click
             if (isReadOnly) {
                 Surface(
                     modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
@@ -225,7 +225,7 @@ fun TimeAndDurationSection(viewModel: BookingViewModel, isReadOnly: Boolean) {
                 ) {
                     Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
                         Text(String.format("%02d:%02d", viewModel.startHour, viewModel.startMinute), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                        Icon(Icons.Default.AccessTime, null, tint = LksOrange) // Un toque de color para indicar que está fijado
+                        Icon(Icons.Default.AccessTime, null, tint = LksOrange)
                     }
                 }
             } else {
@@ -277,17 +277,29 @@ fun DurationBlock(viewModel: BookingViewModel) {
 }
 
 @Composable
-fun BookingActionSection(viewModel: BookingViewModel, isValidTime: Boolean, onConfirmBooking: () -> Unit) {
+fun BookingActionSection(viewModel: BookingViewModel, isButtonEnabled: Boolean, onConfirmBooking: () -> Unit) {
     Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-        if (viewModel.editingReservationId == null && viewModel.hasActiveReservation) {
-            Text(text = stringResource(R.string.booking_error_active), color = Color.Red, style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(bottom = 8.dp))
-        } else if (!isValidTime) {
-            Text(text = stringResource(R.string.booking_error_past), color = Color.Red, style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(bottom = 8.dp))
+
+        if (!isButtonEnabled && viewModel.isDateTimeValid() && viewModel.selectedVehicle != null) {
+            Text(
+                text = stringResource(R.string.booking_error_active),
+                color = Color.Red,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+        } else if (!viewModel.isDateTimeValid()) {
+            // Si el fallo es por la hora pasada
+            Text(
+                text = stringResource(R.string.booking_error_past),
+                color = Color.Red,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
         }
 
         LksButton(
             text = if (viewModel.editingReservationId != null) stringResource(R.string.booking_btn_update) else stringResource(R.string.booking_btn_confirm),
-            enabled = (viewModel.editingReservationId != null || !viewModel.hasActiveReservation) && viewModel.selectedVehicle != null && isValidTime,
+            enabled = isButtonEnabled,
             onClick = {
                 val realZone = ParkingMock.zones.find { it.name == viewModel.parkingZone } ?: ParkingMock.zones.first()
                 viewModel.selectedVehicle?.let { vehicle ->

@@ -11,7 +11,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -23,7 +22,6 @@ import com.lksnext.ParkingMMartinez.ui.components.DateItem
 import com.lksnext.ParkingMMartinez.ui.components.LksHeader
 import com.lksnext.ParkingMMartinez.ui.components.LksTimePicker
 import com.lksnext.ParkingMMartinez.ui.components.ZoneCard
-import com.lksnext.ParkingMMartinez.ui.theme.LksOrange
 import com.lksnext.ParkingMMartinez.ui.theme.bookingCardColor
 import com.lksnext.ParkingMMartinez.ui.theme.lightGray
 import com.lksnext.ParkingMMartinez.ui.theme.mistGray
@@ -45,11 +43,10 @@ fun MapScreen(
         viewModel.refreshParkingStatus()
 
         onPauseOrDispose {
-            // Por si hiciera falta limpiar recursos
+            // Limpieza si fuera necesario
         }
     }
 
-    // Diálogo emergente nativo para seleccionar la hora
     if (viewModel.showTimePicker) {
         LksTimePicker(
             onConfirm = { h, m ->
@@ -141,9 +138,16 @@ fun MapScreen(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 viewModel.zones.forEach { zone ->
+                    // 🎯 CALCULAMOS SI ESTÁ LLENO AQUÍ TAMBIÉN
+                    val isZoneFull = zone.availableSpots <= 0
+
                     ZoneCard(
                         zone = zone,
-                        onClick = { onZoneClick(zone.name) }
+                        onClick = {
+                            if (!isZoneFull) {
+                                onZoneClick(zone.name)
+                            }
+                        }
                     )
                 }
             }

@@ -280,21 +280,35 @@ fun DurationBlock(viewModel: BookingViewModel) {
 fun BookingActionSection(viewModel: BookingViewModel, isButtonEnabled: Boolean, onConfirmBooking: () -> Unit) {
     Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
 
-        if (!isButtonEnabled && viewModel.isDateTimeValid() && viewModel.selectedVehicle != null) {
-            Text(
-                text = stringResource(R.string.booking_error_active),
-                color = Color.Red,
-                style = MaterialTheme.typography.bodySmall,
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
-        } else if (!viewModel.isDateTimeValid()) {
-            // Si el fallo es por la hora pasada
-            Text(
-                text = stringResource(R.string.booking_error_past),
-                color = Color.Red,
-                style = MaterialTheme.typography.bodySmall,
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
+        if (!isButtonEnabled) {
+            when {
+                viewModel.isOverlapConflict -> {
+                    Text(
+                        text = "Next booking at ${viewModel.nextCollisionTime} so you can maximum reserve ${viewModel.maxAllowedHours} hours",
+                        color = Color.Red,
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+                }
+
+                viewModel.isDateTimeValid() && viewModel.selectedVehicle != null -> {
+                    Text(
+                        text = stringResource(R.string.booking_error_active),
+                        color = Color.Red,
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+                }
+
+                !viewModel.isDateTimeValid() -> {
+                    Text(
+                        text = stringResource(R.string.booking_error_past),
+                        color = Color.Red,
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+                }
+            }
         }
 
         LksButton(

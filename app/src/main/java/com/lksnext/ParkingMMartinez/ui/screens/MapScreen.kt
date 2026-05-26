@@ -29,15 +29,19 @@ import com.lksnext.ParkingMMartinez.ui.theme.lightGray
 import com.lksnext.ParkingMMartinez.ui.theme.mistGray
 import com.lksnext.ParkingMMartinez.ui.viewmodel.MapViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
+import com.lksnext.ParkingMMartinez.ui.viewmodel.BookingViewModel
 
 @Composable
 fun MapScreen(
     viewModel: MapViewModel = viewModel(),
+    bookingViewModel: BookingViewModel,
     onZoneClick: (String) -> Unit
 ) {
     val todayStr = stringResource(R.string.booking_today)
 
     LifecycleResumeEffect(Unit) {
+        bookingViewModel.cancelEditing()
+        bookingViewModel.checkUserReservationStatus()
         viewModel.refreshParkingStatus()
 
         onPauseOrDispose {

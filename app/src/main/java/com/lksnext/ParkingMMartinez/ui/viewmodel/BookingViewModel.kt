@@ -224,5 +224,19 @@ class BookingViewModel (
 
     }
 
+    fun canUserConfirmBooking(): Boolean {
+        if (!isDateTimeValid()) return false
+
+        if (selectedVehicle == null) return false
+
+        if (editingReservationId != null) return true
+
+        val currentUserId = sessionManager.getActiveUserId() ?: return false
+        val allBookings = repository.getAllReservations()
+
+        val hasAnyActive = allBookings.any { it.vehicle.id == currentUserId }
+
+        return !hasAnyActive
+    }
 
 }

@@ -154,6 +154,7 @@ fun LksNavigation() {
             composable(Screen.Map.route) {
                 MapScreen(
                     viewModel = mapViewModel,
+                    bookingViewModel = sharedBookingViewModel,
                     onZoneClick = { zoneName ->
                         navController.navigate(
                             Screen.Booking.createRoute(

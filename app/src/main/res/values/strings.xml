@@ -43,6 +43,9 @@
     <string name="profile_delete_msg">Are you sure you want to remove %1$s? This action cannot be undone.</string>
     <string name="btn_cancel">Cancel</string>
     <string name="btn_delete">Delete</string>
+    <string name="error_empty_fields">Fields cannot be empty.</string>
+    <string name="error_duplicate_plate">A vehicle with this license plate already exists.</string>
+    <string name="error_active_booking">Cannot delete: This vehicle has an active parking reservation.</string>
 
     <!-- TEXTO LOGIN/REGISTER/RECOVERY EN INGLES -->
     <string name="login_welcome">Welcome Back</string>

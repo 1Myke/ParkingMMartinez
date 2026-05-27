@@ -10,10 +10,13 @@ import com.lksnext.ParkingMMartinez.data.repository.UserRepository
 import com.lksnext.ParkingMMartinez.data.repository.VehicleRepository
 import com.lksnext.ParkingMMartinez.model.Vehicle
 import com.lksnext.ParkingMMartinez.model.VehicleType
+import com.lksnext.ParkingMMartinez.R
+import com.lksnext.ParkingMMartinez.data.repository.BookingRepository
 
 class ProfileViewModel(
     private val vehicleRepository: VehicleRepository,
     private val userRepository: UserRepository,
+    private val bookingRepository: BookingRepository,
     private val sessionManager: SessionManager
 ) : ViewModel() {
 
@@ -32,11 +35,18 @@ class ProfileViewModel(
     var newVehicleName by mutableStateOf("")
     var newVehiclePlate by mutableStateOf("")
     var selectedVehicleType by mutableStateOf(VehicleType.STANDARD)
+    var vehicleErrorMessage by mutableStateOf<Int?>(null)
+        private set
 
 
     // Lista de vehículos reactiva
     private val _vehicles = mutableStateListOf<Vehicle>()
     val vehicles: List<Vehicle> get() = _vehicles
+    var vehicleAddError by mutableStateOf<Int?>(null)
+        private set
+
+    var vehicleDeleteError by mutableStateOf<Int?>(null)
+        private set
 
     fun loadUserData() {
         val userId = sessionManager.getActiveUserId() ?: return
@@ -57,16 +67,19 @@ class ProfileViewModel(
 
 
     fun onOpenDialog() {
+        vehicleAddError = null
         showAddVehicleDialog = true
     }
 
     fun onCloseDialog() {
         newVehicleName = ""
         newVehiclePlate = ""
+        vehicleAddError = null
         showAddVehicleDialog = false
     }
 
     fun askDeleteVehicle(vehicle: Vehicle) {
+        vehicleDeleteError = null
         vehicleToDelete = vehicle
         showDeleteConfirmation = true
     }
@@ -74,6 +87,7 @@ class ProfileViewModel(
     fun dismissDeleteDialog() {
         showDeleteConfirmation = false
         vehicleToDelete = null
+        vehicleDeleteError = null
     }
 
     fun onVehicleTypeChange(type: VehicleType) {
@@ -82,27 +96,49 @@ class ProfileViewModel(
 
     fun addVehicle() {
         val userId = sessionManager.getActiveUserId() ?: return
+        vehicleAddError = null
 
-        if (newVehicleName.isNotBlank() && newVehiclePlate.isNotBlank()) {
-            val newVehicle = Vehicle(
-                name = newVehicleName,
-                plate = newVehiclePlate,
-                type = selectedVehicleType,
-                isAdapted = selectedVehicleType == VehicleType.ADAPTED
-            )
+        val cleanPlate = newVehiclePlate.replace("\\s".toRegex(), "").uppercase()
+        val cleanName = newVehicleName.trim()
 
-            vehicleRepository.addVehicle(userId, newVehicle)
-            _vehicles.add(newVehicle)
-            onCloseDialog()
+        if (cleanName.isBlank() || cleanPlate.isBlank()) {
+            vehicleAddError = R.string.error_empty_fields
+            return
         }
+
+        val isDuplicate = _vehicles.any { it.plate == cleanPlate }
+        if (isDuplicate) {
+            vehicleAddError = R.string.error_duplicate_plate
+            return
+        }
+
+        val newVehicle = Vehicle(
+            userId = userId,
+            name = cleanName,
+            plate = cleanPlate,
+            type = selectedVehicleType
+        )
+
+        vehicleRepository.addVehicle(userId, newVehicle)
+        _vehicles.add(newVehicle)
+        onCloseDialog()
     }
 
     fun confirmDeleteVehicle() {
         val userId = sessionManager.getActiveUserId() ?: return
-        vehicleToDelete?.let { vehicle ->
-            vehicleRepository.deleteVehicle(userId, vehicle)
-            _vehicles.remove(vehicle)
+        val vehicle = vehicleToDelete ?: return
+
+        val hasActiveBookings = bookingRepository.getAllReservations().any { booking ->
+            booking.vehicle.plate == vehicle.plate
         }
+
+        if (hasActiveBookings) {
+            vehicleDeleteError = R.string.error_active_booking
+            return
+        }
+
+        vehicleRepository.deleteVehicle(userId, vehicle)
+        _vehicles.remove(vehicle)
         dismissDeleteDialog()
     }
 }

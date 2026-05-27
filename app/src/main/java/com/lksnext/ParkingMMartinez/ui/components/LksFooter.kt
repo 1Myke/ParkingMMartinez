@@ -59,7 +59,8 @@ fun LksFooter(navController: NavController) {
 
 private fun isTabSelected(route: String, currentRoute: String?): Boolean {
     return if (route == Screen.Map.route) {
-        currentRoute == Screen.Map.route || currentRoute?.startsWith("booking") == true
+        currentRoute == Screen.Map.route ||
+                (currentRoute?.startsWith("booking") == true && currentRoute != Screen.BookingsList.route)
     } else {
         currentRoute == route
     }
@@ -70,7 +71,7 @@ private fun handleNavigationClick(navController: NavController, targetRoute: Str
         val previousEntry = navController.previousBackStackEntry
         val previousRoute = previousEntry?.destination?.route
 
-        if (previousRoute?.startsWith("booking") == true) {
+        if (previousRoute?.startsWith("booking") == true && previousRoute != Screen.BookingsList.route) {
             navController.popBackStack()
             return
         }

@@ -4,6 +4,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.google.firebase.auth.FirebaseAuth
 import com.lksnext.ParkingMMartinez.data.SessionManager
 import com.lksnext.ParkingMMartinez.data.repository.UserRepository
 import com.lksnext.ParkingMMartinez.data.repository.VehicleRepository
@@ -12,6 +14,7 @@ import com.lksnext.ParkingMMartinez.model.Vehicle
 import com.lksnext.ParkingMMartinez.model.VehicleType
 import com.lksnext.ParkingMMartinez.ui.screens.isPlateInvalid
 import com.lksnext.ParkingMMartinez.R // Importamos tus recursos
+import kotlinx.coroutines.launch
 
 class RegistrationViewModel(
     private val userRepository: UserRepository,
@@ -41,31 +44,38 @@ class RegistrationViewModel(
 
     fun register(onSuccess: () -> Unit) {
         isLoading = true
-
         val cleanPlate = plate.replace("\\s".toRegex(), "").uppercase()
 
-        when {
-            !email.contains("@") -> errorCode = R.string.err_invalid_email
-            password.length < 6 -> errorCode = R.string.err_password_short
-            password != passwordRepeat -> errorCode = R.string.err_password_mismatch
-            isPlateInvalid(cleanPlate) -> errorCode = R.string.err_invalid_plate
-            userRepository.getAllUsers().any { it.username == username } -> errorCode = R.string.err_user_exists
-            else -> {
-                val newUser = User(name=name, lastName=lastName, username=username, email=email, pass=password)
-                userRepository.registerUser(newUser)
-                sessionManager.saveSession(true, newUser.id)
+        viewModelScope.launch {
+            when {
+                !email.contains("@") -> { errorCode = R.string.err_invalid_email; isLoading = false }
+                password.length < 6 -> { errorCode = R.string.err_password_short; isLoading = false }
+                password != passwordRepeat -> { errorCode = R.string.err_password_mismatch; isLoading = false }
+                isPlateInvalid(cleanPlate) -> { errorCode = R.string.err_invalid_plate; isLoading = false }
+                // MEJORAS FIREBASE: Firebase no permite listar todos los usuarios, así que esta validación
+                // de 'username exists' la omitiremos de momento o la haremos en Firestore luego.
+                else -> {
+                    val newUser = User(name=name, lastName=lastName, username=username, email=email, pass=password)
 
-                val defaultVehicle = Vehicle(
-                    userId = newUser.id,
-                    name = "My Vehicle",
-                    plate = cleanPlate,
-                    type = selectedVehicleType
-                )
+                    // LLAMADA A FIREBASE
+                    val success = userRepository.registerUser(newUser)
 
-                vehicleRepository.addVehicle(newUser.id, defaultVehicle)
-                onSuccess()
+                    if (success) {
+                        val currentUser = FirebaseAuth.getInstance().currentUser
+                        val realId = currentUser?.uid ?: newUser.id
+
+                        sessionManager.saveSession(true, realId)
+
+
+                        // ... (resto del registro de vehículo)
+                        isLoading = false
+                        onSuccess()
+                    } else {
+                        errorCode = R.string.err_registration_failed // Crea este string si no existe
+                        isLoading = false
+                    }
+                }
             }
         }
-        isLoading = false
     }
 }

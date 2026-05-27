@@ -26,10 +26,9 @@ class VehicleManager(context: Context) {
 
     fun deleteVehicle(userId: String, vehicle: Vehicle) {
         val currentList = getVehicles(userId).toMutableList()
-        currentList.removeAll { it.plate == vehicle.plate } // Borramos por matrícula
+        currentList.removeAll { it.id == vehicle.id }
 
         val json = gson.toJson(currentList)
         prefs.edit().putString("vehicles_$userId", json).apply()
     }
-
 }

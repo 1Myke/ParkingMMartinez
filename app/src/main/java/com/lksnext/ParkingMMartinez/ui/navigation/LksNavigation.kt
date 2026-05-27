@@ -87,7 +87,7 @@ fun LksNavigation() {
     val profileViewModel: ProfileViewModel = viewModel(
         factory = viewModelFactory {
             addInitializer(ProfileViewModel::class) {
-                ProfileViewModel(vehicleRepository, userRepository, session)
+                ProfileViewModel(vehicleRepository, userRepository, bookingRepository, session)
             }
         }
     )

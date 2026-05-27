@@ -18,12 +18,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.DirectionsCar
-import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilterChip
@@ -39,13 +35,11 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
@@ -57,7 +51,6 @@ import com.lksnext.ParkingMMartinez.ui.components.LksTextField
 import com.lksnext.ParkingMMartinez.ui.components.ProfileHeaderSection
 import com.lksnext.ParkingMMartinez.ui.components.VehicleCard
 import com.lksnext.ParkingMMartinez.ui.theme.LksOrange
-import com.lksnext.ParkingMMartinez.ui.theme.bookingCardColor
 import com.lksnext.ParkingMMartinez.ui.theme.lightGray
 import com.lksnext.ParkingMMartinez.ui.theme.navyBlue
 import com.lksnext.ParkingMMartinez.ui.viewmodel.ProfileViewModel
@@ -70,9 +63,9 @@ fun ProfileScreen(
     LaunchedEffect(Unit) {
         viewModel.loadUserData()
     }
-    
+
     Scaffold(
-        // SOLO para el boton flotante naranja
+        containerColor = Color.White,
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { viewModel.onOpenDialog() },
@@ -88,7 +81,7 @@ fun ProfileScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .background(Color.White) //????HACE FALTA
+                .background(Color.White)
                 .verticalScroll(rememberScrollState())
         ) {
 
@@ -99,10 +92,12 @@ fun ProfileScreen(
                 horizontalArrangement = Arrangement.End
             ) {
                 IconButton(onClick = onLogoutClick) {
-                    Icon(Icons.AutoMirrored.Default.Logout,
+                    Icon(
+                        Icons.AutoMirrored.Default.Logout,
                         null,
                         tint = Color.Gray,
-                        modifier = Modifier.size(28.dp))
+                        modifier = Modifier.size(28.dp)
+                    )
                 }
             }
 
@@ -128,13 +123,13 @@ fun ProfileScreen(
                 Spacer(modifier = Modifier.width(8.dp))
 
                 Text(
-                    text = stringResource(R.string.profile_vehicles),//"My Vehicles",
+                    text = stringResource(R.string.profile_vehicles),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold
                 )
             }
 
-            // LISTA DINÁMICA <- de momento! Luego tendre que ver como hacerlo con Firebase
+            // LISTA DE VEHÍCULOS
             Column(
                 modifier = Modifier.padding(24.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -161,7 +156,6 @@ fun ProfileScreen(
         if (viewModel.showDeleteConfirmation) {
             DeleteConfirmationDialog(viewModel)
         }
-
     }
 }
 
@@ -184,7 +178,7 @@ fun AddVehicleDialog(viewModel: ProfileViewModel) {
                     .verticalScroll(rememberScrollState())
             ) {
                 Text(
-                    text = stringResource(R.string.profile_add_vehicle_title), // "+ Add New Vehicle"
+                    text = stringResource(R.string.profile_add_vehicle_title),
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
                     color = navyBlue
@@ -193,35 +187,36 @@ fun AddVehicleDialog(viewModel: ProfileViewModel) {
                 Spacer(modifier = Modifier.height(24.dp))
 
                 Text(
-                    text = stringResource(R.string.profile_label_nickname), // "NICKNAME"
+                    text = stringResource(R.string.profile_label_nickname),
                     style = MaterialTheme.typography.labelLarge,
                     color = Color.Gray
                 )
                 LksTextField(
                     value = viewModel.newVehicleName,
                     onValueChange = { viewModel.newVehicleName = it },
-                    label = stringResource(R.string.profile_hint_nickname), // "Nickname"
-                    placeholder = stringResource(R.string.profile_placeholder_nickname) // "e.g. Work Car"
+                    label = stringResource(R.string.profile_hint_nickname),
+                    placeholder = stringResource(R.string.profile_placeholder_nickname)
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Text(
-                    text = stringResource(R.string.profile_label_plate), // "LICENSE PLATE"
+                    text = stringResource(R.string.profile_label_plate),
                     style = MaterialTheme.typography.labelLarge,
                     color = Color.Gray
                 )
                 LksTextField(
                     value = viewModel.newVehiclePlate,
-                    onValueChange = { viewModel.newVehiclePlate = it },
-                    label = stringResource(R.string.profile_hint_plate), // "License Plate"
-                    placeholder = stringResource(R.string.profile_placeholder_plate) // "1234 ABC"
+                    onValueChange = { viewModel.newVehiclePlate = it.uppercase() },
+                    label = stringResource(R.string.profile_hint_plate),
+                    placeholder = stringResource(R.string.profile_placeholder_plate),
+                    isError = viewModel.vehicleAddError != null
                 )
 
                 Spacer(modifier = Modifier.height(24.dp))
 
                 Text(
-                    text = stringResource(R.string.profile_label_type), // "VEHICLE TYPE"
+                    text = stringResource(R.string.profile_label_type),
                     style = MaterialTheme.typography.labelLarge,
                     color = Color.Gray
                 )
@@ -239,7 +234,6 @@ fun AddVehicleDialog(viewModel: ProfileViewModel) {
                             selected = isSelected,
                             onClick = { viewModel.onVehicleTypeChange(type) },
                             label = {
-                                // Esto formatea el Enum (ej: ELECTRIC_CAR -> Electric car)
                                 Text(type.name.replace("_", " ").lowercase().replaceFirstChar { it.uppercase() })
                             },
                             colors = FilterChipDefaults.filterChipColors(
@@ -248,6 +242,15 @@ fun AddVehicleDialog(viewModel: ProfileViewModel) {
                             )
                         )
                     }
+                }
+
+                viewModel.vehicleAddError?.let { resId ->
+                    Text(
+                        text = stringResource(id = resId),
+                        color = Color.Red,
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    )
                 }
 
                 Row(
@@ -259,11 +262,11 @@ fun AddVehicleDialog(viewModel: ProfileViewModel) {
                         modifier = Modifier.weight(1f),
                         shape = RoundedCornerShape(12.dp)
                     ) {
-                        Text(stringResource(R.string.btn_cancel)) // "Cancel"
+                        Text(stringResource(R.string.btn_cancel))
                     }
 
                     LksButton(
-                        text = stringResource(R.string.profile_btn_save), // "Save Vehicle"
+                        text = stringResource(R.string.profile_btn_save),
                         onClick = { viewModel.addVehicle() },
                         modifier = Modifier.weight(1.3f)
                     )
@@ -277,19 +280,31 @@ fun AddVehicleDialog(viewModel: ProfileViewModel) {
 fun DeleteConfirmationDialog(viewModel: ProfileViewModel) {
     AlertDialog(
         onDismissRequest = { viewModel.dismissDeleteDialog() },
-        title = { Text(text = stringResource(R.string.profile_delete_title)) }, // "Confirm Delete"
+        title = { Text(text = stringResource(R.string.profile_delete_title)) },
         text = {
-            Text(
-                text = stringResource(
-                    R.string.profile_delete_msg,
-                    viewModel.vehicleToDelete?.name ?: ""
-                ) // "Are you sure you want to remove %1$s?..."
-            )
+            Column {
+                Text(
+                    text = stringResource(
+                        R.string.profile_delete_msg,
+                        viewModel.vehicleToDelete?.name ?: ""
+                    )
+                )
+
+                viewModel.vehicleDeleteError?.let { resId ->
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Text(
+                        text = stringResource(id = resId),
+                        color = Color.Red,
+                        style = MaterialTheme.typography.bodySmall,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+            }
         },
         confirmButton = {
             TextButton(onClick = { viewModel.confirmDeleteVehicle() }) {
                 Text(
-                    text = stringResource(R.string.btn_delete), // "Delete"
+                    text = stringResource(R.string.btn_delete),
                     color = Color.Red,
                     fontWeight = FontWeight.Bold
                 )
@@ -302,13 +317,5 @@ fun DeleteConfirmationDialog(viewModel: ProfileViewModel) {
         },
         shape = RoundedCornerShape(16.dp),
         containerColor = Color.White
-    )
-}
-
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun ProfileScreenPreview() {
-    ProfileScreen(
-        onLogoutClick = {}
     )
 }

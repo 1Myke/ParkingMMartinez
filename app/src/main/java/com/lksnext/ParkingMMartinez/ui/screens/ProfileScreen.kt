@@ -54,12 +54,17 @@ import com.lksnext.ParkingMMartinez.ui.theme.LksOrange
 import com.lksnext.ParkingMMartinez.ui.theme.lightGray
 import com.lksnext.ParkingMMartinez.ui.theme.navyBlue
 import com.lksnext.ParkingMMartinez.ui.viewmodel.ProfileViewModel
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.foundation.gestures.detectTapGestures
 
 @Composable
 fun ProfileScreen(
     viewModel: ProfileViewModel = viewModel(),
     onLogoutClick: () -> Unit
 ){
+    val focusManager = LocalFocusManager.current
+
     LaunchedEffect(Unit) {
         viewModel.loadUserData()
     }
@@ -82,6 +87,11 @@ fun ProfileScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
                 .background(Color.White)
+                .pointerInput(Unit) {
+                    detectTapGestures(onTap = {
+                        focusManager.clearFocus()
+                    })
+                }
                 .verticalScroll(rememberScrollState())
         ) {
 

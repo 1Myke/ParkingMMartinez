@@ -34,4 +34,10 @@ class LoginViewModel(
         }
         isLoading = false
     }
+
+    fun resetLoginFields() {
+        email = ""
+        password = ""
+        errorCode = null
+    }
 }

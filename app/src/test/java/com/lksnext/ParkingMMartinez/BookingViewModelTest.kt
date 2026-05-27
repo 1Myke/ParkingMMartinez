@@ -28,7 +28,13 @@ class BookingViewModelTest {
     private lateinit var viewModel: BookingViewModel
 
     private val userId = "mikel_user_123"
-    private val fakeVehicle = Vehicle(id = "car_abc", name = "Golf", plate = "1234XYZ", type = VehicleType.STANDARD, isAdapted = false)
+    private val fakeVehicle = Vehicle(
+        id = "car_abc",
+        userId = userId,
+        name = "Golf",
+        plate = "1234XYZ",
+        type = VehicleType.STANDARD
+    )
     private val fakeZone = ParkingZone(ZoneNames.STANDARD, 24, 24, 0, Color(0xFF455A64))
 
     @Before
@@ -128,21 +134,30 @@ class BookingViewModelTest {
 
     @Test
     fun checkUserReservationStatus_whenUserHasMatchingReservation_returnsTrue() {
+        val matchingVehicle = Vehicle(
+            id = userId,
+            userId = userId,
+            name = "Golf",
+            plate = "1234XYZ",
+            type = VehicleType.STANDARD
+        )
+
         val matchingReservation = Reservation(
             id = "res_111",
             spotNumber = 5,
-            vehicle = fakeVehicle.copy(id = userId),
+            vehicle = matchingVehicle,
             zone = fakeZone,
             date = Date(),
             startTime = LocalTime.now(),
             endTime = LocalTime.now().plusHours(2),
             isCheckedIn = false
         )
+
         `when`(mockRepository.getAllReservations()).thenReturn(listOf(matchingReservation))
 
         viewModel.checkUserReservationStatus()
 
-        assertTrue(viewModel.hasActiveReservation)
+        assertTrue("El ViewModel debería detectar la reserva porque vehicle.id == userId", viewModel.hasActiveReservation)
     }
 
     @Test

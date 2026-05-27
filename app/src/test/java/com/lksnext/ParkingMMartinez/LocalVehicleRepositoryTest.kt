@@ -39,7 +39,13 @@ class LocalVehicleRepositoryTest {
     @Test
     fun repository_delegatesGetVehiclesToManagerCorrectly() {
         // Corregido con tu modelo
-        val testVehicle = Vehicle(id = "moto_1", name = "Honda", plate = "9999CCC", type = VehicleType.MOTORCYCLE, isAdapted = false)
+        val testVehicle = Vehicle(
+            id = "moto_1",
+            userId = userId,
+            name = "Honda",
+            plate = "9999CCC",
+            type = VehicleType.MOTORCYCLE
+        )
         val jsonList = gson.toJson(listOf(testVehicle))
         `when`(mockPrefs.getString("vehicles_$userId", null)).thenReturn(jsonList)
 
@@ -52,8 +58,13 @@ class LocalVehicleRepositoryTest {
     @Test
     fun repository_delegatesAddVehicleSuccessfully() {
         `when`(mockPrefs.getString("vehicles_$userId", null)).thenReturn(null)
-        // Corregido con tu modelo
-        val vehicle = Vehicle(id = "3", name = "Renault", plate = "4444DDD", type = VehicleType.STANDARD, isAdapted = false)
+        val vehicle = Vehicle(
+            id = "3",
+            userId = userId,
+            name = "Renault",
+            plate = "4444DDD",
+            type = VehicleType.STANDARD
+        )
 
         repository.addVehicle(userId, vehicle)
 

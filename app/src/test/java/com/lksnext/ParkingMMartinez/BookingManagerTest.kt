@@ -43,7 +43,13 @@ class BookingManagerTest {
     private val userId = "user_mikel_123"
 
     // Objetos de ayuda comunes para las pruebas
-    private val fakeVehicle = Vehicle(id = userId, name = "Ibiza", plate = "1234XYZ", type = VehicleType.STANDARD, isAdapted = false)
+    private val fakeVehicle = Vehicle(
+        id = "vehicle_001",
+        userId = userId,
+        name = "Ibiza",
+        plate = "1234XYZ",
+        type = VehicleType.STANDARD
+    )
     private val fakeZone = ParkingZone(ZoneNames.STANDARD, 24, 24, 0, Color(0xFF455A64))
     private val fakeReservation = Reservation(
         id = "res_abc_123",
@@ -91,17 +97,32 @@ class BookingManagerTest {
 
     @Test
     fun getUserBookings_filtersReservationsByVehicleId() {
-        // Arrange: Preparamos dos reservas, una del usuario Mikel y otra de un usuario ajeno
-        val vehicleOther = Vehicle(id = "other_user", name = "Tesla", plate = "5555EV", type = VehicleType.ELECTRIC, isAdapted = false)
+        val vehicleMikel = Vehicle(
+            id = userId,
+            userId = userId,
+            name = "Ibiza",
+            plate = "1234XYZ",
+            type = VehicleType.STANDARD
+        )
+
+        val vehicleOther = Vehicle(
+            id = "other_vehicle_id",
+            userId = "other_user",
+            name = "Tesla",
+            plate = "5555EV",
+            type = VehicleType.ELECTRIC
+        )
+
+        val reservationMikel = fakeReservation.copy(id = "res_abc_123", vehicle = vehicleMikel)
         val reservationOther = fakeReservation.copy(id = "res_999", vehicle = vehicleOther)
 
-        val jsonList = gson.toJson(listOf(fakeReservation, reservationOther))
+        val jsonList = gson.toJson(listOf(reservationMikel, reservationOther))
         `when`(mockPrefs.getString("bookings_list", null)).thenReturn(jsonList)
 
         // Act
-        val result = bookingManager.getUserBookings(userId)
+        val result = bookingManager.getUserBookings(userId) // Buscamos por "user_mikel_123"
 
-        // Assert: Debería filtrar y devolver únicamente la reserva que coincide con el id de vehículo "user_mikel_123"
+        // Assert
         assertEquals(1, result.size)
         assertEquals("res_abc_123", result.first().id)
     }

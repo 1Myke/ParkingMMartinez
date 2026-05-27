@@ -40,7 +40,13 @@ class LocalBookingRepositoryTest {
         .create()
 
     private val userId = "user_mikel_123"
-    private val fakeVehicle = Vehicle(id = userId, name = "Ibiza", plate = "1234XYZ", type = VehicleType.STANDARD, isAdapted = false)
+    private val fakeVehicle = Vehicle(
+        id = "vehicle_001",
+        userId = userId,
+        name = "Ibiza",
+        plate = "1234XYZ",
+        type = VehicleType.STANDARD
+    )
     private val fakeZone = ParkingZone(ZoneNames.STANDARD, 24, 24, 0, Color(0xFF455A64))
     private val fakeReservation = Reservation(
         id = "res_123",

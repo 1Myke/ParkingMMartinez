@@ -2,6 +2,7 @@ package com.lksnext.ParkingMMartinez
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.lksnext.ParkingMMartinez.data.SessionManager
+import com.lksnext.ParkingMMartinez.data.repository.BookingRepository
 import com.lksnext.ParkingMMartinez.data.repository.UserRepository
 import com.lksnext.ParkingMMartinez.data.repository.VehicleRepository
 import com.lksnext.ParkingMMartinez.model.User
@@ -21,6 +22,7 @@ class ProfileViewModelTest {
     private lateinit var mockVehicleRepo: VehicleRepository
     private lateinit var mockUserRepo: UserRepository
     private lateinit var mockSessionManager: SessionManager
+    private lateinit var mockBookingRepo: BookingRepository
     private lateinit var viewModel: ProfileViewModel
 
     private val userId = "mikel_user"
@@ -29,11 +31,12 @@ class ProfileViewModelTest {
     fun setUp() {
         mockVehicleRepo = mock(VehicleRepository::class.java)
         mockUserRepo = mock(UserRepository::class.java)
+        mockBookingRepo = mock(BookingRepository::class.java)
         mockSessionManager = mock(SessionManager::class.java)
 
         `when`(mockSessionManager.getActiveUserId()).thenReturn(userId)
 
-        viewModel = ProfileViewModel(mockVehicleRepo, mockUserRepo, mockSessionManager)
+        viewModel = ProfileViewModel(mockVehicleRepo, mockUserRepo, mockBookingRepo, mockSessionManager)
     }
 
     @Test

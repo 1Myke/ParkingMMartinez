@@ -48,7 +48,13 @@ class VehicleManagerTest {
     @Test
     fun getVehicles_whenDataExists_returnsCorrectParsedList() {
         // Corregido con los parámetros reales de tu data class Vehicle
-        val testVehicle = Vehicle(id = "car1", name = "Golf", plate = "1234XYZ", type = VehicleType.STANDARD, isAdapted = false)
+        val testVehicle = Vehicle(
+            id = "car1",
+            userId = userId,
+            name = "Golf",
+            plate = "1234XYZ",
+            type = VehicleType.STANDARD
+        )
         val jsonList = gson.toJson(listOf(testVehicle))
         `when`(mockPrefs.getString("vehicles_$userId", null)).thenReturn(jsonList)
 
@@ -62,8 +68,13 @@ class VehicleManagerTest {
     @Test
     fun addVehicle_savesUpdatedListInSharedPreferences() {
         `when`(mockPrefs.getString("vehicles_$userId", null)).thenReturn(null)
-        // Corregido aquí también
-        val newVehicle = Vehicle(id = "car2", name = "Tesla", plate = "5555EV", type = VehicleType.ELECTRIC, isAdapted = false)
+        val newVehicle = Vehicle(
+            id = "car2",
+            userId = userId,
+            name = "Tesla",
+            plate = "5555EV",
+            type = VehicleType.ELECTRIC
+        )
 
         vehicleManager.addVehicle(userId, newVehicle)
 
@@ -74,8 +85,8 @@ class VehicleManagerTest {
     @Test
     fun deleteVehicle_removesTargetVehicleAndSavesRemaining() {
         // Corregido añadiendo name e isAdapted
-        val car1 = Vehicle(id = "1", name = "Seat Ibiza", plate = "1111AAA", type = VehicleType.STANDARD, isAdapted = false)
-        val car2 = Vehicle(id = "2", name = "Yamaha", plate = "2222BBB", type = VehicleType.MOTORCYCLE, isAdapted = false)
+        val car1 = Vehicle(id = "1", userId = userId, name = "Seat Ibiza", plate = "1111AAA", type = VehicleType.STANDARD)
+        val car2 = Vehicle(id = "2", userId = userId, name = "Yamaha", plate = "2222BBB", type = VehicleType.MOTORCYCLE)
         val jsonOriginal = gson.toJson(listOf(car1, car2))
 
         `when`(mockPrefs.getString("vehicles_$userId", null)).thenReturn(jsonOriginal)

@@ -136,9 +136,16 @@ class ProfileViewModel(
             type = selectedVehicleType
         )
 
-        vehicleRepository.addVehicle(userId, newVehicle)
-        _vehicles.add(newVehicle)
-        onCloseDialog()
+        // CORRECCIÓN: Ahora es una función suspend, debe ir en un launch
+        viewModelScope.launch {
+            try {
+                vehicleRepository.addVehicle(userId, newVehicle)
+                _vehicles.add(newVehicle)
+                onCloseDialog()
+            } catch (e: Exception) {
+                vehicleAddError = R.string.error_generic
+            }
+        }
     }
 
     fun confirmDeleteVehicle() {
@@ -154,8 +161,14 @@ class ProfileViewModel(
             return
         }
 
-        vehicleRepository.deleteVehicle(userId, vehicle)
-        _vehicles.remove(vehicle)
-        dismissDeleteDialog()
+        viewModelScope.launch {
+            try {
+                vehicleRepository.deleteVehicle(userId, vehicle)
+                _vehicles.remove(vehicle)
+                dismissDeleteDialog()
+            } catch (e: Exception) {
+                vehicleDeleteError = R.string.error_generic
+            }
+        }
     }
 }

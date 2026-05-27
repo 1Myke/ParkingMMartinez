@@ -105,6 +105,12 @@ fun RegistrationScreen(
         }
 
         LksTextField(
+            value = viewModel.vehicleName,
+            onValueChange = { viewModel.onVehicleNameChange(it) },
+            label = stringResource(R.string.reg_vehicle_name)
+        )
+
+        LksTextField(
             value = viewModel.plate,
             onValueChange = { viewModel.onPlateChange(it.uppercase()) },
             label = stringResource(R.string.reg_label_plate),
@@ -146,7 +152,9 @@ fun RegistrationScreen(
 
         LksButton(
             text = stringResource(R.string.reg_btn),
-            enabled = !viewModel.isLoading && viewModel.name.isNotEmpty() && viewModel.email.isNotEmpty(),
+            enabled = !viewModel.isLoading && viewModel.name.isNotEmpty() && viewModel.email.isNotEmpty() && viewModel.vehicleName.isNotEmpty()
+                    && viewModel.username.isNotEmpty() && viewModel.plate.isNotEmpty() && viewModel.password.isNotEmpty() && viewModel.passwordRepeat.isNotEmpty()
+                    && viewModel.lastName.isNotEmpty(),
             onClick = {
                 focusManager.clearFocus()
                 viewModel.register { onRegisterSuccess() }

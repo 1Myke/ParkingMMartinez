@@ -14,7 +14,7 @@ import androidx.navigation.compose.*
 import androidx.navigation.navArgument
 import com.lksnext.ParkingMMartinez.data.SessionManager
 import com.lksnext.ParkingMMartinez.data.repository.LocalBookingRepository
-import com.lksnext.ParkingMMartinez.data.repository.LocalUserRepository
+import com.lksnext.ParkingMMartinez.data.repository.FirebaseUserRepository
 import com.lksnext.ParkingMMartinez.data.repository.LocalVehicleRepository
 import com.lksnext.ParkingMMartinez.ui.components.LksFooter
 import com.lksnext.ParkingMMartinez.ui.screens.*
@@ -34,7 +34,7 @@ fun LksNavigation() {
 
     // Instanciamos Repositorios y Managers
     val bookingRepository = LocalBookingRepository(context)
-    val userRepository = LocalUserRepository(context)
+    val userRepository = FirebaseUserRepository()
     val vehicleRepository = LocalVehicleRepository(context)
     val session = SessionManager(context)
 

@@ -8,19 +8,20 @@ import com.lksnext.ParkingMMartinez.model.User
 class LocalUserRepository(context: Context) : UserRepository {
     private val userManager = UserManager(context)
 
-    override fun getAllUsers(): List<User> = userManager.getAllUsers()
-
-    override fun registerUser(user: User) {
-        userManager.registerUser(user)
+    override suspend fun registerUser(user: User): Boolean {
+        return try {
+            userManager.registerUser(user)
+            true
+        } catch (e : Exception) {
+            false
+        }
     }
 
-    override fun authenticate(email: String, pass: String): User? {
+    override suspend fun authenticate(email: String, pass: String): User? {
         return userManager.authenticate(email, pass)
     }
 
-    override fun getUserById(userId: String): User? {
-        // Buscamos primero en el manager (SharedPreferences)
-        // y si no está, en el Mock (por si son usuarios de prueba)
+    override suspend fun getUserById(userId: String): User? {
         return userManager.getAllUsers().find { it.id == userId }
             ?: UserMock.users.find { it.id == userId }
     }

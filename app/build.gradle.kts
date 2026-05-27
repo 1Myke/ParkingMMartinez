@@ -17,6 +17,7 @@ val navigationVersion = "2.8.0"
 val gsonVersion = "2.11.0"
 val mockitoVersion = "5.11.0"
 val archVersion = "2.2.0"
+val coroutinesVersion = "1.7.3"
 
 android {
     namespace = "com.lksnext.ParkingMMartinez"
@@ -80,6 +81,8 @@ dependencies {
     implementation(libs.firebase.analytics)
     implementation(libs.firebase.crashlytics)
     implementation(libs.firebase.auth)
+    implementation("com.google.firebase:firebase-firestore")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:$coroutinesVersion")
     testImplementation("org.mockito:mockito-core:$mockitoVersion")
     testImplementation("androidx.arch.core:core-testing:$archVersion")
     testImplementation(libs.junit)

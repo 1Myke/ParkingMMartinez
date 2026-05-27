@@ -74,6 +74,7 @@
     <string name="err_password_mismatch">Passwords do not match</string>
     <string name="err_invalid_plate">License plate format is invalid (1234ABC)</string>
     <string name="err_user_exists">This username is already taken</string>
+    <string name="err_registration_failed">Registration failed</string>
 
     <!-- TEXTO DE LOS COMPONENTES EN INGLES -->
     <string name="footer_map">Map</string>

@@ -6,12 +6,14 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.lksnext.ParkingMMartinez.ui.navigation.Screen
 import com.lksnext.ParkingMMartinez.ui.theme.LksOrange
-
+import com.lksnext.ParkingMMartinez.R
 
 @Composable
 fun LksFooter(navController: NavController) {
@@ -19,10 +21,10 @@ fun LksFooter(navController: NavController) {
     val currentRoute = navBackStackEntry?.destination?.route
 
     val items = listOf(
-        Triple(Screen.Map.route, Icons.Default.Map, "Map"),
-        Triple(Screen.BookingsList.route, Icons.Default.CalendarMonth, "Bookings"),
-        Triple(Screen.Alerts.route, Icons.Default.Notifications, "Alerts"),
-        Triple(Screen.Profile.route, Icons.Default.Person, "Profile")
+        Triple(Screen.Map.route, Icons.Default.Map, stringResource(R.string.footer_map)),
+        Triple(Screen.BookingsList.route, Icons.Default.CalendarMonth, stringResource(R.string.footer_bookings)),
+        Triple(Screen.Alerts.route, Icons.Default.Notifications, stringResource(R.string.footer_alerts)),
+        Triple(Screen.Profile.route, Icons.Default.Person, stringResource(R.string.footer_profile))
     )
 
     NavigationBar(
@@ -30,25 +32,17 @@ fun LksFooter(navController: NavController) {
         tonalElevation = 8.dp
     ) {
         items.forEach { (route, icon, label) ->
-            val isSelected = currentRoute == route
+            val isSelected = isTabSelected(route, currentRoute)
 
             NavigationBarItem(
                 selected = isSelected,
                 onClick = {
                     if (currentRoute != route) {
-                        navController.navigate(route) {
-                            popUpTo(navController.graph.startDestinationId) {
-                                saveState = true
-                            }
-                            launchSingleTop = true
-                            restoreState = true
-                        }
+                        handleNavigationClick(navController, route)
                     }
                 },
                 label = { Text(label) },
-                icon = {
-                    Icon(icon, contentDescription = label)
-                },
+                icon = { Icon(icon, contentDescription = label) },
                 colors = NavigationBarItemDefaults.colors(
                     selectedIconColor = LksOrange,
                     selectedTextColor = LksOrange,
@@ -58,5 +52,42 @@ fun LksFooter(navController: NavController) {
                 )
             )
         }
+    }
+}
+
+// --- SUB-COMPONENTES ---
+
+private fun isTabSelected(route: String, currentRoute: String?): Boolean {
+    return if (route == Screen.Map.route) {
+        currentRoute == Screen.Map.route ||
+                (currentRoute?.startsWith("booking") == true && currentRoute != Screen.BookingsList.route)
+    } else {
+        currentRoute == route
+    }
+}
+
+private fun handleNavigationClick(navController: NavController, targetRoute: String) {
+    if (targetRoute == Screen.Map.route) {
+        val previousEntry = navController.previousBackStackEntry
+        val previousRoute = previousEntry?.destination?.route
+
+        if (previousRoute?.startsWith("booking") == true && previousRoute != Screen.BookingsList.route) {
+            navController.popBackStack()
+            return
+        }
+
+        navigateToNormalTab(navController, Screen.Map.route)
+    } else {
+        navigateToNormalTab(navController, targetRoute)
+    }
+}
+
+private fun navigateToNormalTab(navController: NavController, route: String) {
+    navController.navigate(route) {
+        popUpTo(navController.graph.findStartDestination().id) {
+            saveState = true
+        }
+        launchSingleTop = true
+        restoreState = true
     }
 }

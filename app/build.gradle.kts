@@ -1,8 +1,22 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
-    id("org.sonarqube") version "7.3.0.8198"
+    alias(libs.plugins.google.services)
+    alias(libs.plugins.firebase.crashlytics)
+    //id("org.sonarqube")
+    jacoco
 }
+
+val appVersionCode = 1
+val appVersionName = "v1.0.1"
+val targetSdkVersion = 36
+
+// Versiones de paquetes
+val lifecycleVersion = "2.6.2"
+val navigationVersion = "2.8.0"
+val gsonVersion = "2.11.0"
+val mockitoVersion = "5.11.0"
+val archVersion = "2.2.0"
 
 android {
     namespace = "com.lksnext.ParkingMMartinez"
@@ -15,20 +29,23 @@ android {
     defaultConfig {
         applicationId = "com.lksnext.ParkingMMartinez"
         minSdk = 26
-        targetSdk = 36
-        versionCode = 1
-        versionName = "v1.0.0" //En la branch release
+        targetSdk = targetSdkVersion
+        versionCode = appVersionCode
+        versionName = appVersionName
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+        }
+        getByName("debug") {
+            enableUnitTestCoverage = true
         }
     }
     compileOptions {
@@ -37,6 +54,12 @@ android {
     }
     buildFeatures {
         compose = true
+    }
+}
+
+sonar {
+    properties {
+        property("sonar.coverage.jacoco.xmlReportPaths", "build/reports/coverage/test/debug/report.xml")
     }
 }
 
@@ -50,9 +73,15 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
     implementation("androidx.compose.material:material-icons-extended")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")
-    implementation("androidx.navigation:navigation-compose:2.8.0")
-    implementation("com.google.code.gson:gson:2.11.0")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycleVersion")
+    implementation("androidx.navigation:navigation-compose:$navigationVersion")
+    implementation("com.google.code.gson:gson:$gsonVersion")
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.analytics)
+    implementation(libs.firebase.crashlytics)
+    implementation(libs.firebase.auth)
+    testImplementation("org.mockito:mockito-core:$mockitoVersion")
+    testImplementation("androidx.arch.core:core-testing:$archVersion")
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -60,11 +89,4 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
-}
-
-sonar {
-    properties {
-        property("sonar.projectKey", "1Myke_ParkingMMartinez")
-        property("sonar.organization", "1myke")
-    }
 }

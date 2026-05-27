@@ -4,117 +4,68 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import com.lksnext.ParkingMMartinez.data.SessionManager
+import com.lksnext.ParkingMMartinez.data.repository.UserRepository
+import com.lksnext.ParkingMMartinez.data.repository.VehicleRepository
+import com.lksnext.ParkingMMartinez.model.User
+import com.lksnext.ParkingMMartinez.model.Vehicle
 import com.lksnext.ParkingMMartinez.model.VehicleType
 import com.lksnext.ParkingMMartinez.ui.screens.isPlateInvalid
+import com.lksnext.ParkingMMartinez.R // Importamos tus recursos
 
-class RegistrationViewModel: ViewModel() {
-
+class RegistrationViewModel(
+    private val userRepository: UserRepository,
+    private val vehicleRepository: VehicleRepository,
+    private val sessionManager: SessionManager
+) : ViewModel() {
     var name by mutableStateOf("")
-        private set
     var lastName by mutableStateOf("")
-        private set
     var username by mutableStateOf("")
-        private set
     var email by mutableStateOf("")
-        private set
     var password by mutableStateOf("")
-        private set
     var passwordRepeat by mutableStateOf("")
-        private set
     var plate by mutableStateOf("")
-        private set
-    var vehicleType by mutableStateOf("Car")
-        private set
-    var errorMessage by mutableStateOf("")
+    var selectedVehicleType by mutableStateOf(VehicleType.STANDARD)
+    var errorCode by mutableStateOf<Int?>(null)
         private set
 
     var isLoading by mutableStateOf(false)
-        private set
 
-    fun onNameChange(newValue: String) {
-        name = newValue
-        errorMessage = ""
-    }
+    fun onUsernameChange(v: String) { username = v; errorCode = null }
+    fun onEmailChange(v: String) { email = v; errorCode = null }
+    fun onPasswordChange(v: String) { password = v; errorCode = null }
+    fun onPasswordRepeatChange(v: String) { passwordRepeat = v; errorCode = null }
+    fun onPlateChange(v: String) { plate = v; errorCode = null }
 
-    fun onLastNameChange(newValue: String) {
-        lastName = newValue
-        errorMessage = ""
-    }
+    fun onVehicleTypeChange(type: VehicleType) { selectedVehicleType = type }
 
-    fun onUsernameChange(newValue: String) {
-        username = newValue
-        errorMessage = ""
-    }
-
-    fun onEmailChange(newValue: String) {
-        email = newValue
-        errorMessage = ""
-    }
-
-    fun onPasswordChange(newValue: String) {
-        password = newValue
-        errorMessage = ""
-    }
-
-    fun onPasswordRepeatChange(newValue: String) {
-        passwordRepeat = newValue
-        errorMessage = ""
-    }
-
-    fun onPlateChange(newValue: String) {
-        plate = newValue
-        errorMessage = ""
-    }
-
-    fun onVehicleTypeChange(newValue: String) {
-        vehicleType = newValue
-        errorMessage = ""
-    }
-
-    fun register(context: android.content.Context, onSuccess: () -> Unit) {
+    fun register(onSuccess: () -> Unit) {
         isLoading = true
 
-        val userManager = com.lksnext.ParkingMMartinez.data.UserManager(context)
-        val sessionManager = com.lksnext.ParkingMMartinez.data.SessionManager(context)
+        val cleanPlate = plate.replace("\\s".toRegex(), "").uppercase()
 
         when {
-            email.isBlank() || !email.contains("@") -> errorMessage = "Invalid email format"
-            password != passwordRepeat -> errorMessage = "Passwords do not match"
-            password.length < 6 -> errorMessage = "Password too short"
-            isPlateInvalid(plate) -> errorMessage = "Invalid license plate (1234ABC)"
+            !email.contains("@") -> errorCode = R.string.err_invalid_email
+            password.length < 6 -> errorCode = R.string.err_password_short
+            password != passwordRepeat -> errorCode = R.string.err_password_mismatch
+            isPlateInvalid(cleanPlate) -> errorCode = R.string.err_invalid_plate
+            userRepository.getAllUsers().any { it.username == username } -> errorCode = R.string.err_user_exists
             else -> {
-                val newUser = com.lksnext.ParkingMMartinez.model.User(
-                    name = name,
-                    lastName = lastName,
-                    username = username,
-                    email = email,
-                    pass = password
-                )
-
-                userManager.registerUser(newUser)
-
+                val newUser = User(name=name, lastName=lastName, username=username, email=email, pass=password)
+                userRepository.registerUser(newUser)
                 sessionManager.saveSession(true, newUser.id)
 
-                val selectedType = when (vehicleType) {
-                    "Motorcycle" -> com.lksnext.ParkingMMartinez.model.VehicleType.MOTORCYCLE
-                    "Electric Car" -> com.lksnext.ParkingMMartinez.model.VehicleType.ELECTRIC
-                    "Adapted Car" -> com.lksnext.ParkingMMartinez.model.VehicleType.ADAPTED
-                    else -> com.lksnext.ParkingMMartinez.model.VehicleType.STANDARD
-                }
-
-                val firstVehicle = com.lksnext.ParkingMMartinez.model.Vehicle(
-                    id = newUser.id, //MEJORAS: Cuando use firebase añadir un campo al vehiculo que sea ownerID para distinguir de quien es el vehiculo
+                val defaultVehicle = Vehicle(
+                    userId = newUser.id,
                     name = "My Vehicle",
-                    plate = plate,
-                    type = selectedType,
-                    isAdapted = false
+                    plate = cleanPlate,
+                    type = selectedVehicleType
                 )
-                com.lksnext.ParkingMMartinez.data.VehicleManager(context).addVehicle(newUser.id, firstVehicle)
 
+                vehicleRepository.addVehicle(newUser.id, defaultVehicle)
                 onSuccess()
             }
         }
-
         isLoading = false
     }
 }

@@ -15,9 +15,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.lksnext.ParkingMMartinez.R
 import com.lksnext.ParkingMMartinez.ui.theme.LksOrange
+import com.lksnext.ParkingMMartinez.ui.theme.mistGray
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -36,12 +39,12 @@ fun LksTimePicker(
         onDismissRequest = onDismiss,
         confirmButton = {
             TextButton(onClick = { onConfirm(state.hour, state.minute) }) {
-                Text("Confirm", color = LksOrange, fontWeight = FontWeight.Bold)
+                Text(stringResource(R.string.timepick_confirm), color = LksOrange, fontWeight = FontWeight.Bold)
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel", color = Color.Gray)
+                Text(stringResource(R.string.timepick_cancel), color = Color.Gray)
             }
         },
         containerColor = Color.White,
@@ -51,7 +54,7 @@ fun LksTimePicker(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "Select Time",
+                    text = stringResource(R.string.timepick_selecttime),
                     style = MaterialTheme.typography.labelLarge,
                     modifier = Modifier.padding(bottom = 20.dp),
                     color = Color.Gray
@@ -62,7 +65,7 @@ fun LksTimePicker(
                 TimePicker(
                     state = state,
                     colors = TimePickerDefaults.colors(
-                        clockDialColor = Color(0xFFF1F3F5),
+                        clockDialColor = mistGray,
                         selectorColor = LksOrange,
                         containerColor = Color.White,
                         periodSelectorSelectedContainerColor = LksOrange.copy(alpha = 0.2f),

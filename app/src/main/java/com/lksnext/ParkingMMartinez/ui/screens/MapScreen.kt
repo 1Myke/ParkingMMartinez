@@ -1,88 +1,156 @@
 package com.lksnext.ParkingMMartinez.ui.screens
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccessTime
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.lksnext.ParkingMMartinez.data.ParkingMock
+import com.lksnext.ParkingMMartinez.R
+import com.lksnext.ParkingMMartinez.ui.components.DateItem
 import com.lksnext.ParkingMMartinez.ui.components.LksHeader
+import com.lksnext.ParkingMMartinez.ui.components.LksTimePicker
 import com.lksnext.ParkingMMartinez.ui.components.ZoneCard
+import com.lksnext.ParkingMMartinez.ui.theme.bookingCardColor
+import com.lksnext.ParkingMMartinez.ui.theme.lightGray
+import com.lksnext.ParkingMMartinez.ui.theme.mistGray
 import com.lksnext.ParkingMMartinez.ui.viewmodel.MapViewModel
-import com.lksnext.ParkingMMartinez.model.*
+import androidx.lifecycle.compose.LifecycleResumeEffect
+import com.lksnext.ParkingMMartinez.ui.viewmodel.BookingViewModel
 
 @Composable
 fun MapScreen(
     viewModel: MapViewModel = viewModel(),
+    bookingViewModel: BookingViewModel,
     onZoneClick: (String) -> Unit
 ) {
+    val todayStr = stringResource(R.string.booking_today)
 
-    // De momento vamos a hacer el import del mock para que tenga los datos
-    val context = androidx.compose.ui.platform.LocalContext.current
+    LifecycleResumeEffect(Unit) {
+        bookingViewModel.cancelEditing()
+        bookingViewModel.checkUserReservationStatus()
+        viewModel.refreshParkingStatus()
 
-    LaunchedEffect(Unit) {
-        viewModel.refreshParkingStatus(context)
+        onPauseOrDispose {
+            // Limpieza si fuera necesario
+        }
+    }
+
+    if (viewModel.showTimePicker) {
+        LksTimePicker(
+            onConfirm = { h, m ->
+                viewModel.onTimeChange(h, m)
+                viewModel.showTimePicker = false
+            },
+            onDismiss = { viewModel.showTimePicker = false }
+        )
     }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFF8F9FA))
+            .background(mistGray)
     ) {
         LksHeader(
-            title = "LKS Next Parking",
-            subtitle = "Select a zone to book instantly"
+            title = stringResource(R.string.map_header_title),
+            subtitle = stringResource(R.string.map_header_subtitle)
         )
 
         Column(
             modifier = Modifier
-                .padding(16.dp)
+                .fillMaxSize()
+                .padding(horizontal = 16.dp)
                 .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            viewModel.zones.forEach { zone ->
-                val type: VehicleType = when (zone.name) {
-                    ZoneNames.DISABILITY -> VehicleType.ADAPTED
-                    ZoneNames.EV -> VehicleType.ELECTRIC
-                    ZoneNames.MOTORCYCLE -> VehicleType.MOTORCYCLE
-                    ZoneNames.STANDARD -> VehicleType.STANDARD
-                    else -> {
-                        android.util.Log.e("MAP_ERROR", "ZoneName no reconocido: ${zone.name}")
-                        VehicleType.STANDARD
+            Spacer(Modifier.height(4.dp))
+
+            // --- SELECTOR DE FECHAS HORIZONTAL ---
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                viewModel.availableDates.forEach { (day, label) ->
+                    val displayLabel = if (label == "TODAY") todayStr else label
+                    DateItem(
+                        day = day.toString(),
+                        label = displayLabel,
+                        isSelected = viewModel.selectedDayNumber == day,
+                        onClick = { viewModel.onDateSelected(day) }
+                    )
+                }
+            }
+
+            // --- SELECTOR DE HORA DE INICIO ---
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                border = BorderStroke(1.dp, Color.LightGray),
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Column(modifier = Modifier.padding(14.dp)) {
+                    Text(
+                        text = stringResource(R.string.booking_start_time),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = Color.Gray
+                    )
+
+                    OutlinedCard(
+                        onClick = { viewModel.showTimePicker = true },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 8.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = CardDefaults.outlinedCardColors(containerColor = bookingCardColor),
+                        border = BorderStroke(1.dp, lightGray)
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(12.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(
+                                text = String.format("%02d:%02d", viewModel.selectedStartTime.hour, viewModel.selectedStartTime.minute),
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                            Icon(Icons.Default.AccessTime, null, tint = Color.Gray)
+                        }
                     }
                 }
+            }
 
-                val available = ParkingMock.getAvailableSpotsCount(type)
-                val total = ParkingMock.getTotalSpotsCount(type)
+            // --- ZONAS DE APARCAMIENTO ---
+            Column(
+                modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                viewModel.zones.forEach { zone ->
+                    // 🎯 CALCULAMOS SI ESTÁ LLENO AQUÍ TAMBIÉN
+                    val isZoneFull = zone.availableSpots <= 0
 
-                // Creamos una copia de la zona con los datos actualizados para la Card
-                val updatedZone = zone.copy(
-                    availableSpots = available,
-                    totalSpots = total
-                )
-
-                ZoneCard(
-                    zone = updatedZone,
-                    onClick = { onZoneClick(zone.name) }
-                )
+                    ZoneCard(
+                        zone = zone,
+                        onClick = {
+                            if (!isZoneFull) {
+                                onZoneClick(zone.name)
+                            }
+                        }
+                    )
+                }
             }
         }
     }
-}
-
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun MapScreenPreview() {
-    MapScreen(
-        onZoneClick = {zoneName -> }
-    )
 }

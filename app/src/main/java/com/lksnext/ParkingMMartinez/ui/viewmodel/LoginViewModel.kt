@@ -4,64 +4,40 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import com.google.firebase.auth.FirebaseAuth
+import com.lksnext.ParkingMMartinez.data.SessionManager
+import com.lksnext.ParkingMMartinez.data.repository.UserRepository
 
-class LoginViewModel : ViewModel() {
+class LoginViewModel(
+    private val userRepository: UserRepository,
+    private val sessionManager: SessionManager
+) : ViewModel() {
     var email by mutableStateOf("")
-        private set
     var password by mutableStateOf("")
-        private set
-    var errorMessage by mutableStateOf("")
-        private set
+    var errorCode by mutableStateOf<String?>(null) // Guardamos el ID del error
     var isLoading by mutableStateOf(false)
-        private set
-
     var rememberMe by mutableStateOf(false)
-        private set
 
-    fun onEmailChange(newValue: String) {
-        email = newValue
-        errorMessage = ""
-    }
+    fun onEmailChange(newValue: String) { email = newValue; errorCode = null }
+    fun onPasswordChange(newValue: String) { password = newValue; errorCode = null }
+    fun onRememberMeChange(newValue: Boolean) { rememberMe = newValue }
 
-    fun onPasswordChange(newValue: String) {
-        password = newValue
-        errorMessage = ""
-    }
-
-    fun login(context: android.content.Context, onSuccess: (Boolean) -> Unit) {
+    fun login(onSuccess: (Boolean) -> Unit) {
         isLoading = true
-
-        val userManager = com.lksnext.ParkingMMartinez.data.UserManager(context)
-        val sessionManager = com.lksnext.ParkingMMartinez.data.SessionManager(context)
-        val userMock = com.lksnext.ParkingMMartinez.data.UserMock
-
-        var user = userManager.authenticate(email, password)
-
-        //MEJORAS: Analizar que tdo este bien
-//        if (!email.contains("@")) {
-//            errorMessage = "Please enter a valid email"
-//        } else if (password.length < 6) {
-//            errorMessage = "Password must be at least 6 characters"
-//        } else {
-//            // Simulamos éxito
-//            onSuccess(rememberMe)
-//        }
-        if (user == null) {
-            user = userMock.users.find { it.email == email && it.pass == password }
-        }
+        val user = userRepository.authenticate(email, password)
 
         if (user != null) {
-            android.util.Log.d("DEBUG_LOGIN", "Usuario encontrado: ${user.email}, ID: ${user.id}")
-            sessionManager.saveSession(true, user.id)
-
+            sessionManager.saveSession(rememberMe, user.id)
             onSuccess(rememberMe)
         } else {
-            errorMessage = "Invalid email or password"
+            errorCode = "error_invalid_credentials"
         }
         isLoading = false
     }
 
-    fun onRememberMeChange(newValue: Boolean) {
-        rememberMe = newValue
+    fun resetLoginFields() {
+        email = ""
+        password = ""
+        errorCode = null
     }
 }

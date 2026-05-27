@@ -1,3 +1,100 @@
 <resources>
     <string name="app_name">lksParking</string>
+
+    <!-- TEXTO BOOKING_SCREEN EN INGLES -->
+    <string name ="booking_header_label">YOU ARE BOOKING A SPOT IN</string>
+    <string name="booking_select_vehicle">Select Vehicle</string>
+    <string name="booking_manage">Manage</string>
+    <string name="booking_error_active">You already have an active reservation.</string>
+    <string name="booking_error_past">Cannot book in the past. Select a future time.</string>
+    <string name="booking_btn_confirm">Confirm Reservation</string>
+    <string name="booking_btn_update">Update Reservation</string>
+    <string name="booking_no_vehicles">No compatible vehicles found for %1$s.</string>
+    <string name="booking_add_vehicle_hint">Please add a vehicle of this type in \'Manage\' to continue.</string>
+    <string name="booking_select_date">Select Date</string>
+    <string name="booking_time_duration">Time &amp; Duration</string>
+    <string name="booking_start_time">START TIME</string>
+    <string name="booking_duration_label">DURATION</string>
+    <string name="booking_ending_at">ENDING AT %1$s</string>
+    <string name="booking_next_day_warning">(+1 day)</string>
+    <string name="booking_hours_unit">hours</string>
+    <string name="booking_today">TODAY</string>
+
+    <!-- TEXTO BOOKING_REGISTER_SCREEN EN INGLES -->
+    <string name="register_title">My Reservations</string>
+    <string name="register_empty">No active reservations</string>
+
+    <!-- TEXTO MAP SCREEN EN INGLES -->
+    <string name="map_header_title">LKS Next Parking</string>
+    <string name="map_header_subtitle">Select a zone to book instantly</string>
+
+    <!-- TEXTO PROFILE SCREEN EN INGLES -->
+    <string name="profile_vehicles">My Vehicles</string>
+    <string name="profile_add_vehicle_title">+ Add New Vehicle</string>
+    <string name="profile_label_nickname">NICKNAME</string>
+    <string name="profile_hint_nickname">Nickname</string>
+    <string name="profile_placeholder_nickname">e.g. Work Car</string>
+    <string name="profile_label_plate">LICENSE PLATE</string>
+    <string name="profile_hint_plate">License Plate</string>
+    <string name="profile_placeholder_plate">1234 ABC</string>
+    <string name="profile_label_type">VEHICLE TYPE</string>
+    <string name="profile_btn_save">Save Vehicle</string>
+    <string name="profile_delete_title">Confirm Delete</string>
+    <string name="profile_delete_msg">Are you sure you want to remove %1$s? This action cannot be undone.</string>
+    <string name="btn_cancel">Cancel</string>
+    <string name="btn_delete">Delete</string>
+    <string name="error_empty_fields">Fields cannot be empty.</string>
+    <string name="error_duplicate_plate">A vehicle with this license plate already exists.</string>
+    <string name="error_active_booking">Cannot delete: This vehicle has an active parking reservation.</string>
+
+    <!-- TEXTO LOGIN/REGISTER/RECOVERY EN INGLES -->
+    <string name="login_welcome">Welcome Back</string>
+    <string name="login_username">Username</string>
+    <string name="login_password">Password</string>
+    <string name="login_remember">Remember me</string>
+    <string name="login_forgot">Forgot Password?</string>
+    <string name="login_btn">LOG IN</string>
+    <string name="login_no_account">Don\'t have an account?</string>
+    <string name="login_register_link">Register here!</string>
+    <string name="login_email_label">Email</string>
+
+    <string name="reg_title">Register</string>
+    <string name="reg_label_name">Name</string>
+    <string name="reg_label_plate">License Plate</string>
+    <string name="reg_vehicle_type">Vehicle Type</string>
+    <string name="reg_btn">SIGN UP</string>
+
+    <string name="rec_title">Recover your password</string>
+    <string name="rec_placeholder">Use your registration email</string>
+    <string name="rec_btn_continue">Continue</string>
+
+    <string name="err_login_failed">Invalid email or password</string>
+    <string name="err_invalid_email">Please enter a valid email address</string>
+    <string name="err_password_short">Password must be at least 6 characters</string>
+    <string name="err_password_mismatch">Passwords do not match</string>
+    <string name="err_invalid_plate">License plate format is invalid (1234ABC)</string>
+    <string name="err_user_exists">This username is already taken</string>
+
+    <!-- TEXTO DE LOS COMPONENTES EN INGLES -->
+    <string name="footer_map">Map</string>
+    <string name="footer_bookings">Bookings</string>
+    <string name="footer_alerts">Alerts</string>
+    <string name="footer_profile">Profile</string>
+
+    <string name="timepick_confirm">Confirm</string>
+    <string name="timepick_cancel">Cancel</string>
+    <string name="timepick_selecttime">Select Time</string>
+
+    <string name="label_location">Level 1</string>
+    <string name="label_date">DATE</string>
+    <string name="label_time">TIME</string>
+    <string name="label_vehicle">VEHICLE</string>
+    <string name="label_available">AVAILABLE</string>
+    <string name="status_active">ACTIVE</string>
+    <string name="btn_edit">Edit</string>
+    <string name="btn_check_in">Check-in Now</string>
+
+
+
+
 </resources>

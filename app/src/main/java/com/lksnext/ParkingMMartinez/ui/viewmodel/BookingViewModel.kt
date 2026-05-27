@@ -6,6 +6,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import com.lksnext.ParkingMMartinez.data.BookingManager
+import com.lksnext.ParkingMMartinez.data.SessionManager
+import com.lksnext.ParkingMMartinez.data.repository.BookingRepository
 import com.lksnext.ParkingMMartinez.model.ParkingZone
 import com.lksnext.ParkingMMartinez.model.Reservation
 import com.lksnext.ParkingMMartinez.model.Vehicle
@@ -15,7 +17,10 @@ import java.util.*
 import java.text.SimpleDateFormat
 import java.time.LocalTime
 
-class BookingViewModel: ViewModel() {
+class BookingViewModel (
+    private val repository: BookingRepository,
+    private val sessionManager: SessionManager
+): ViewModel() {
     var startHour by mutableStateOf(8)
         private set
     var startMinute by mutableStateOf(0)
@@ -37,6 +42,15 @@ class BookingViewModel: ViewModel() {
     var selectedVehicle by mutableStateOf<Vehicle?>(null)
 
     var editingReservationId by mutableStateOf<String?>(null)
+        private set
+
+    var nextCollisionTime by mutableStateOf<String?>(null)
+        private set
+
+    var maxAllowedHours by mutableStateOf(0)
+        private set
+
+    var isOverlapConflict by mutableStateOf(false)
         private set
 
     // Logica para los proximos 7 dias
@@ -96,21 +110,19 @@ class BookingViewModel: ViewModel() {
     }
 
     fun confirmReservation(
-        context: Context,
         vehicle: Vehicle,
         zone: ParkingZone,
         onComplete: () -> Unit
     ) {
-        val bookingManager = BookingManager(context)
 
         editingReservationId?.let { oldId ->
-            bookingManager.cancelReservation(oldId)
+            repository.cancelReservation(oldId)
         }
 
-        val userId = com.lksnext.ParkingMMartinez.data.SessionManager(context).getActiveUserId() ?: ""
-        val vehicleWithId = vehicle.copy(id = userId) // Nos aseguramos de que lleve el ID del dueño
+        val userId = sessionManager.getActiveUserId() ?: ""
+        val vehicleWithId = vehicle.copy(id = userId) // Nos aseguramos de que lleve el ID del dueño. MEJORAS: Darle un id unico al vehiculo
 
-        val start = java.time.LocalTime.of(startHour, startMinute)
+        val start = LocalTime.of(startHour, startMinute)
         val end = start.plusHours(duration.toLong())
 
         val zoneType = when (parkingZone) {
@@ -129,32 +141,37 @@ class BookingViewModel: ViewModel() {
 
         val calendar = Calendar.getInstance()
         calendar.set(Calendar.DAY_OF_MONTH, selectedDay)
+        // Ponemos a cero las horas en la fecha para que no interfieran con los LocalTime
+        calendar.set(Calendar.HOUR_OF_DAY, 0)
+        calendar.set(Calendar.MINUTE, 0)
+        calendar.set(Calendar.SECOND, 0)
+        calendar.set(Calendar.MILLISECOND, 0)
 
-        val newReservation = com.lksnext.ParkingMMartinez.model.Reservation(
+        val newReservation = Reservation(
             id = UUID.randomUUID().toString(),
             vehicle = vehicleWithId,
             zone = zone,
-            date = calendar.time,
+            date = calendar.time, // Ahora va una fecha "limpia" de residuos horarios
             startTime = start,
             endTime = end,
             isCheckedIn = false,
             spotNumber = assignedSpot
         )
 
-        bookingManager.saveReservation(newReservation)
+        repository.saveReservation(newReservation)
 
         editingReservationId = null
         hasActiveReservation = true
         onComplete()
     }
 
-    fun checkUserReservationStatus(context: Context) {
-        val currentUserId = com.lksnext.ParkingMMartinez.data.SessionManager(context).getActiveUserId()
+    fun checkUserReservationStatus() {
+        val currentUserId = sessionManager.getActiveUserId()
         if (currentUserId == null) {
             hasActiveReservation = false
             return
         }
-        val allBookings = BookingManager(context).getAllBookings()
+        val allBookings = repository.getAllReservations()
 
         hasActiveReservation = allBookings.any { it.vehicle.id == currentUserId && it.id != editingReservationId }
     }
@@ -179,15 +196,23 @@ class BookingViewModel: ViewModel() {
 
     fun isDateTimeValid(): Boolean {
         val now = Calendar.getInstance()
+
+        // 🎯 MARGEN DE CORTESÍA: Le restamos 5 minutos a la hora actual
+        // para que si el usuario reserva en el mismo minuto exacto (o se retrasa unos segundos),
+        // el sistema no lo tome como una reserva en el pasado.
+        now.add(Calendar.MINUTE, -5)
+
         val selected = Calendar.getInstance()
 
         // Configuramos el calendario con lo seleccionado por el usuario
         selected.set(Calendar.DAY_OF_MONTH, selectedDay)
         selected.set(Calendar.HOUR_OF_DAY, startHour)
         selected.set(Calendar.MINUTE, startMinute)
+        // Limpiamos segundos y milisegundos para una comparación limpia
+        selected.set(Calendar.SECOND, 0)
+        selected.set(Calendar.MILLISECOND, 0)
 
-        // Si el día seleccionado es hoy, comparamos con la hora actual
-        // Si es un día futuro (dentro de los 7 permitidos), siempre es válido
+        // Si el momento seleccionado es posterior al "ahora con margen", es válido
         return selected.after(now)
     }
 
@@ -208,5 +233,61 @@ class BookingViewModel: ViewModel() {
 
     }
 
+    fun canUserConfirmBooking(): Boolean {
+        // Resetear estados de conflicto al empezar la validación
+        isOverlapConflict = false
+        nextCollisionTime = null
+        maxAllowedHours = 0
+
+        if (!isDateTimeValid()) return false
+        if (selectedVehicle == null) return false
+        if (editingReservationId != null) return true
+
+        val currentUserId = sessionManager.getActiveUserId() ?: return false
+        val allBookings = repository.getAllReservations()
+
+        val hasAnyActive = allBookings.any { it.vehicle.id == currentUserId }
+        if (hasAnyActive) return false
+
+        val proposedStart = LocalTime.of(startHour, startMinute)
+        val proposedEnd = proposedStart.plusHours(duration.toLong())
+
+        val mockZone = com.lksnext.ParkingMMartinez.data.ParkingMock.zones.find { it.name == parkingZone }
+        val maxSpotsInZone = mockZone?.totalSpots ?: 4
+
+        val conflictingBookings = allBookings.filter { booking ->
+            val calendar = Calendar.getInstance().apply { time = booking.date }
+            val isSameDay = calendar.get(Calendar.DAY_OF_MONTH) == selectedDay
+            isSameDay && booking.zone.name == parkingZone
+        }
+
+        var tempTime = proposedStart
+        var earliestCollision: LocalTime? = null
+
+        while (tempTime.isBefore(proposedEnd)) {
+            val carsAtThisHour = conflictingBookings.count { booking ->
+                val startsBeforeOrAt = booking.startTime.isBefore(tempTime) || booking.startTime == tempTime
+                val endsAfter = booking.endTime.isAfter(tempTime)
+                startsBeforeOrAt && endsAfter
+            }
+
+            if (carsAtThisHour >= maxSpotsInZone && earliestCollision == null) {
+                earliestCollision = tempTime
+            }
+            tempTime = tempTime.plusMinutes(30)
+        }
+
+        if (earliestCollision != null) {
+            isOverlapConflict = true
+            nextCollisionTime = String.format("%02d:%02d", earliestCollision.hour, earliestCollision.minute)
+
+            val minutesAvailable = java.time.Duration.between(proposedStart, earliestCollision).toMinutes()
+            maxAllowedHours = (minutesAvailable / 60).toInt()
+
+            return false
+        }
+
+        return true
+    }
 
 }

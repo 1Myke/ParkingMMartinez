@@ -7,17 +7,20 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import com.lksnext.ParkingMMartinez.data.BookingManager
 import com.lksnext.ParkingMMartinez.data.ParkingMock
+import com.lksnext.ParkingMMartinez.data.SessionManager
+import com.lksnext.ParkingMMartinez.data.repository.BookingRepository
 import com.lksnext.ParkingMMartinez.model.Reservation
 
-class BookingRegisterViewModel : ViewModel() {
+class BookingRegisterViewModel(
+    private val repository: BookingRepository,
+    private val sessionManager: SessionManager
+) : ViewModel() {
 
     var reservations by mutableStateOf(listOf<Reservation>())
         private set
 
     // Carga las reservas desde la memoria local
-    fun loadReservations(context: android.content.Context) {
-        val manager = BookingManager(context)
-        val sessionManager = com.lksnext.ParkingMMartinez.data.SessionManager(context)
+    fun loadReservations() {
         val currentUserId = sessionManager.getActiveUserId()
 
         if (currentUserId == null) {
@@ -25,16 +28,14 @@ class BookingRegisterViewModel : ViewModel() {
             return
         }
 
-        reservations = manager.getAllBookings().filter { it.vehicle.id == currentUserId }
+        reservations = repository.getUserReservations(currentUserId)
     }
 
     // Borra la reserva y actualiza la lista inmediatamente
-    fun cancelReservation(context: Context, reservationId: String) {
-        val manager = BookingManager(context)
-
-        manager.cancelReservation(reservationId)
+    fun cancelReservation(reservationId: String) {
+        repository.cancelReservation(reservationId)
         // Refrescar la lista local para que el cambio se vea al instante
-        loadReservations(context)
+        loadReservations()
     }
 
     fun doCheckIn(reservationId: String) {

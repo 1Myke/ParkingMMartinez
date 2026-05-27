@@ -1,67 +1,47 @@
 package com.lksnext.ParkingMMartinez.ui.screens
 
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.lksnext.ParkingMMartinez.ui.components.LksButton
-import com.lksnext.ParkingMMartinez.ui.components.LksClickableLabel
-import com.lksnext.ParkingMMartinez.ui.components.LksPasswordField
-import com.lksnext.ParkingMMartinez.ui.components.LksTextField
+import com.lksnext.ParkingMMartinez.R
+import com.lksnext.ParkingMMartinez.model.VehicleType
+import com.lksnext.ParkingMMartinez.ui.components.*
 import com.lksnext.ParkingMMartinez.ui.theme.LksOrange
 import com.lksnext.ParkingMMartinez.ui.viewmodel.RegistrationViewModel
 
 @Composable
 fun RegistrationScreen(
-    viewModel: RegistrationViewModel = viewModel(),
+    viewModel: RegistrationViewModel,
     onRegisterSuccess: () -> Unit,
     onNavigateToLogin: () -> Unit
 ) {
-    /*
-    var name by remember { mutableStateOf("") }
-    var lastName by remember { mutableStateOf("") }
-    var username by remember { mutableStateOf("") }
-    var email by remember { mutableStateOf("")}
-    var pass by remember { mutableStateOf("")}
-    var passRepeat by remember { mutableStateOf("")}
-    var plate by remember { mutableStateOf("")}
-    
-    var vehicleType by remember { mutableStateOf("Car") }
-    
-    var errorMessage by remember { mutableStateOf("") }
-    */
+    val focusManager = LocalFocusManager.current
 
-    val context = androidx.compose.ui.platform.LocalContext.current
+    val errorMessage = viewModel.errorCode?.let { stringResource(id = it) }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(24.dp)
+            .pointerInput(Unit) {
+                detectTapGestures(onTap = { focusManager.clearFocus() })
+            }
             .verticalScroll(rememberScrollState()),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = "Register",
+            text = stringResource(R.string.reg_title),
             style = MaterialTheme.typography.headlineLarge,
             color = LksOrange
         )
@@ -70,31 +50,31 @@ fun RegistrationScreen(
 
         LksTextField(
             value = viewModel.name,
-            onValueChange = { viewModel.onNameChange(it) },
-            label = "Name",
-            isError = false //Simplemente es su nombre, no podemos saber si esta bien o mal
+            onValueChange = { viewModel.name = it },
+            label = stringResource(R.string.reg_label_name)
         )
 
         LksTextField(
             value = viewModel.lastName,
-            onValueChange = { viewModel.onLastNameChange(it) },
-            label = "Last name",
-            isError = false //Simplemente es su apellido, no podemos saber si esta bien o mal
+            onValueChange = { viewModel.lastName = it },
+            label = "Last Name"
         )
 
         LksTextField(
             value = viewModel.username,
             onValueChange = { viewModel.onUsernameChange(it) },
-            label = "Username",
-            isError = viewModel.errorMessage.contains("username", true) //No puede haber usernames repetidos
+            label = stringResource(R.string.login_username),
+            isError = viewModel.errorCode == R.string.err_user_exists
         )
 
-        //Elegir el type
         Text(
-            text = "Vehicle Type",
+            text = stringResource(R.string.reg_vehicle_type),
             style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.align(Alignment.Start).padding(top = 8.dp)
+            modifier = Modifier
+                .align(Alignment.Start)
+                .padding(top = 8.dp)
         )
+
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -102,17 +82,23 @@ fun RegistrationScreen(
                 .horizontalScroll(rememberScrollState()),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            val vehicles = listOf("Car", "Motorcycle", "Electric Car", "Adapted Car")
-            vehicles.forEach { type ->
-                val isSelected = viewModel.vehicleType == type
+            VehicleType.values().forEach { type ->
+                val isSelected = viewModel.selectedVehicleType == type
+
+                val typeLabel = when (type) {
+                    VehicleType.STANDARD -> "Standard Car"
+                    VehicleType.ELECTRIC -> "Electric Car"
+                    VehicleType.MOTORCYCLE -> "Motorcycle"
+                    VehicleType.ADAPTED -> "Adapted Car"
+                }
+
                 FilterChip(
                     selected = isSelected,
                     onClick = { viewModel.onVehicleTypeChange(type) },
-                    label = { Text(type) },
+                    label = { Text(typeLabel) },
                     colors = FilterChipDefaults.filterChipColors(
                         selectedContainerColor = LksOrange.copy(alpha = 0.2f),
-                        selectedLabelColor = LksOrange,
-                        selectedLeadingIconColor = LksOrange
+                        selectedLabelColor = LksOrange
                     )
                 )
             }
@@ -120,92 +106,71 @@ fun RegistrationScreen(
 
         LksTextField(
             value = viewModel.plate,
-            onValueChange = { viewModel.onPlateChange(it.uppercase()) }, // Forzamos mayúsculas en la matrícula
-            label = "License Plate",
-            isError = isPlateInvalid(viewModel.plate) //Da error, de momento lo he escrito asi, pero ayudame porfa
+            onValueChange = { viewModel.onPlateChange(it.uppercase()) },
+            label = stringResource(R.string.reg_label_plate),
+            isError = viewModel.errorCode == R.string.err_invalid_plate
         )
 
         LksTextField(
             value = viewModel.email,
             onValueChange = { viewModel.onEmailChange(it) },
             label = "Email",
-            isError = viewModel.errorMessage.contains("email", true)
+            isError = viewModel.errorCode == R.string.err_invalid_email
         )
 
         LksPasswordField(
             value = viewModel.password,
             onValueChange = { viewModel.onPasswordChange(it) },
-            label = "Password",
-            isError = viewModel.errorMessage.contains("password", true)
+            label = stringResource(R.string.login_password),
+            isError = viewModel.errorCode == R.string.err_password_short ||
+                    viewModel.errorCode == R.string.err_password_mismatch
         )
 
         LksPasswordField(
             value = viewModel.passwordRepeat,
             onValueChange = { viewModel.onPasswordRepeatChange(it) },
-            label = "Confirm password",
-            isError = viewModel.errorMessage.contains("password", true)
+            label = "Confirm Password",
+            isError = viewModel.errorCode == R.string.err_password_mismatch
         )
 
-        //Comprobar que las dos passwords sean iguales y que tienen bien el regex que pedire
-
-        if (viewModel.errorMessage.isNotEmpty()) {
+        if (errorMessage != null) {
             Text(
-                text = viewModel.errorMessage,
+                text = errorMessage,
                 color = Color.Red,
-                modifier = Modifier.padding(8.dp)
+                modifier = Modifier.padding(8.dp),
+                style = MaterialTheme.typography.bodySmall
             )
         }
 
         Spacer(modifier = Modifier.height(24.dp))
 
         LksButton(
-            text = "SIGN UP",
-            enabled = (viewModel.name.isNotEmpty() &&
-                    viewModel.lastName.isNotEmpty() &&
-                    viewModel.username.isNotEmpty() &&
-                    viewModel.email.isNotEmpty() &&
-                    viewModel.password.isNotEmpty() &&
-                    viewModel.passwordRepeat.isNotEmpty() &&
-                    viewModel.plate.isNotEmpty() &&
-                    viewModel.vehicleType.isNotEmpty()
-                    ),
+            text = stringResource(R.string.reg_btn),
+            enabled = !viewModel.isLoading && viewModel.name.isNotEmpty() && viewModel.email.isNotEmpty(),
             onClick = {
-                viewModel.register(context) { onRegisterSuccess() }
+                focusManager.clearFocus()
+                viewModel.register { onRegisterSuccess() }
             }
         )
 
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 16.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
         ) {
-            Text(
-                text = "Already have an account?",
-                textAlign = TextAlign.Center
-            )
+            Text(text = "Already have an account? ")
             LksClickableLabel(
                 text = "Log In",
-                onClick = {
-                    onNavigateToLogin()
-                }
+                onClick = onNavigateToLogin
             )
         }
-
-
     }
 }
 
 fun isPlateInvalid(plate: String): Boolean {
-    if (plate.isEmpty()) return false // No marcamos error si está vacío al empezar
-    val regex = Regex("^[0-9]{4}[A-Z]{3}$") // Ejemplo: 1234ABC
-    return !regex.matches(plate) // Si NO coincide, devolvemos TRUE (es un error)
-}
-
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun RegistrationScreenPreview() {
-    RegistrationScreen(
-        onRegisterSuccess = {},
-        onNavigateToLogin = {}
-    )
+    if (plate.isEmpty()) return false
+    val regex = Regex("^[0-9]{4}[A-Z]{3}$")
+    return !regex.matches(plate)
 }

@@ -26,6 +26,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.lksnext.ParkingMMartinez.model.VehicleType
+import com.lksnext.ParkingMMartinez.ui.theme.*
 
 @Composable
 fun VehicleCard(
@@ -36,10 +37,10 @@ fun VehicleCard(
 ) {
     // Definimos los colores dinámicos según el tipo
     val (containerColor, contentColor) = when (type) {
-        VehicleType.STANDARD -> Color(0xFFFFF4E6) to Color(0xFFD9480F) // Naranja suave
-        VehicleType.MOTORCYCLE -> Color(0xFFE7F5FF) to Color(0xFF1971C2) // Azul suave
-        VehicleType.ELECTRIC -> Color(0xFFEBFBEE) to Color(0xFF2F9E44) // Verde suave
-        VehicleType.ADAPTED -> Color(0xFFF1F3F5) to Color(0xFF495057) // Gris para vehiculos adaptados
+        VehicleType.STANDARD -> standardVehicleColor
+        VehicleType.MOTORCYCLE -> motorcycleVehicleColor
+        VehicleType.ELECTRIC -> electricVehicleColor
+        VehicleType.ADAPTED -> adaptedVehicleColor
     }
 
     Card(
@@ -55,7 +56,7 @@ fun VehicleCard(
             // Icono del vehículo con fondo gris circular
             Surface(
                 modifier = Modifier.size(48.dp),
-                color = Color(0xFFF1F3F5),
+                color = mistGray,
                 shape = RoundedCornerShape(12.dp)
             ) {
                 Icon(
@@ -63,7 +64,7 @@ fun VehicleCard(
                     imageVector = if (type == VehicleType.MOTORCYCLE) Icons.Default.TwoWheeler else Icons.Default.DirectionsCar,
                     contentDescription = null,
                     modifier = Modifier.padding(12.dp),
-                    tint = Color(0xFF495057)
+                    tint = grisPizarra
                 )
             }
 
@@ -75,7 +76,7 @@ fun VehicleCard(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     // La matrícula con fondo gris suave para que destaque
                     Surface(
-                        color = Color(0xFFF1F3F5),
+                        color = mistGray,
                         shape = RoundedCornerShape(4.dp)
                     ) {
                         Text(
@@ -95,7 +96,7 @@ fun VehicleCard(
                         shape = RoundedCornerShape(4.dp)
                     ) {
                         Text(
-                            text = type.toString().lowercase().capitalize(),
+                            text = type.toString().lowercase().replaceFirstChar { it.uppercase() },
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
                             style = MaterialTheme.typography.labelSmall,
                             color = contentColor,

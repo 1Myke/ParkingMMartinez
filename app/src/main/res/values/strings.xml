@@ -46,6 +46,7 @@
     <string name="error_empty_fields">Fields cannot be empty.</string>
     <string name="error_duplicate_plate">A vehicle with this license plate already exists.</string>
     <string name="error_active_booking">Cannot delete: This vehicle has an active parking reservation.</string>
+    <string name="error_generic">An unexpected error has occurred. Please try again.</string>
 
     <!-- TEXTO LOGIN/REGISTER/RECOVERY EN INGLES -->
     <string name="login_welcome">Welcome Back</string>
@@ -62,6 +63,7 @@
     <string name="reg_label_name">Name</string>
     <string name="reg_label_plate">License Plate</string>
     <string name="reg_vehicle_type">Vehicle Type</string>
+    <string name="reg_vehicle_name">Vehicle Name</string>
     <string name="reg_btn">SIGN UP</string>
 
     <string name="rec_title">Recover your password</string>

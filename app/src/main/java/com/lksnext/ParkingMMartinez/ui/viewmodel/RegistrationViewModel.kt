@@ -28,6 +28,7 @@ class RegistrationViewModel(
     var password by mutableStateOf("")
     var passwordRepeat by mutableStateOf("")
     var plate by mutableStateOf("")
+    var vehicleName by mutableStateOf("")
     var selectedVehicleType by mutableStateOf(VehicleType.STANDARD)
     var errorCode by mutableStateOf<Int?>(null)
         private set
@@ -39,6 +40,7 @@ class RegistrationViewModel(
     fun onPasswordChange(v: String) { password = v; errorCode = null }
     fun onPasswordRepeatChange(v: String) { passwordRepeat = v; errorCode = null }
     fun onPlateChange(v: String) { plate = v; errorCode = null }
+    fun onVehicleNameChange(v: String) { vehicleName = v; errorCode = null }
 
     fun onVehicleTypeChange(type: VehicleType) { selectedVehicleType = type }
 
@@ -57,21 +59,32 @@ class RegistrationViewModel(
                 else -> {
                     val newUser = User(name=name, lastName=lastName, username=username, email=email, pass=password)
 
-                    // LLAMADA A FIREBASE
                     val success = userRepository.registerUser(newUser)
 
                     if (success) {
                         val currentUser = FirebaseAuth.getInstance().currentUser
                         val realId = currentUser?.uid ?: newUser.id
-
                         sessionManager.saveSession(true, realId)
 
+                        // AHORA USAMOS TUS VARIABLES DE REGISTRO
+                        val initialVehicle = Vehicle(
+                            userId = realId,
+                            name = vehicleName,
+                            plate = cleanPlate,
+                            type = selectedVehicleType
+                        )
 
-                        // ... (resto del registro de vehículo)
+                        try {
+                            vehicleRepository.addVehicle(realId, initialVehicle)
+                            println("DEBUG: Vehículo registrado con éxito en Firestore")
+                        } catch (e: Exception) {
+                            println("DEBUG: Error al guardar vehículo inicial: ${e.message}")
+                        }
+
                         isLoading = false
                         onSuccess()
                     } else {
-                        errorCode = R.string.err_registration_failed // Crea este string si no existe
+                        errorCode = R.string.err_registration_failed
                         isLoading = false
                     }
                 }

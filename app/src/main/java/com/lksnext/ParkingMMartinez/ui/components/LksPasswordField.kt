@@ -2,6 +2,7 @@ package com.lksnext.ParkingMMartinez.ui.components
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material3.*
@@ -25,7 +26,9 @@ fun LksPasswordField(
     onValueChange: (String) -> Unit,
     label: String = stringResource(R.string.login_password),
     isError: Boolean = false,
-    leadingIcon: ImageVector? = null
+    leadingIcon: ImageVector? = null,
+    keyboardOptions: KeyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+    keyboardActions: KeyboardActions = KeyboardActions.Default
 ) {
     var passwordVisible by remember { mutableStateOf(false) }
 
@@ -45,7 +48,10 @@ fun LksPasswordField(
                 Icon(imageVector = icon, contentDescription = null)
             }
         },
-        keyboardOptions = KeyboardOptions( keyboardType = KeyboardType.Password),
+        keyboardOptions = keyboardOptions,
+        keyboardActions = keyboardActions,
+        singleLine = true,
+        maxLines = 1,
         colors = OutlinedTextFieldDefaults.colors(
             focusedBorderColor = LksOrange,
             focusedLabelColor = LksOrange,

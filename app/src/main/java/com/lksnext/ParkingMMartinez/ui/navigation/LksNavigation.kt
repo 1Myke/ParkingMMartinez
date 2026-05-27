@@ -214,6 +214,7 @@ fun LksNavigation() {
                 ProfileScreen(
                     viewModel = profileViewModel,
                     onLogoutClick = {
+                        loginViewModel.resetLoginFields()
                         session.clearSession()
                         navController.navigate(Screen.Login.route) {
                             popUpTo(0) { inclusive = true }

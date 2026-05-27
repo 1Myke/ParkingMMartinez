@@ -16,12 +16,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.DirectionsCar
-import androidx.compose.material.icons.filled.Logout
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilterChip
@@ -29,48 +27,50 @@ import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.lksnext.ParkingMMartinez.R
 import com.lksnext.ParkingMMartinez.model.VehicleType
 import com.lksnext.ParkingMMartinez.ui.components.LksButton
 import com.lksnext.ParkingMMartinez.ui.components.LksTextField
 import com.lksnext.ParkingMMartinez.ui.components.ProfileHeaderSection
 import com.lksnext.ParkingMMartinez.ui.components.VehicleCard
 import com.lksnext.ParkingMMartinez.ui.theme.LksOrange
+import com.lksnext.ParkingMMartinez.ui.theme.lightGray
+import com.lksnext.ParkingMMartinez.ui.theme.navyBlue
 import com.lksnext.ParkingMMartinez.ui.viewmodel.ProfileViewModel
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.foundation.gestures.detectTapGestures
 
 @Composable
 fun ProfileScreen(
     viewModel: ProfileViewModel = viewModel(),
     onLogoutClick: () -> Unit
 ){
-    val context = androidx.compose.ui.platform.LocalContext.current
-    val sessionManager = com.lksnext.ParkingMMartinez.data.SessionManager(context)
+    val focusManager = LocalFocusManager.current
 
-    val currentUserId = sessionManager.getActiveUserId()
-
-    androidx.compose.runtime.LaunchedEffect(currentUserId) {
-        android.util.Log.d("DEBUG_SESSION", "ID actual en Perfil: $currentUserId")
-        if (currentUserId != null) {
-            viewModel.loadUserVehicles(context)
-        }
+    LaunchedEffect(Unit) {
+        viewModel.loadUserData()
     }
-    
+
     Scaffold(
-        // SOLO para el boton flotante naranja
+        containerColor = Color.White,
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { viewModel.onOpenDialog() },
@@ -86,7 +86,12 @@ fun ProfileScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .background(Color.White) //????HACE FALTA
+                .background(Color.White)
+                .pointerInput(Unit) {
+                    detectTapGestures(onTap = {
+                        focusManager.clearFocus()
+                    })
+                }
                 .verticalScroll(rememberScrollState())
         ) {
 
@@ -96,13 +101,10 @@ fun ProfileScreen(
                     .padding(horizontal = 8.dp, vertical = 8.dp),
                 horizontalArrangement = Arrangement.End
             ) {
-                androidx.compose.material3.IconButton(onClick = {
-                    com.lksnext.ParkingMMartinez.data.SessionManager(context).clearSession()
-                    onLogoutClick()
-                }) {
+                IconButton(onClick = onLogoutClick) {
                     Icon(
-                        imageVector = Icons.Default.Logout,
-                        contentDescription = "Logout",
+                        Icons.AutoMirrored.Default.Logout,
+                        null,
                         tint = Color.Gray,
                         modifier = Modifier.size(28.dp)
                     )
@@ -115,7 +117,7 @@ fun ProfileScreen(
                 viewModel.userEmail
             )
 
-            HorizontalDivider(modifier = Modifier.padding(vertical = 24.dp), thickness = 1.dp, color = Color(0xFFEEEEEE))
+            HorizontalDivider(modifier = Modifier.padding(vertical = 24.dp), thickness = 1.dp, color = lightGray)
 
             Row(
                 modifier = Modifier.padding(horizontal = 24.dp),
@@ -131,13 +133,13 @@ fun ProfileScreen(
                 Spacer(modifier = Modifier.width(8.dp))
 
                 Text(
-                    text = "My Vehicles",
+                    text = stringResource(R.string.profile_vehicles),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold
                 )
             }
 
-            // LISTA DINÁMICA <- de momento! Luego tendre que ver como hacerlo con Firebase
+            // LISTA DE VEHÍCULOS
             Column(
                 modifier = Modifier.padding(24.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -158,133 +160,172 @@ fun ProfileScreen(
         }
 
         if (viewModel.showAddVehicleDialog) {
-            Dialog(
-                onDismissRequest = { viewModel.onCloseDialog() },
-                properties = DialogProperties(usePlatformDefaultWidth = false)
-            ) {
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth(0.95f)
-                        .padding(16.dp),
-                    shape = RoundedCornerShape(24.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.White)
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .padding(24.dp)
-                            .verticalScroll(rememberScrollState())
-                    ) {
-                        Text(
-                            text = "+ Add New Vehicle",
-                            style = MaterialTheme.typography.headlineSmall,
-                            fontWeight = FontWeight.Bold,
-                            color = Color(0xFF1A2C42)
-                        )
-
-                        Spacer(modifier = Modifier.height(24.dp))
-
-                        Text("NICKNAME", style = MaterialTheme.typography.labelLarge, color = Color.Gray)
-                        LksTextField(
-                            value = viewModel.newVehicleName,
-                            onValueChange = { viewModel.newVehicleName = it },
-                            label = "Nickname",
-                            placeholder = "e.g. Work Car"
-                        )
-
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        Text("LICENSE PLATE", style = MaterialTheme.typography.labelLarge, color = Color.Gray)
-                        LksTextField(
-                            value = viewModel.newVehiclePlate,
-                            onValueChange = { viewModel.newVehiclePlate = it },
-                            label = "License Plate",
-                            placeholder = "1234 ABC"
-                        )
-
-                        Spacer(modifier = Modifier.height(24.dp))
-
-                        Text(
-                            text = "VEHICLE TYPE",
-                            style = MaterialTheme.typography.labelLarge,
-                            color = Color.Gray
-                        )
-
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 12.dp)
-                                .horizontalScroll(rememberScrollState()),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            VehicleType.values().forEach { type ->
-                                val isSelected = viewModel.selectedVehicleType == type
-                                FilterChip(
-                                    selected = isSelected,
-                                    onClick = { viewModel.onVehicleTypeChange(type) },
-                                    label = { Text(type.name.replace("_", " ").lowercase().capitalize()) },
-                                    colors = FilterChipDefaults.filterChipColors(
-                                        selectedContainerColor = LksOrange.copy(alpha = 0.2f),
-                                        selectedLabelColor = LksOrange
-                                    )
-                                )
-                            }
-                        }
-
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
-                            OutlinedButton(
-                                onClick = { viewModel.onCloseDialog() },
-                                modifier = Modifier.weight(1f),
-                                shape = RoundedCornerShape(12.dp)
-                            ) {
-                                Text("Cancel", maxLines = 1)
-                            }
-
-                            LksButton(
-                                text = "Save Vehicle",
-                                onClick = { viewModel.addVehicle(context) },
-                                modifier = Modifier.weight(1.3f) // Un poco más de peso para que no corte el texto
-                            )
-                        }
-                    }
-                }
-            }
+            AddVehicleDialog(viewModel)
         }
 
         if (viewModel.showDeleteConfirmation) {
-            androidx.compose.material3.AlertDialog(
-                onDismissRequest = { viewModel.dismissDeleteDialog() },
-                title = { Text(text = "Confirm Delete") },
-                text = {
-                    Text("Are you sure you want to remove ${viewModel.vehicleToDelete?.name}? This action cannot be undone.")
-                },
-                confirmButton = {
-                    androidx.compose.material3.TextButton(
-                        onClick = { viewModel.confirmDeleteVehicle(context) }
-                    ) {
-                        Text("Delete", color = Color.Red, fontWeight = FontWeight.Bold)
-                    }
-                },
-                dismissButton = {
-                    androidx.compose.material3.TextButton(
-                        onClick = { viewModel.dismissDeleteDialog() }
-                    ) {
-                        Text("Cancel", color = Color.Gray)
-                    }
-                },
-                shape = RoundedCornerShape(16.dp),
-                containerColor = Color.White
-            )
+            DeleteConfirmationDialog(viewModel)
         }
     }
 }
 
-@Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun ProfileScreenPreview() {
-    ProfileScreen(
-        onLogoutClick = {}
+fun AddVehicleDialog(viewModel: ProfileViewModel) {
+    Dialog(
+        onDismissRequest = { viewModel.onCloseDialog() },
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth(0.95f)
+                .padding(16.dp),
+            shape = RoundedCornerShape(24.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.White)
+        ) {
+            Column(
+                modifier = Modifier
+                    .padding(24.dp)
+                    .verticalScroll(rememberScrollState())
+            ) {
+                Text(
+                    text = stringResource(R.string.profile_add_vehicle_title),
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = navyBlue
+                )
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Text(
+                    text = stringResource(R.string.profile_label_nickname),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = Color.Gray
+                )
+                LksTextField(
+                    value = viewModel.newVehicleName,
+                    onValueChange = { viewModel.newVehicleName = it },
+                    label = stringResource(R.string.profile_hint_nickname),
+                    placeholder = stringResource(R.string.profile_placeholder_nickname)
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Text(
+                    text = stringResource(R.string.profile_label_plate),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = Color.Gray
+                )
+                LksTextField(
+                    value = viewModel.newVehiclePlate,
+                    onValueChange = { viewModel.newVehiclePlate = it.uppercase() },
+                    label = stringResource(R.string.profile_hint_plate),
+                    placeholder = stringResource(R.string.profile_placeholder_plate),
+                    isError = viewModel.vehicleAddError != null
+                )
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Text(
+                    text = stringResource(R.string.profile_label_type),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = Color.Gray
+                )
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 12.dp)
+                        .horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    VehicleType.values().forEach { type ->
+                        val isSelected = viewModel.selectedVehicleType == type
+                        FilterChip(
+                            selected = isSelected,
+                            onClick = { viewModel.onVehicleTypeChange(type) },
+                            label = {
+                                Text(type.name.replace("_", " ").lowercase().replaceFirstChar { it.uppercase() })
+                            },
+                            colors = FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = LksOrange.copy(alpha = 0.2f),
+                                selectedLabelColor = LksOrange
+                            )
+                        )
+                    }
+                }
+
+                viewModel.vehicleAddError?.let { resId ->
+                    Text(
+                        text = stringResource(id = resId),
+                        color = Color.Red,
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    )
+                }
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    OutlinedButton(
+                        onClick = { viewModel.onCloseDialog() },
+                        modifier = Modifier.weight(1f),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Text(stringResource(R.string.btn_cancel))
+                    }
+
+                    LksButton(
+                        text = stringResource(R.string.profile_btn_save),
+                        onClick = { viewModel.addVehicle() },
+                        modifier = Modifier.weight(1.3f)
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun DeleteConfirmationDialog(viewModel: ProfileViewModel) {
+    AlertDialog(
+        onDismissRequest = { viewModel.dismissDeleteDialog() },
+        title = { Text(text = stringResource(R.string.profile_delete_title)) },
+        text = {
+            Column {
+                Text(
+                    text = stringResource(
+                        R.string.profile_delete_msg,
+                        viewModel.vehicleToDelete?.name ?: ""
+                    )
+                )
+
+                viewModel.vehicleDeleteError?.let { resId ->
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Text(
+                        text = stringResource(id = resId),
+                        color = Color.Red,
+                        style = MaterialTheme.typography.bodySmall,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = { viewModel.confirmDeleteVehicle() }) {
+                Text(
+                    text = stringResource(R.string.btn_delete),
+                    color = Color.Red,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = { viewModel.dismissDeleteDialog() }) {
+                Text(text = stringResource(R.string.btn_cancel), color = Color.Gray)
+            }
+        },
+        shape = RoundedCornerShape(16.dp),
+        containerColor = Color.White
     )
 }

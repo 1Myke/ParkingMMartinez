@@ -1,23 +1,22 @@
 package com.lksnext.ParkingMMartinez.data
 
 import android.content.Context
-import androidx.compose.ui.graphics.PathSegment
 import com.lksnext.ParkingMMartinez.model.Reservation
-import com.google.gson.Gson
+import com.google.gson.GsonBuilder
+import com.google.gson.JsonDeserializer
+import com.google.gson.JsonPrimitive
+import com.google.gson.JsonSerializer
 import com.google.gson.reflect.TypeToken
+import java.time.LocalTime
 
 class BookingManager(context: Context) {
     private val prefs = context.getSharedPreferences("parking_prefs", Context.MODE_PRIVATE)
-    private val gson = com.google.gson.GsonBuilder()
-        .registerTypeAdapter(java.time.LocalTime::class.java, object : com.google.gson.JsonSerializer<java.time.LocalTime> {
-            override fun serialize(src: java.time.LocalTime, typeOfSrc: java.lang.reflect.Type, context: com.google.gson.JsonSerializationContext): com.google.gson.JsonElement {
-                return com.google.gson.JsonPrimitive(src.toString()) // Guarda como "HH:mm"
-            }
+    private val gson = GsonBuilder()
+        .registerTypeAdapter(LocalTime::class.java, JsonSerializer<LocalTime> { src, _, _ ->
+            JsonPrimitive(src.toString())
         })
-        .registerTypeAdapter(java.time.LocalTime::class.java, object : com.google.gson.JsonDeserializer<java.time.LocalTime> {
-            override fun deserialize(json: com.google.gson.JsonElement, typeOfT: java.lang.reflect.Type, context: com.google.gson.JsonDeserializationContext): java.time.LocalTime {
-                return java.time.LocalTime.parse(json.asString) // Lee el String y lo vuelve a hacer LocalTime
-            }
+        .registerTypeAdapter(LocalTime::class.java, JsonDeserializer<LocalTime> { json, _, _ ->
+            LocalTime.parse(json.asString)
         })
         .create()
 
@@ -25,7 +24,7 @@ class BookingManager(context: Context) {
         val currentBookings = getAllBookings().toMutableList()
         currentBookings.add(reservation)
         val json = gson.toJson(currentBookings)
-        prefs.edit().putString("bookings_list", json).commit()
+        prefs.edit().putString("bookings_list", json).apply()
     }
 
     fun getAllBookings(): List<Reservation> {
@@ -42,10 +41,9 @@ class BookingManager(context: Context) {
     }
 
     fun cancelReservation(reservationId: String) {
-        val allBookings = getAllBookings().toMutableList()
+        val allBookings = getAllBookings() // Obtenemos lista inmutable primero
 
-        val reservationToDelete = allBookings.find { it.id == reservationId }
-        reservationToDelete?.let {
+        allBookings.find { it.id == reservationId }?.let {
             ParkingMock.releaseSpot(it.spotNumber)
         }
 

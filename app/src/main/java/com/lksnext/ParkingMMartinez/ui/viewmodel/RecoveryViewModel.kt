@@ -9,19 +9,20 @@ class RecoveryViewModel : ViewModel() {
     var email by mutableStateOf("")
         private set
 
-    var errorMessage by mutableStateOf("")
+    var errorCode by mutableStateOf<String?>(null)
         private set
 
     fun onEmailChange(newValue: String) {
         email = newValue
-        errorMessage = "" // Limpiamos el error al escribir
+        errorCode = null
     }
 
     fun validateAndSend(onSuccess: () -> Unit) {
-        if (!email.contains("@") && !email.contains(".")) {
-            errorMessage = "Please enter a valid email or username"
+        // MEJORAS: PONER UN BUEN REGEX
+        if (!email.contains("@")) {
+            errorCode = "error_invalid_email_recovery"
         } else {
-            // Aquí irá la lógica de Firebase después
+            // Aquí irá la lógica de Firebase para enviar el correo de reset
             onSuccess()
         }
     }

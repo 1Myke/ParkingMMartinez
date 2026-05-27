@@ -11,8 +11,8 @@ enum class VehicleType{
 
 data class Vehicle(
     val id: String = UUID.randomUUID().toString(),
+    val userId: String,
     val name: String,
     val plate: String,
     val type: VehicleType,
-    val isAdapted: Boolean
 )

@@ -9,11 +9,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.lksnext.ParkingMMartinez.ui.navigation.Screen
 import com.lksnext.ParkingMMartinez.ui.theme.LksOrange
 import com.lksnext.ParkingMMartinez.R
-
 
 @Composable
 fun LksFooter(navController: NavController) {
@@ -32,25 +32,17 @@ fun LksFooter(navController: NavController) {
         tonalElevation = 8.dp
     ) {
         items.forEach { (route, icon, label) ->
-            val isSelected = currentRoute == route
+            val isSelected = isTabSelected(route, currentRoute)
 
             NavigationBarItem(
                 selected = isSelected,
                 onClick = {
                     if (currentRoute != route) {
-                        navController.navigate(route) {
-                            popUpTo(navController.graph.startDestinationId) {
-                                saveState = true
-                            }
-                            launchSingleTop = true
-                            restoreState = true
-                        }
+                        handleNavigationClick(navController, route)
                     }
                 },
                 label = { Text(label) },
-                icon = {
-                    Icon(icon, contentDescription = label)
-                },
+                icon = { Icon(icon, contentDescription = label) },
                 colors = NavigationBarItemDefaults.colors(
                     selectedIconColor = LksOrange,
                     selectedTextColor = LksOrange,
@@ -60,5 +52,41 @@ fun LksFooter(navController: NavController) {
                 )
             )
         }
+    }
+}
+
+// --- SUB-COMPONENTES ---
+
+private fun isTabSelected(route: String, currentRoute: String?): Boolean {
+    return if (route == Screen.Map.route) {
+        currentRoute == Screen.Map.route || currentRoute?.startsWith("booking") == true
+    } else {
+        currentRoute == route
+    }
+}
+
+private fun handleNavigationClick(navController: NavController, targetRoute: String) {
+    if (targetRoute == Screen.Map.route) {
+        val previousEntry = navController.previousBackStackEntry
+        val previousRoute = previousEntry?.destination?.route
+
+        if (previousRoute?.startsWith("booking") == true) {
+            navController.popBackStack()
+            return
+        }
+
+        navigateToNormalTab(navController, Screen.Map.route)
+    } else {
+        navigateToNormalTab(navController, targetRoute)
+    }
+}
+
+private fun navigateToNormalTab(navController: NavController, route: String) {
+    navController.navigate(route) {
+        popUpTo(navController.graph.findStartDestination().id) {
+            saveState = true
+        }
+        launchSingleTop = true
+        restoreState = true
     }
 }

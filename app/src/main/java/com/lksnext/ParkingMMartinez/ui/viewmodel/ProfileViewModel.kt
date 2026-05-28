@@ -152,23 +152,27 @@ class ProfileViewModel(
         val userId = sessionManager.getActiveUserId() ?: return
         val vehicle = vehicleToDelete ?: return
 
-        val hasActiveBookings = bookingRepository.getAllReservations().any { booking ->
-            booking.vehicle.plate == vehicle.plate
-        }
-
-        if (hasActiveBookings) {
-            vehicleDeleteError = R.string.error_active_booking
-            return
-        }
-
         viewModelScope.launch {
             try {
+                // Ahora esto es suspend, así que debe ir dentro de la corrutina
+                val allBookings = bookingRepository.getAllReservations()
+                val hasActiveBookings = allBookings.any { booking ->
+                    booking.vehicle.plate == vehicle.plate
+                }
+
+                if (hasActiveBookings) {
+                    vehicleDeleteError = R.string.error_active_booking
+                    return@launch
+                }
+
                 vehicleRepository.deleteVehicle(userId, vehicle)
                 _vehicles.remove(vehicle)
                 dismissDeleteDialog()
+
             } catch (e: Exception) {
                 vehicleDeleteError = R.string.error_generic
             }
         }
     }
+
 }

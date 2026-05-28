@@ -11,6 +11,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -28,6 +29,7 @@ import com.lksnext.ParkingMMartinez.ui.theme.mistGray
 import com.lksnext.ParkingMMartinez.ui.viewmodel.MapViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import com.lksnext.ParkingMMartinez.ui.viewmodel.BookingViewModel
+import kotlinx.coroutines.launch
 
 @Composable
 fun MapScreen(
@@ -37,10 +39,15 @@ fun MapScreen(
 ) {
     val todayStr = stringResource(R.string.booking_today)
 
+    val scope = rememberCoroutineScope()
+
     LifecycleResumeEffect(Unit) {
         bookingViewModel.cancelEditing()
         bookingViewModel.checkUserReservationStatus()
-        viewModel.refreshParkingStatus()
+
+        scope.launch {
+            viewModel.refreshParking()
+        }
 
         onPauseOrDispose {
             // Limpieza si fuera necesario

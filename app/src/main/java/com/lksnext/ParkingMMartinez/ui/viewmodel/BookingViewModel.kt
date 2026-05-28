@@ -5,7 +5,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import com.lksnext.ParkingMMartinez.data.BookingManager
+import androidx.lifecycle.viewModelScope
 import com.lksnext.ParkingMMartinez.data.SessionManager
 import com.lksnext.ParkingMMartinez.data.repository.BookingRepository
 import com.lksnext.ParkingMMartinez.model.ParkingZone
@@ -13,9 +13,10 @@ import com.lksnext.ParkingMMartinez.model.Reservation
 import com.lksnext.ParkingMMartinez.model.Vehicle
 import com.lksnext.ParkingMMartinez.model.ZoneNames
 import com.lksnext.ParkingMMartinez.model.VehicleType
-import java.util.*
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.time.LocalTime
+import java.util.*
 
 class BookingViewModel (
     private val repository: BookingRepository,
@@ -51,6 +52,8 @@ class BookingViewModel (
         private set
 
     var isOverlapConflict by mutableStateOf(false)
+        private set
+    var isButtonEnabled by mutableStateOf(false)
         private set
 
     // Logica para los proximos 7 dias
@@ -114,66 +117,46 @@ class BookingViewModel (
         zone: ParkingZone,
         onComplete: () -> Unit
     ) {
-
-        editingReservationId?.let { oldId ->
-            repository.cancelReservation(oldId)
-        }
-
         val userId = sessionManager.getActiveUserId() ?: ""
-        val vehicleWithId = vehicle.copy(id = userId) // Nos aseguramos de que lleve el ID del dueño. MEJORAS: Darle un id unico al vehiculo
-
+        val vehicleWithId = vehicle.copy(id = userId)
         val start = LocalTime.of(startHour, startMinute)
         val end = start.plusHours(duration.toLong())
 
-        val zoneType = when (parkingZone) {
-            ZoneNames.DISABILITY -> VehicleType.ADAPTED
-            ZoneNames.EV -> VehicleType.ELECTRIC
-            ZoneNames.MOTORCYCLE -> VehicleType.MOTORCYCLE
-            ZoneNames .STANDARD-> VehicleType.STANDARD
-            else -> {
-                // Por si llega algo rarete
-                android.util.Log.e("MAP_ERROR", "Nombre de zona no reconocido: $parkingZone")
-                VehicleType.STANDARD
-            }
+        val calendar = Calendar.getInstance().apply {
+            set(Calendar.DAY_OF_MONTH, selectedDay)
+            set(Calendar.HOUR_OF_DAY, 0)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
         }
 
-        val assignedSpot = com.lksnext.ParkingMMartinez.data.ParkingMock.occupyFirstAvailableSpot(zoneType) ?: 0
-
-        val calendar = Calendar.getInstance()
-        calendar.set(Calendar.DAY_OF_MONTH, selectedDay)
-        // Ponemos a cero las horas en la fecha para que no interfieran con los LocalTime
-        calendar.set(Calendar.HOUR_OF_DAY, 0)
-        calendar.set(Calendar.MINUTE, 0)
-        calendar.set(Calendar.SECOND, 0)
-        calendar.set(Calendar.MILLISECOND, 0)
-
         val newReservation = Reservation(
-            id = UUID.randomUUID().toString(),
+            id = editingReservationId ?: UUID.randomUUID().toString(),
             vehicle = vehicleWithId,
             zone = zone,
-            date = calendar.time, // Ahora va una fecha "limpia" de residuos horarios
+            date = calendar.time,
             startTime = start,
             endTime = end,
             isCheckedIn = false,
-            spotNumber = assignedSpot
+            spotNumber = 0 // Esto lo deberías gestionar idealmente en el repo
         )
 
-        repository.saveReservation(newReservation)
+        viewModelScope.launch {
+            editingReservationId?.let { repository.cancelReservation(it) }
+            repository.saveReservation(newReservation)
 
-        editingReservationId = null
-        hasActiveReservation = true
-        onComplete()
-    }
-
-    fun checkUserReservationStatus() {
-        val currentUserId = sessionManager.getActiveUserId()
-        if (currentUserId == null) {
-            hasActiveReservation = false
-            return
+            editingReservationId = null
+            hasActiveReservation = true
+            onComplete()
         }
-        val allBookings = repository.getAllReservations()
+    }
+    fun checkUserReservationStatus() {
+        val currentUserId = sessionManager.getActiveUserId() ?: return
 
-        hasActiveReservation = allBookings.any { it.vehicle.id == currentUserId && it.id != editingReservationId }
+        viewModelScope.launch {
+            val allBookings = repository.getAllReservations()
+            hasActiveReservation = allBookings.any { it.vehicle.userId == currentUserId }
+        }
     }
 
     fun loadAndFilterVehicles(context: Context) {
@@ -197,9 +180,6 @@ class BookingViewModel (
     fun isDateTimeValid(): Boolean {
         val now = Calendar.getInstance()
 
-        // 🎯 MARGEN DE CORTESÍA: Le restamos 5 minutos a la hora actual
-        // para que si el usuario reserva en el mismo minuto exacto (o se retrasa unos segundos),
-        // el sistema no lo tome como una reserva en el pasado.
         now.add(Calendar.MINUTE, -5)
 
         val selected = Calendar.getInstance()
@@ -233,25 +213,27 @@ class BookingViewModel (
 
     }
 
-    fun canUserConfirmBooking(): Boolean {
-        // Resetear estados de conflicto al empezar la validación
+    fun validateBooking() {
+        viewModelScope.launch {
+            isButtonEnabled = performValidation()
+        }
+    }
+
+    private suspend fun performValidation(): Boolean {
         isOverlapConflict = false
         nextCollisionTime = null
         maxAllowedHours = 0
 
-        if (!isDateTimeValid()) return false
-        if (selectedVehicle == null) return false
+        if (!isDateTimeValid() || selectedVehicle == null) return false
         if (editingReservationId != null) return true
 
         val currentUserId = sessionManager.getActiveUserId() ?: return false
         val allBookings = repository.getAllReservations()
 
-        val hasAnyActive = allBookings.any { it.vehicle.id == currentUserId }
-        if (hasAnyActive) return false
+        if (allBookings.any { it.vehicle.userId == currentUserId }) return false
 
         val proposedStart = LocalTime.of(startHour, startMinute)
         val proposedEnd = proposedStart.plusHours(duration.toLong())
-
         val mockZone = com.lksnext.ParkingMMartinez.data.ParkingMock.zones.find { it.name == parkingZone }
         val maxSpotsInZone = mockZone?.totalSpots ?: 4
 
@@ -263,30 +245,22 @@ class BookingViewModel (
 
         var tempTime = proposedStart
         var earliestCollision: LocalTime? = null
-
         while (tempTime.isBefore(proposedEnd)) {
-            val carsAtThisHour = conflictingBookings.count { booking ->
-                val startsBeforeOrAt = booking.startTime.isBefore(tempTime) || booking.startTime == tempTime
-                val endsAfter = booking.endTime.isAfter(tempTime)
+            val carsAtThisHour = conflictingBookings.count { b ->
+                val startsBeforeOrAt = b.startTime.isBefore(tempTime) || b.startTime == tempTime
+                val endsAfter = b.endTime.isAfter(tempTime)
                 startsBeforeOrAt && endsAfter
             }
-
-            if (carsAtThisHour >= maxSpotsInZone && earliestCollision == null) {
-                earliestCollision = tempTime
-            }
+            if (carsAtThisHour >= maxSpotsInZone && earliestCollision == null) earliestCollision = tempTime
             tempTime = tempTime.plusMinutes(30)
         }
 
         if (earliestCollision != null) {
             isOverlapConflict = true
             nextCollisionTime = String.format("%02d:%02d", earliestCollision.hour, earliestCollision.minute)
-
-            val minutesAvailable = java.time.Duration.between(proposedStart, earliestCollision).toMinutes()
-            maxAllowedHours = (minutesAvailable / 60).toInt()
-
+            maxAllowedHours = (java.time.Duration.between(proposedStart, earliestCollision).toMinutes() / 60).toInt()
             return false
         }
-
         return true
     }
 

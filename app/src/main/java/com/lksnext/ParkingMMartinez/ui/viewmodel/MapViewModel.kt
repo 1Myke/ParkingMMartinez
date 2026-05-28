@@ -4,8 +4,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.lksnext.ParkingMMartinez.data.ParkingMock
 import com.lksnext.ParkingMMartinez.data.repository.BookingRepository
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.time.LocalTime
 import java.util.*
@@ -44,7 +46,9 @@ class MapViewModel(
         selectedDate = cleanCalendar.time
 
         generateAvailableDates()
-        refreshParkingStatus()
+        viewModelScope.launch {
+            refreshParkingStatus()
+        }
     }
 
     private fun generateAvailableDates() {
@@ -83,15 +87,25 @@ class MapViewModel(
         calendar.set(Calendar.MILLISECOND, 0)
 
         selectedDate = calendar.time
-        refreshParkingStatus()
+        viewModelScope.launch {
+            refreshParkingStatus()
+        }
     }
 
     fun onTimeChange(hour: Int, minute: Int) {
         selectedStartTime = LocalTime.of(hour, minute)
-        refreshParkingStatus()
+        viewModelScope.launch {
+            refreshParkingStatus()
+        }
     }
 
-    fun refreshParkingStatus() {
+    fun refreshParking() {
+        viewModelScope.launch {
+            refreshParkingStatus()
+        }
+    }
+
+    private suspend fun refreshParkingStatus() {
         val allBookings = repository.getAllReservations()
 
         ParkingMock.syncWithReservationsForTimeSlot(

@@ -48,7 +48,7 @@ fun BookingScreen(
     val context = androidx.compose.ui.platform.LocalContext.current
     val todayStr = stringResource(R.string.booking_today)
 
-    val isButtonEnabled = viewModel.canUserConfirmBooking()
+    val isButtonEnabled = viewModel.isButtonEnabled
 
     LaunchedEffect(initialZone, initialDay, initialHour, initialMinute) {
         viewModel.setZone(initialZone)
@@ -60,6 +60,7 @@ fun BookingScreen(
         }
         viewModel.checkUserReservationStatus()
         viewModel.loadAndFilterVehicles(context)
+        viewModel.validateBooking()
     }
 
     DisposableEffect(Unit) {

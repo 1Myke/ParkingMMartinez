@@ -7,7 +7,7 @@ import com.lksnext.ParkingMMartinez.model.VehicleType
 import com.lksnext.ParkingMMartinez.model.ZoneNames
 import java.util.Calendar
 
-object ParkingMock {
+object ParkingManager {
 
     val zones: List<ParkingZone>
         get() = listOf(

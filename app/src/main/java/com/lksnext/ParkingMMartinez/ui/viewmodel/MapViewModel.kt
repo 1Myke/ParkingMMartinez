@@ -5,7 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.lksnext.ParkingMMartinez.data.ParkingMock
+import com.lksnext.ParkingMMartinez.data.ParkingManager
 import com.lksnext.ParkingMMartinez.data.repository.BookingRepository
 import com.lksnext.ParkingMMartinez.model.ParkingZone
 import kotlinx.coroutines.launch
@@ -108,7 +108,7 @@ class MapViewModel(
         try {
             val allBookings = repository.getAllReservations()
 
-            ParkingMock.syncWithReservationsForTimeSlot(
+            ParkingManager.syncWithReservationsForTimeSlot(
                 allBookings = allBookings,
                 selectedDate = selectedDate,
                 slotStart = selectedStartTime,
@@ -116,7 +116,7 @@ class MapViewModel(
             )
 
             val freshlyCalculatedZones = mutableListOf<ParkingZone>()
-            ParkingMock.zones.forEach { zone ->
+            ParkingManager.zones.forEach { zone ->
                 freshlyCalculatedZones.add(zone.copy())
             }
 

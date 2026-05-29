@@ -26,7 +26,7 @@ import com.lksnext.ParkingMMartinez.ui.components.LksButton
 import com.lksnext.ParkingMMartinez.ui.components.LksTimePicker
 import com.lksnext.ParkingMMartinez.ui.theme.LksOrange
 import com.lksnext.ParkingMMartinez.ui.viewmodel.BookingViewModel
-import com.lksnext.ParkingMMartinez.data.ParkingMock
+import com.lksnext.ParkingMMartinez.data.ParkingManager
 import com.lksnext.ParkingMMartinez.model.VehicleType
 import com.lksnext.ParkingMMartinez.R
 import com.lksnext.ParkingMMartinez.ui.components.DateItem
@@ -320,7 +320,7 @@ fun BookingActionSection(viewModel: BookingViewModel, isButtonEnabled: Boolean, 
             text = if (viewModel.editingReservationId != null) stringResource(R.string.booking_btn_update) else stringResource(R.string.booking_btn_confirm),
             enabled = isButtonEnabled,
             onClick = {
-                val realZone = ParkingMock.zones.find { it.name == viewModel.parkingZone } ?: ParkingMock.zones.first()
+                val realZone = ParkingManager.zones.find { it.name == viewModel.parkingZone } ?: ParkingManager.zones.first()
                 viewModel.selectedVehicle?.let { vehicle ->
                     viewModel.confirmReservation(vehicle, realZone) { onConfirmBooking() }
                 }

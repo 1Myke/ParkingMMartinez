@@ -124,4 +124,48 @@ object ParkingMock {
             }
         }
     }
+
+    fun findFirstAvailableSpotNumber(
+        allBookings: List<com.lksnext.ParkingMMartinez.model.Reservation>,
+        zoneName: String,
+        vehicleType: VehicleType,
+        selectedDate: java.util.Date,
+        slotStart: java.time.LocalTime,
+        slotEnd: java.time.LocalTime,
+        editingReservationId: String? = null
+    ): Int {
+        val zoneSpots = spots.filter { it.zone == vehicleType }.map { it.number }
+
+        val cal1 = Calendar.getInstance()
+        val cal2 = Calendar.getInstance()
+        cal1.time = selectedDate
+
+        val occupiedSpotNumbers = mutableSetOf<Int>()
+
+        allBookings.forEach { res ->
+            if (editingReservationId != null && res.id == editingReservationId) {
+                return@forEach
+            }
+
+            cal2.time = res.date
+            val isSameDay = cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
+                    cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR)
+
+            if (isSameDay && res.zone.name == zoneName) {
+                val resStartClean = res.startTime.withSecond(0).withNano(0)
+                val resEndClean = res.endTime.withSecond(0).withNano(0)
+                val slotStartClean = slotStart.withSecond(0).withNano(0)
+                val slotEndClean = slotEnd.withSecond(0).withNano(0)
+
+                val overlaps = slotStartClean.isBefore(resEndClean) && slotEndClean.isAfter(resStartClean)
+
+                if (overlaps) {
+                    occupiedSpotNumbers.add(res.spotNumber)
+                }
+            }
+        }
+
+        return zoneSpots.find { it !in occupiedSpotNumbers } ?: zoneSpots.firstOrNull() ?: 0
+    }
+
 }

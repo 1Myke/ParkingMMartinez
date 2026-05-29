@@ -6,6 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.lksnext.ParkingMMartinez.data.ParkingMock
 import com.lksnext.ParkingMMartinez.data.SessionManager
 import com.lksnext.ParkingMMartinez.data.repository.BookingRepository
 import com.lksnext.ParkingMMartinez.data.repository.VehicleRepository
@@ -132,18 +133,32 @@ class BookingViewModel (
             set(Calendar.MILLISECOND, 0)
         }
 
-        val newReservation = Reservation(
-            id = editingReservationId ?: UUID.randomUUID().toString(),
-            vehicle = vehicleWithId,
-            zone = zone,
-            date = calendar.time,
-            startTime = start,
-            endTime = end,
-            isCheckedIn = false,
-            spotNumber = 0
-        )
-
         viewModelScope.launch {
+            // CORRECCIÓN CRÍTICA: Nos descargamos las reservas actuales para calcular la plaza libre real
+            val allBookings = repository.getAllReservations()
+
+            // Calculamos de forma inteligente el primer número de plaza desocupado en ese tramo
+            val calculatedSpotNumber = ParkingMock.findFirstAvailableSpotNumber(
+                allBookings = allBookings,
+                zoneName = parkingZone,
+                vehicleType = vehicle.type,
+                selectedDate = calendar.time,
+                slotStart = start,
+                slotEnd = end,
+                editingReservationId = editingReservationId
+            )
+
+            val newReservation = Reservation(
+                id = editingReservationId ?: UUID.randomUUID().toString(),
+                vehicle = vehicleWithId,
+                zone = zone,
+                date = calendar.time,
+                startTime = start,
+                endTime = end,
+                isCheckedIn = false,
+                spotNumber = calculatedSpotNumber // <--- ¡Y le asignamos su plaza real! (1, 35, etc.)
+            )
+
             editingReservationId?.let { repository.cancelReservation(it) }
             repository.saveReservation(newReservation)
 

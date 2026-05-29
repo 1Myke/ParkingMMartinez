@@ -1,4 +1,4 @@
-package com.lksnext.ParkingMMartinez
+package com.lksnext.parkingmmartinez
 
 import android.content.Context
 import android.content.SharedPreferences
@@ -13,6 +13,8 @@ import com.lksnext.ParkingMMartinez.model.Vehicle
 import com.lksnext.ParkingMMartinez.model.VehicleType
 import com.lksnext.ParkingMMartinez.model.ZoneNames
 import androidx.compose.ui.graphics.Color
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.runTest // Importación clave para probar métodos suspendidos
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
@@ -22,6 +24,7 @@ import org.mockito.Mockito.*
 import java.time.LocalTime
 import java.util.Date
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class LocalBookingRepositoryTest {
 
     private lateinit var mockContext: Context
@@ -73,7 +76,7 @@ class LocalBookingRepositoryTest {
     }
 
     @Test
-    fun repository_delegatesGetAllReservationsCorrectly() {
+    fun repository_delegatesGetAllReservationsCorrectly() = runTest { // CORRECCIÓN: runTest para envolver la llamada suspendida
         val jsonList = gson.toJson(listOf(fakeReservation))
         `when`(mockPrefs.getString("bookings_list", null)).thenReturn(jsonList)
 
@@ -84,7 +87,7 @@ class LocalBookingRepositoryTest {
     }
 
     @Test
-    fun repository_delegatesSaveReservationSuccessfully() {
+    fun repository_delegatesSaveReservationSuccessfully() = runTest { // CORRECCIÓN: runTest añadido
         `when`(mockPrefs.getString("bookings_list", null)).thenReturn(null)
 
         repository.saveReservation(fakeReservation)
@@ -93,7 +96,7 @@ class LocalBookingRepositoryTest {
     }
 
     @Test
-    fun repository_delegatesCancelReservationSuccessfully() {
+    fun repository_delegatesCancelReservationSuccessfully() = runTest { // CORRECCIÓN: runTest añadido
         val jsonList = gson.toJson(listOf(fakeReservation))
         `when`(mockPrefs.getString("bookings_list", null)).thenReturn(jsonList)
 

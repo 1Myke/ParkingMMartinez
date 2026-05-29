@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.lksnext.ParkingMMartinez.data.SessionManager
 import com.lksnext.ParkingMMartinez.data.repository.BookingRepository
+import com.lksnext.ParkingMMartinez.data.repository.VehicleRepository
 import com.lksnext.ParkingMMartinez.model.ParkingZone
 import com.lksnext.ParkingMMartinez.model.Reservation
 import com.lksnext.ParkingMMartinez.model.Vehicle
@@ -20,6 +21,7 @@ import java.util.*
 
 class BookingViewModel (
     private val repository: BookingRepository,
+    private val vehicleRepository: VehicleRepository,
     private val sessionManager: SessionManager
 ): ViewModel() {
     var startHour by mutableStateOf(8)
@@ -159,22 +161,34 @@ class BookingViewModel (
         }
     }
 
-    fun loadAndFilterVehicles(context: Context) {
-        val userId = com.lksnext.ParkingMMartinez.data.SessionManager(context).getActiveUserId() ?: ""
-        val allVehicles = com.lksnext.ParkingMMartinez.data.VehicleManager(context).getVehicles(userId)
+    fun loadAndFilterVehicles() {
+        val userId = sessionManager.getActiveUserId() ?: ""
 
-        val requiredType = when (parkingZone) {
-            "Disability", ZoneNames.DISABILITY -> VehicleType.ADAPTED
-            "EV", ZoneNames.EV -> VehicleType.ELECTRIC
-            "Motorcycle", ZoneNames.MOTORCYCLE -> VehicleType.MOTORCYCLE
-            "Standard", ZoneNames.STANDARD -> VehicleType.STANDARD
-            else -> VehicleType.STANDARD
+        viewModelScope.launch {
+            try {
+                val allVehicles = vehicleRepository.getVehicles(userId)
+
+                val requiredType = when (parkingZone) {
+                    "Disability", ZoneNames.DISABILITY -> VehicleType.ADAPTED
+                    "EV", ZoneNames.EV -> VehicleType.ELECTRIC
+                    "Motorcycle", ZoneNames.MOTORCYCLE -> VehicleType.MOTORCYCLE
+                    "Standard", ZoneNames.STANDARD -> VehicleType.STANDARD
+                    else -> VehicleType.STANDARD
+                }
+
+                val filtered = allVehicles.filter { it.type == requiredType }
+
+                userVehicles = filtered
+                selectedVehicle = if (filtered.isNotEmpty()) filtered[0] else null
+
+                validateBooking()
+
+            } catch (e: Exception) {
+                android.util.Log.e("FIREBASE_ERROR", "Error cargando vehículos en la reserva: ${e.message}")
+                userVehicles = emptyList()
+                selectedVehicle = null
+            }
         }
-
-        val filtered = allVehicles.filter { it.type == requiredType }
-
-        userVehicles = filtered
-        selectedVehicle = if (filtered.isNotEmpty()) filtered[0] else null
     }
 
     fun isDateTimeValid(): Boolean {

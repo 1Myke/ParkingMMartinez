@@ -3,6 +3,7 @@ package com.lksnext.ParkingMMartinez.data
 import androidx.compose.ui.graphics.Color
 import com.lksnext.ParkingMMartinez.model.ParkingSpot
 import com.lksnext.ParkingMMartinez.model.ParkingZone
+import com.lksnext.ParkingMMartinez.model.Reservation
 import com.lksnext.ParkingMMartinez.model.VehicleType
 import com.lksnext.ParkingMMartinez.model.ZoneNames
 import java.util.Calendar
@@ -71,46 +72,51 @@ object ParkingManager {
         }
     }
 
-    fun syncWithReservations(allBookings: List<com.lksnext.ParkingMMartinez.model.Reservation>) {
+    fun syncWithReservations(allBookings: List<Reservation>) {
         spots.forEach { it.isOccupied = false }
         allBookings.forEach { res ->
             val spot = spots.find { it.number == res.spotNumber }
             spot?.isOccupied = true
         }
     }
+    private fun isReservationOverlapping(
+        res: Reservation,
+        calSelected: Calendar,
+        calRes: Calendar,
+        slotStart: java.time.LocalTime,
+        slotEnd: java.time.LocalTime
+    ): Boolean {
+        calRes.time = res.date
+        val isSameDay = calSelected.get(Calendar.YEAR) == calRes.get(Calendar.YEAR) &&
+                calSelected.get(Calendar.DAY_OF_YEAR) == calRes.get(Calendar.DAY_OF_YEAR)
+
+        if (!isSameDay) return false
+
+        val resStartClean = res.startTime.withSecond(0).withNano(0)
+        val resEndClean = res.endTime.withSecond(0).withNano(0)
+        val slotStartClean = slotStart.withSecond(0).withNano(0)
+        val slotEndClean = slotEnd.withSecond(0).withNano(0)
+
+        return slotStartClean.isBefore(resEndClean) && slotEndClean.isAfter(resStartClean)
+    }
 
     fun syncWithReservationsForTimeSlot(
-        allBookings: List<com.lksnext.ParkingMMartinez.model.Reservation>,
+        allBookings: List<Reservation>,
         selectedDate: java.util.Date,
         slotStart: java.time.LocalTime,
         slotEnd: java.time.LocalTime
     ) {
         spots.forEach { it.isOccupied = false }
 
-        val cal1 = Calendar.getInstance()
+        val cal1 = Calendar.getInstance().apply { time = selectedDate }
         val cal2 = Calendar.getInstance()
-        cal1.time = selectedDate
 
         val conflictCounts = mutableMapOf<VehicleType, Int>().withDefault { 0 }
 
         allBookings.forEach { res ->
-            cal2.time = res.date
-
-            val isSameDay = cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
-                    cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR)
-
-            if (isSameDay) {
-                val resStartClean = res.startTime.withSecond(0).withNano(0)
-                val resEndClean = res.endTime.withSecond(0).withNano(0)
-                val slotStartClean = slotStart.withSecond(0).withNano(0)
-                val slotEndClean = slotEnd.withSecond(0).withNano(0)
-
-                val overlaps = slotStartClean.isBefore(resEndClean) && slotEndClean.isAfter(resStartClean)
-
-                if (overlaps) {
-                    val vehicleType = res.vehicle.type
-                    conflictCounts[vehicleType] = conflictCounts.getValue(vehicleType) + 1
-                }
+            if (isReservationOverlapping(res, cal1, cal2, slotStart, slotEnd)) {
+                val vehicleType = res.vehicle.type
+                conflictCounts[vehicleType] = conflictCounts.getValue(vehicleType) + 1
             }
         }
 
@@ -126,7 +132,7 @@ object ParkingManager {
     }
 
     fun findFirstAvailableSpotNumber(
-        allBookings: List<com.lksnext.ParkingMMartinez.model.Reservation>,
+        allBookings: List<Reservation>,
         zoneName: String,
         vehicleType: VehicleType,
         selectedDate: java.util.Date,
@@ -136,9 +142,8 @@ object ParkingManager {
     ): Int {
         val zoneSpots = spots.filter { it.zone == vehicleType }.map { it.number }
 
-        val cal1 = Calendar.getInstance()
+        val cal1 = Calendar.getInstance().apply { time = selectedDate }
         val cal2 = Calendar.getInstance()
-        cal1.time = selectedDate
 
         val occupiedSpotNumbers = mutableSetOf<Int>()
 
@@ -147,25 +152,11 @@ object ParkingManager {
                 return@forEach
             }
 
-            cal2.time = res.date
-            val isSameDay = cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
-                    cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR)
-
-            if (isSameDay && res.zone.name == zoneName) {
-                val resStartClean = res.startTime.withSecond(0).withNano(0)
-                val resEndClean = res.endTime.withSecond(0).withNano(0)
-                val slotStartClean = slotStart.withSecond(0).withNano(0)
-                val slotEndClean = slotEnd.withSecond(0).withNano(0)
-
-                val overlaps = slotStartClean.isBefore(resEndClean) && slotEndClean.isAfter(resStartClean)
-
-                if (overlaps) {
-                    occupiedSpotNumbers.add(res.spotNumber)
-                }
+            if (res.zone.name == zoneName && isReservationOverlapping(res, cal1, cal2, slotStart, slotEnd)) {
+                occupiedSpotNumbers.add(res.spotNumber)
             }
         }
 
         return zoneSpots.find { it !in occupiedSpotNumbers } ?: zoneSpots.firstOrNull() ?: 0
     }
-
 }

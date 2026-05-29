@@ -1,6 +1,7 @@
 package com.lksnext.ParkingMMartinez.data.repository
 
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.getField
 import com.lksnext.ParkingMMartinez.model.Reservation
 import com.lksnext.ParkingMMartinez.model.Vehicle
 import com.lksnext.ParkingMMartinez.model.ParkingZone
@@ -8,15 +9,14 @@ import kotlinx.coroutines.tasks.await
 import java.time.LocalTime
 import java.util.Date
 
-class FirebaseBookingRepository(private val db: FirebaseFirestore) : BookingRepository {
-
+class FirebaseBookingRepository() : BookingRepository {
+    private val db = FirebaseFirestore.getInstance()
     private val collection = db.collection("bookings")
 
     override suspend fun getAllReservations(): List<Reservation> {
         val snapshot = collection.get().await()
         return snapshot.documents.mapNotNull { doc ->
             try {
-                // Mapeo manual de campos para evitar conflictos de tipos
                 val id = doc.getString("id") ?: ""
                 val spotNumber = (doc.getLong("spotNumber") ?: 0).toInt()
                 val date = doc.getDate("date") ?: Date()
@@ -25,12 +25,15 @@ class FirebaseBookingRepository(private val db: FirebaseFirestore) : BookingRepo
                 val startTime = LocalTime.parse(doc.getString("startTime") ?: "00:00")
                 val endTime = LocalTime.parse(doc.getString("endTime") ?: "00:00")
 
-                // Aquí Firebase reconstruye el objeto Vehicle automáticamente gracias a los valores por defecto
-                val vehicle = doc.toObject(Vehicle::class.java)!!
-                val zone = doc.toObject(ParkingZone::class.java)!!
+                // CORRECCIÓN CRÍTICA: Apuntamos al campo específico dentro del documento
+                val vehicle = doc.getField<Vehicle>("vehicle") ?: return@mapNotNull null
+                val zone = doc.getField<ParkingZone>("zone") ?: return@mapNotNull null
 
                 Reservation(id, spotNumber, vehicle, zone, date, startTime, endTime, isCheckedIn)
-            } catch (e: Exception) { null }
+            } catch (e: Exception) {
+                android.util.Log.e("FIREBASE_READ_ERROR", "Error parseando getAllReservations: ${e.message}")
+                null
+            }
         }
     }
 
@@ -53,25 +56,27 @@ class FirebaseBookingRepository(private val db: FirebaseFirestore) : BookingRepo
     }
 
     override suspend fun getUserReservations(userId: String): List<Reservation> {
-        // Buscamos dentro del campo 'vehicle' el atributo 'userId'
         val snapshot = collection.whereEqualTo("vehicle.userId", userId).get().await()
 
         return snapshot.documents.mapNotNull { doc ->
             try {
+                val id = doc.getString("id") ?: ""
+                val spotNumber = (doc.getLong("spotNumber") ?: 0).toInt()
+                val date = doc.getDate("date") ?: Date()
+                val isCheckedIn = doc.getBoolean("isCheckedIn") ?: false
+
                 val startTime = LocalTime.parse(doc.getString("startTime") ?: "00:00")
                 val endTime = LocalTime.parse(doc.getString("endTime") ?: "00:00")
 
-                Reservation(
-                    id = doc.getString("id") ?: "",
-                    spotNumber = (doc.getLong("spotNumber") ?: 0).toInt(),
-                    vehicle = doc.toObject(Vehicle::class.java)!!,
-                    zone = doc.toObject(ParkingZone::class.java)!!,
-                    date = doc.getDate("date") ?: Date(),
-                    startTime = startTime,
-                    endTime = endTime,
-                    isCheckedIn = doc.getBoolean("isCheckedIn") ?: false
-                )
-            } catch (e: Exception) { null }
+                // CORRECCIÓN CRÍTICA: Apuntamos al campo específico dentro del documento
+                val vehicle = doc.getField<Vehicle>("vehicle") ?: return@mapNotNull null
+                val zone = doc.getField<ParkingZone>("zone") ?: return@mapNotNull null
+
+                Reservation(id, spotNumber, vehicle, zone, date, startTime, endTime, isCheckedIn)
+            } catch (e: Exception) {
+                android.util.Log.e("FIREBASE_READ_ERROR", "Error parseando getUserReservations: ${e.message}")
+                null
+            }
         }
     }
 }

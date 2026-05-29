@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.lksnext.ParkingMMartinez.data.ParkingMock
 import com.lksnext.ParkingMMartinez.data.repository.BookingRepository
+import com.lksnext.ParkingMMartinez.model.ParkingZone
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.time.LocalTime
@@ -19,18 +20,18 @@ class MapViewModel(
     var selectedDate by mutableStateOf(Date())
         private set
 
-    var selectedStartTime by mutableStateOf(LocalTime.now())
+    var selectedStartTime by mutableStateOf(LocalTime.now().withSecond(0).withNano(0))
         private set
 
     val selectedEndTime: LocalTime
         get() = selectedStartTime.plusHours(1)
 
-    var zones by mutableStateOf(ParkingMock.zones)
+    var zones by mutableStateOf<List<ParkingZone>>(emptyList())
         private set
 
     var showTimePicker by mutableStateOf(false)
 
-    var availableDates by mutableStateOf<List<Pair<Int, String>>>(emptyList())
+    var availableDates by mutableStateOf<List<Pair<Date, String>>>(emptyList())
         private set
 
     var selectedDayNumber by mutableStateOf(0)
@@ -52,48 +53,46 @@ class MapViewModel(
     }
 
     private fun generateAvailableDates() {
-        val list = mutableListOf<Pair<Int, String>>()
+        val list = mutableListOf<Pair<Date, String>>()
         val calendar = Calendar.getInstance()
 
         selectedDayNumber = calendar.get(Calendar.DAY_OF_MONTH)
-        list.add(Pair(selectedDayNumber, "TODAY"))
+
+        val todayCalendar = calendar.clone() as Calendar
+        todayCalendar.set(Calendar.HOUR_OF_DAY, 0)
+        todayCalendar.set(Calendar.MINUTE, 0)
+        todayCalendar.set(Calendar.SECOND, 0)
+        todayCalendar.set(Calendar.MILLISECOND, 0)
+        list.add(Pair(todayCalendar.time, "TODAY"))
 
         val dateFormat = SimpleDateFormat("EEE", Locale.getDefault())
         for (i in 1..7) {
             calendar.add(Calendar.DAY_OF_MONTH, 1)
-            val dayNum = calendar.get(Calendar.DAY_OF_MONTH)
-            val label = dateFormat.format(calendar.time)
-            list.add(Pair(dayNum, label))
+
+            val futureDayCalendar = calendar.clone() as Calendar
+            futureDayCalendar.set(Calendar.HOUR_OF_DAY, 0)
+            futureDayCalendar.set(Calendar.MINUTE, 0)
+            futureDayCalendar.set(Calendar.SECOND, 0)
+            futureDayCalendar.set(Calendar.MILLISECOND, 0)
+
+            val label = dateFormat.format(futureDayCalendar.time)
+            list.add(Pair(futureDayCalendar.time, label))
         }
         availableDates = list
     }
 
-    fun onDateSelected(dayNumber: Int) {
-        selectedDayNumber = dayNumber
+    fun onDateSelected(fullDate: Date) {
+        val calendar = Calendar.getInstance().apply { time = fullDate }
+        selectedDayNumber = calendar.get(Calendar.DAY_OF_MONTH)
+        selectedDate = fullDate
 
-        val calendar = Calendar.getInstance()
-        val currentDay = calendar.get(Calendar.DAY_OF_MONTH)
-
-        if (dayNumber >= currentDay) {
-            calendar.set(Calendar.DAY_OF_MONTH, dayNumber)
-        } else {
-            calendar.add(Calendar.MONTH, 1)
-            calendar.set(Calendar.DAY_OF_MONTH, dayNumber)
-        }
-
-        calendar.set(Calendar.HOUR_OF_DAY, 0)
-        calendar.set(Calendar.MINUTE, 0)
-        calendar.set(Calendar.SECOND, 0)
-        calendar.set(Calendar.MILLISECOND, 0)
-
-        selectedDate = calendar.time
         viewModelScope.launch {
             refreshParkingStatus()
         }
     }
 
     fun onTimeChange(hour: Int, minute: Int) {
-        selectedStartTime = LocalTime.of(hour, minute)
+        selectedStartTime = LocalTime.of(hour, minute).withSecond(0).withNano(0)
         viewModelScope.launch {
             refreshParkingStatus()
         }
@@ -106,15 +105,25 @@ class MapViewModel(
     }
 
     private suspend fun refreshParkingStatus() {
-        val allBookings = repository.getAllReservations()
+        try {
+            val allBookings = repository.getAllReservations()
 
-        ParkingMock.syncWithReservationsForTimeSlot(
-            allBookings = allBookings,
-            selectedDate = selectedDate,
-            slotStart = selectedStartTime,
-            slotEnd = selectedEndTime
-        )
+            ParkingMock.syncWithReservationsForTimeSlot(
+                allBookings = allBookings,
+                selectedDate = selectedDate,
+                slotStart = selectedStartTime,
+                slotEnd = selectedEndTime
+            )
 
-        zones = ParkingMock.zones.toList()
+            val freshlyCalculatedZones = mutableListOf<ParkingZone>()
+            ParkingMock.zones.forEach { zone ->
+                freshlyCalculatedZones.add(zone.copy())
+            }
+
+            zones = freshlyCalculatedZones
+
+        } catch (e: Exception) {
+            android.util.Log.e("MAP_REFRESH_ERROR", "Error refrescando el mapa: ${e.message}")
+        }
     }
 }

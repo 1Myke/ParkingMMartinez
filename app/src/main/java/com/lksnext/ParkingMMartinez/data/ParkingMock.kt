@@ -7,45 +7,64 @@ import com.lksnext.ParkingMMartinez.model.VehicleType
 import com.lksnext.ParkingMMartinez.model.ZoneNames
 import java.util.Calendar
 
-
-object  ParkingMock {
+object ParkingMock {
 
     val zones: List<ParkingZone>
         get() = listOf(
-            ParkingZone(ZoneNames.DISABILITY, getAvailableSpotsCount(VehicleType.ADAPTED), getTotalSpotsCount(VehicleType.ADAPTED), 0, Color(0xFF2D5AF0)),
-            ParkingZone(ZoneNames.EV, getAvailableSpotsCount(VehicleType.ELECTRIC), getTotalSpotsCount(VehicleType.ELECTRIC), 0, Color(0xFF00C853)),
-            ParkingZone(ZoneNames.STANDARD, getAvailableSpotsCount(VehicleType.STANDARD), getTotalSpotsCount(VehicleType.STANDARD), 0, Color(0xFF455A64)),
-            ParkingZone(ZoneNames.MOTORCYCLE, getAvailableSpotsCount(VehicleType.MOTORCYCLE), getTotalSpotsCount(VehicleType.MOTORCYCLE), 0, Color(0xFFA66FB5))
+            ParkingZone(
+                name = ZoneNames.DISABILITY,
+                availableSpots = getAvailableSpotsCount(VehicleType.ADAPTED),
+                totalSpots = getTotalSpotsCount(VehicleType.ADAPTED),
+                iconRes = 0,
+                color = Color(0xFF2D5AF0)
+            ),
+            ParkingZone(
+                name = ZoneNames.EV,
+                availableSpots = getAvailableSpotsCount(VehicleType.ELECTRIC),
+                totalSpots = getTotalSpotsCount(VehicleType.ELECTRIC),
+                iconRes = 0,
+                color = Color(0xFF00C853)
+            ),
+            ParkingZone(
+                name = ZoneNames.STANDARD,
+                availableSpots = getAvailableSpotsCount(VehicleType.STANDARD),
+                totalSpots = getTotalSpotsCount(VehicleType.STANDARD),
+                iconRes = 0,
+                color = Color(0xFF455A64)
+            ),
+            ParkingZone(
+                name = ZoneNames.MOTORCYCLE,
+                availableSpots = getAvailableSpotsCount(VehicleType.MOTORCYCLE),
+                totalSpots = getTotalSpotsCount(VehicleType.MOTORCYCLE),
+                iconRes = 0,
+                color = Color(0xFFA66FB5)
+            )
         )
 
     private val spots = mutableListOf<ParkingSpot>().apply {
-        repeat(6) { add(ParkingSpot(it + 1, VehicleType.ADAPTED))}
-        repeat(4) { add(ParkingSpot(it + 7, VehicleType.ELECTRIC))}
-        repeat(24) { add(ParkingSpot(it + 11, VehicleType.STANDARD))}
-        repeat(16) { add(ParkingSpot(it + 35, VehicleType.MOTORCYCLE))}
+        repeat(6) { add(ParkingSpot(it + 1, VehicleType.ADAPTED)) }
+        repeat(4) { add(ParkingSpot(it + 7, VehicleType.ELECTRIC)) }
+        repeat(24) { add(ParkingSpot(it + 11, VehicleType.STANDARD)) }
+        repeat(16) { add(ParkingSpot(it + 35, VehicleType.MOTORCYCLE)) }
     }
 
-    // Cuenta cuántas plazas hay libres para un tipo concreto
     fun getAvailableSpotsCount(type: VehicleType): Int {
         return spots.count { it.zone == type && !it.isOccupied }
     }
 
-    // Cuenta el total de plazas de un tipo
     fun getTotalSpotsCount(type: VehicleType): Int {
         return spots.count { it.zone == type }
     }
 
-    // Busca la primera plaza libre de ese tipo, la marca como ocupada y devuelve el número
     fun occupyFirstAvailableSpot(type: VehicleType): Int? {
         val spot = spots.find { it.zone == type && !it.isOccupied }
         spot?.let {
             it.isOccupied = true
             return it.number
         }
-        return null // No hay plazas libres
+        return null
     }
 
-    // Libera una plaza por su número (para cuando se cancela la reserva)
     fun releaseSpot(spotNumber: Int) {
         spots.find { it.number == spotNumber }?.let {
             it.isOccupied = false
@@ -54,12 +73,9 @@ object  ParkingMock {
 
     fun syncWithReservations(allBookings: List<com.lksnext.ParkingMMartinez.model.Reservation>) {
         spots.forEach { it.isOccupied = false }
-
         allBookings.forEach { res ->
             val spot = spots.find { it.number == res.spotNumber }
-            if (spot != null) {
-                spot.isOccupied = true
-            }
+            spot?.isOccupied = true
         }
     }
 
@@ -75,6 +91,8 @@ object  ParkingMock {
         val cal2 = Calendar.getInstance()
         cal1.time = selectedDate
 
+        val conflictCounts = mutableMapOf<VehicleType, Int>().withDefault { 0 }
+
         allBookings.forEach { res ->
             cal2.time = res.date
 
@@ -82,14 +100,28 @@ object  ParkingMock {
                     cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR)
 
             if (isSameDay) {
-                val overlaps = slotStart.isBefore(res.endTime) && slotEnd.isAfter(res.startTime)
+                val resStartClean = res.startTime.withSecond(0).withNano(0)
+                val resEndClean = res.endTime.withSecond(0).withNano(0)
+                val slotStartClean = slotStart.withSecond(0).withNano(0)
+                val slotEndClean = slotEnd.withSecond(0).withNano(0)
+
+                val overlaps = slotStartClean.isBefore(resEndClean) && slotEndClean.isAfter(resStartClean)
 
                 if (overlaps) {
-                    val spot = spots.find { it.number == res.spotNumber }
-                    spot?.isOccupied = true
+                    val vehicleType = res.vehicle.type
+                    conflictCounts[vehicleType] = conflictCounts.getValue(vehicleType) + 1
+                }
+            }
+        }
+
+        conflictCounts.forEach { (type, count) ->
+            var occupiedSoFar = 0
+            spots.forEach { spot ->
+                if (spot.zone == type && occupiedSoFar < count) {
+                    spot.isOccupied = true
+                    occupiedSoFar++
                 }
             }
         }
     }
-
 }

@@ -1,12 +1,11 @@
 package com.lksnext.ParkingMMartinez.ui.viewmodel
 
-import android.content.Context
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.lksnext.ParkingMMartinez.data.ParkingMock
+import com.lksnext.ParkingMMartinez.data.ParkingManager
 import com.lksnext.ParkingMMartinez.data.SessionManager
 import com.lksnext.ParkingMMartinez.data.repository.BookingRepository
 import com.lksnext.ParkingMMartinez.data.repository.VehicleRepository
@@ -138,7 +137,7 @@ class BookingViewModel (
             val allBookings = repository.getAllReservations()
 
             // Calculamos de forma inteligente el primer número de plaza desocupado en ese tramo
-            val calculatedSpotNumber = ParkingMock.findFirstAvailableSpotNumber(
+            val calculatedSpotNumber = ParkingManager.findFirstAvailableSpotNumber(
                 allBookings = allBookings,
                 zoneName = parkingZone,
                 vehicleType = vehicle.type,
@@ -258,7 +257,7 @@ class BookingViewModel (
 
         val proposedStart = LocalTime.of(startHour, startMinute)
         val proposedEnd = proposedStart.plusHours(duration.toLong())
-        val mockZone = com.lksnext.ParkingMMartinez.data.ParkingMock.zones.find { it.name == parkingZone }
+        val mockZone = com.lksnext.ParkingMMartinez.data.ParkingManager.zones.find { it.name == parkingZone }
         val maxSpotsInZone = mockZone?.totalSpots ?: 4
 
         val conflictingBookings = allBookings.filter { booking ->

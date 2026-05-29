@@ -44,7 +44,7 @@ class BookingManager(context: Context) {
         val allBookings = getAllBookings() // Obtenemos lista inmutable primero
 
         allBookings.find { it.id == reservationId }?.let {
-            ParkingMock.releaseSpot(it.spotNumber)
+            ParkingManager.releaseSpot(it.spotNumber)
         }
 
         val updatedBookings = allBookings.filter { it.id != reservationId }

@@ -13,7 +13,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.*
 import androidx.navigation.navArgument
 import com.lksnext.ParkingMMartinez.data.SessionManager
-import com.lksnext.ParkingMMartinez.data.repository.LocalBookingRepository
+import com.lksnext.ParkingMMartinez.data.repository.FirebaseBookingRepository
 import com.lksnext.ParkingMMartinez.data.repository.FirebaseUserRepository
 import com.lksnext.ParkingMMartinez.data.repository.FirebaseVehicleRepository
 import com.lksnext.ParkingMMartinez.ui.components.LksFooter
@@ -22,6 +22,7 @@ import com.lksnext.ParkingMMartinez.ui.viewmodel.BookingRegisterViewModel
 import com.lksnext.ParkingMMartinez.ui.viewmodel.BookingViewModel
 import com.lksnext.ParkingMMartinez.ui.viewmodel.LoginViewModel
 import com.lksnext.ParkingMMartinez.ui.viewmodel.MapViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.lksnext.ParkingMMartinez.ui.viewmodel.ProfileViewModel
 import com.lksnext.ParkingMMartinez.ui.viewmodel.RecoveryViewModel
 import com.lksnext.ParkingMMartinez.ui.viewmodel.RegistrationViewModel
@@ -32,15 +33,12 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 fun LksNavigation() {
     val context = LocalContext.current
 
-    // Instanciamos Repositorios y Managers
-    val bookingRepository = LocalBookingRepository(context)
+    val bookingRepository = FirebaseBookingRepository()
     val userRepository = FirebaseUserRepository()
     val vehicleRepository = FirebaseVehicleRepository()
     val session = SessionManager(context)
 
     val navController = rememberNavController()
-
-    // --- FACTORY PARA LOS VIEWMODELS ---
 
     val loginViewModel: LoginViewModel = viewModel(
         factory = viewModelFactory {
@@ -92,7 +90,6 @@ fun LksNavigation() {
         }
     )
 
-    // Lógica de inicio y estado de navegación
     val startDestination = if (session.isLoggedIn()) Screen.Map.route else Screen.Login.route
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
@@ -114,7 +111,6 @@ fun LksNavigation() {
             startDestination = startDestination,
             modifier = Modifier.padding(paddingValues)
         ) {
-            // --- LOGIN ---
             composable(Screen.Login.route) {
                 LoginScreen(
                     viewModel = loginViewModel,
@@ -129,7 +125,6 @@ fun LksNavigation() {
                 )
             }
 
-            // --- REGISTER ---
             composable(Screen.Register.route) {
                 RegistrationScreen(
                     viewModel = registrationViewModel,
@@ -142,7 +137,6 @@ fun LksNavigation() {
                 )
             }
 
-            // --- RECOVERY ---
             composable(Screen.Recovery.route) {
                 RecoveryScreen(
                     viewModel = recoveryViewModel,
@@ -156,6 +150,9 @@ fun LksNavigation() {
                     viewModel = mapViewModel,
                     bookingViewModel = sharedBookingViewModel,
                     onZoneClick = { zoneName ->
+                        // Sincronizamos la fecha completa justo antes de viajar para evitar el desajuste de meses
+                        sharedBookingViewModel.onDateSelected(mapViewModel.selectedDate)
+
                         navController.navigate(
                             Screen.Booking.createRoute(
                                 zoneName = zoneName,
@@ -186,7 +183,7 @@ fun LksNavigation() {
                 BookingScreen(
                     viewModel = sharedBookingViewModel,
                     initialZone = zoneName,
-                    initialDay = day,
+                    //initialDay = day,
                     initialHour = hour,
                     initialMinute = minute,
                     onConfirmBooking = { navController.popBackStack() },
@@ -198,7 +195,6 @@ fun LksNavigation() {
                 )
             }
 
-            // --- BOOKING LIST ---
             composable(Screen.BookingsList.route) {
                 BookingRegisterScreen(
                     viewModel = registerViewModel,
@@ -209,7 +205,6 @@ fun LksNavigation() {
                 )
             }
 
-            // --- PROFILE ---
             composable(Screen.Profile.route) {
                 ProfileScreen(
                     viewModel = profileViewModel,
@@ -223,7 +218,6 @@ fun LksNavigation() {
                 )
             }
 
-            // --- ALERTS ---
             composable(Screen.Alerts.route) { NotificationScreen() }
         }
     }

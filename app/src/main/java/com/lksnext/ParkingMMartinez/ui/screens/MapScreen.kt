@@ -30,6 +30,7 @@ import com.lksnext.ParkingMMartinez.ui.viewmodel.MapViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import com.lksnext.ParkingMMartinez.ui.viewmodel.BookingViewModel
 import kotlinx.coroutines.launch
+import java.util.Calendar
 
 @Composable
 fun MapScreen(
@@ -90,13 +91,18 @@ fun MapScreen(
                     .horizontalScroll(rememberScrollState()),
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                viewModel.availableDates.forEach { (day, label) ->
+                viewModel.availableDates.forEach { (fullDate, label) ->
                     val displayLabel = if (label == "TODAY") todayStr else label
+
+                    // Extraemos el número de día para mandárselo al componente visual DateItem
+                    val cal = Calendar.getInstance().apply { time = fullDate }
+                    val dayNumStr = cal.get(Calendar.DAY_OF_MONTH).toString()
+
                     DateItem(
-                        day = day.toString(),
+                        day = dayNumStr,
                         label = displayLabel,
-                        isSelected = viewModel.selectedDayNumber == day,
-                        onClick = { viewModel.onDateSelected(day) }
+                        isSelected = viewModel.selectedDate == fullDate,
+                        onClick = { viewModel.onDateSelected(fullDate) } // Mandamos el Date completo al ViewModel
                     )
                 }
             }
@@ -145,13 +151,14 @@ fun MapScreen(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 viewModel.zones.forEach { zone ->
-                    // 🎯 CALCULAMOS SI ESTÁ LLENO AQUÍ TAMBIÉN
                     val isZoneFull = zone.availableSpots <= 0
 
                     ZoneCard(
                         zone = zone,
                         onClick = {
                             if (!isZoneFull) {
+                                bookingViewModel.onDateSelected(viewModel.selectedDate)
+
                                 onZoneClick(zone.name)
                             }
                         }

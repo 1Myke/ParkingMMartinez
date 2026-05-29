@@ -30,7 +30,7 @@ class BookingViewModel (
         private set
     var duration by mutableStateOf(4f)
         private set
-    var selectedDay by mutableStateOf(Calendar.getInstance().get(Calendar.DAY_OF_MONTH))
+    var selectedDate by mutableStateOf(Date())
         private set
     var showTimePicker by mutableStateOf(false)
         private set
@@ -82,8 +82,8 @@ class BookingViewModel (
         duration = newDuration.coerceIn(1.0f, 8.0f)
     }
 
-    fun onDateSelected(day: Int) {
-        selectedDay = day
+    fun onDateSelected(date: Date) {
+        selectedDate = date
     }
 
     // Cálculos derivados (Lo que dice el PDF sobre reactividad)
@@ -125,7 +125,7 @@ class BookingViewModel (
         val end = start.plusHours(duration.toLong())
 
         val calendar = Calendar.getInstance().apply {
-            set(Calendar.DAY_OF_MONTH, selectedDay)
+            time = selectedDate
             set(Calendar.HOUR_OF_DAY, 0)
             set(Calendar.MINUTE, 0)
             set(Calendar.SECOND, 0)
@@ -140,7 +140,7 @@ class BookingViewModel (
             startTime = start,
             endTime = end,
             isCheckedIn = false,
-            spotNumber = 0 // Esto lo deberías gestionar idealmente en el repo
+            spotNumber = 0
         )
 
         viewModelScope.launch {
@@ -193,20 +193,16 @@ class BookingViewModel (
 
     fun isDateTimeValid(): Boolean {
         val now = Calendar.getInstance()
-
         now.add(Calendar.MINUTE, -5)
 
-        val selected = Calendar.getInstance()
+        val selected = Calendar.getInstance().apply {
+            time = selectedDate
+            set(Calendar.HOUR_OF_DAY, startHour)
+            set(Calendar.MINUTE, startMinute)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }
 
-        // Configuramos el calendario con lo seleccionado por el usuario
-        selected.set(Calendar.DAY_OF_MONTH, selectedDay)
-        selected.set(Calendar.HOUR_OF_DAY, startHour)
-        selected.set(Calendar.MINUTE, startMinute)
-        // Limpiamos segundos y milisegundos para una comparación limpia
-        selected.set(Calendar.SECOND, 0)
-        selected.set(Calendar.MILLISECOND, 0)
-
-        // Si el momento seleccionado es posterior al "ahora con margen", es válido
         return selected.after(now)
     }
 
@@ -215,8 +211,7 @@ class BookingViewModel (
         parkingZone = reservation.zone.name
         startHour = reservation.startTime.hour
         startMinute = reservation.startTime.minute
-        selectedDay = Calendar.getInstance().apply { time = reservation.date }.get(Calendar.DAY_OF_MONTH)
-
+        selectedDate = reservation.date
         // Calculamos la duración más o menos
         val diff = java.time.Duration.between(reservation.startTime, reservation.endTime).toHours()
         duration = diff.toFloat().coerceIn(1f, 8f)
@@ -252,9 +247,12 @@ class BookingViewModel (
         val maxSpotsInZone = mockZone?.totalSpots ?: 4
 
         val conflictingBookings = allBookings.filter { booking ->
-            val calendar = Calendar.getInstance().apply { time = booking.date }
-            val isSameDay = calendar.get(Calendar.DAY_OF_MONTH) == selectedDay
-            isSameDay && booking.zone.name == parkingZone
+            val calProposed = Calendar.getInstance().apply { time = selectedDate }
+            val calBooking = Calendar.getInstance().apply { time = booking.date }
+
+            calProposed.get(Calendar.YEAR) == calBooking.get(Calendar.YEAR) &&
+                    calProposed.get(Calendar.DAY_OF_YEAR) == calBooking.get(Calendar.DAY_OF_YEAR) &&
+                    booking.zone.name == parkingZone
         }
 
         var tempTime = proposedStart

@@ -34,27 +34,27 @@ import com.lksnext.ParkingMMartinez.ui.theme.lightGray
 import com.lksnext.ParkingMMartinez.ui.theme.bookingCardColor
 import com.lksnext.ParkingMMartinez.ui.theme.cremaSuave
 import com.lksnext.ParkingMMartinez.ui.theme.palePink
+import java.util.Calendar
+import java.util.Date
 
 @Composable
 fun BookingScreen(
     viewModel: BookingViewModel,
     initialZone: String = "",
-    initialDay: Int = 0,
+    //initialDay: Int = 0,
     initialHour: Int = 8,
     initialMinute: Int = 0,
     onConfirmBooking: () -> Unit = {},
     onManageVehicles: () -> Unit = {}
 ) {
     val todayStr = stringResource(R.string.booking_today)
-
     val isButtonEnabled = viewModel.isButtonEnabled
 
-    LaunchedEffect(initialZone, initialDay, initialHour, initialMinute) {
+    LaunchedEffect(initialZone, initialHour, initialMinute) {
         viewModel.setZone(initialZone)
 
-        if (viewModel.editingReservationId == null && initialDay != -1) {
+        if (viewModel.editingReservationId == null) {
             viewModel.cancelEditing()
-            viewModel.onDateSelected(initialDay)
             viewModel.onTimeChange(initialHour, initialMinute)
         }
         viewModel.checkUserReservationStatus()
@@ -90,7 +90,7 @@ fun BookingScreen(
 
             Spacer(Modifier.height(16.dp))
 
-            // --- FECHAS (SOLO MOSTRAR EN PANTALLA DE EDICION) ---
+            // --- FECHAS (SÓLO SE MUESTRA EN PANTALLA DE EDICIÓN) ---
             if (viewModel.editingReservationId != null) {
                 SectionHeader(title = stringResource(R.string.booking_select_date))
                 Row(
@@ -100,13 +100,18 @@ fun BookingScreen(
                         .horizontalScroll(rememberScrollState()),
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    viewModel.availableDates.forEach { (day, label) ->
+                    viewModel.availableDates.forEach { (dayInt, label) ->
                         val displayLabel = if (label == "TODAY") todayStr else label
+                        val isSelected = isDateMatchingDay(viewModel.selectedDate, dayInt)
+
                         DateItem(
-                            day = day.toString(),
+                            day = dayInt.toString(),
                             label = displayLabel,
-                            isSelected = viewModel.selectedDay == day,
-                            onClick = { viewModel.onDateSelected(day) }
+                            isSelected = isSelected,
+                            onClick = {
+                                val targetDate = calculateTargetDate(dayInt)
+                                viewModel.onDateSelected(targetDate)
+                            }
                         )
                     }
                 }
@@ -121,7 +126,7 @@ fun BookingScreen(
 
             Spacer(Modifier.height(32.dp))
 
-            // --- CONFIRMACIÓN (PASANDO LA COHERENCIA CORREGIDA) ---
+            // --- CONFIRMACIÓN ---
             BookingActionSection(
                 viewModel = viewModel,
                 isButtonEnabled = isButtonEnabled,
@@ -347,4 +352,28 @@ fun SectionHeader(
             )
         }
     }
+}
+
+// --- FUNCIONES PURAS AUXILIARES PARA BAJAR LA COMPLEJIDAD COGNITIVA (SONAR) ---
+
+private fun isDateMatchingDay(selectedDate: Date, dayInt: Int): Boolean {
+    val calSelected = Calendar.getInstance().apply { time = selectedDate }
+    return calSelected.get(Calendar.DAY_OF_MONTH) == dayInt
+}
+
+private fun calculateTargetDate(dayInt: Int): Date {
+    val targetCal = Calendar.getInstance()
+    val currentDay = targetCal.get(Calendar.DAY_OF_MONTH)
+
+    if (dayInt < currentDay) {
+        targetCal.add(Calendar.MONTH, 1)
+    }
+
+    targetCal.set(Calendar.DAY_OF_MONTH, dayInt)
+    targetCal.set(Calendar.HOUR_OF_DAY, 0)
+    targetCal.set(Calendar.MINUTE, 0)
+    targetCal.set(Calendar.SECOND, 0)
+    targetCal.set(Calendar.MILLISECOND, 0)
+
+    return targetCal.time
 }

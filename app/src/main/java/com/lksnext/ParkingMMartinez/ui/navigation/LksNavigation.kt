@@ -63,7 +63,7 @@ fun LksNavigation() {
     val sharedBookingViewModel: BookingViewModel = viewModel(
         factory = viewModelFactory {
             addInitializer(BookingViewModel::class) {
-                BookingViewModel(bookingRepository, session)
+                BookingViewModel(bookingRepository, vehicleRepository, session)
             }
         }
     )

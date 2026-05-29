@@ -45,7 +45,6 @@ fun BookingScreen(
     onConfirmBooking: () -> Unit = {},
     onManageVehicles: () -> Unit = {}
 ) {
-    val context = androidx.compose.ui.platform.LocalContext.current
     val todayStr = stringResource(R.string.booking_today)
 
     val isButtonEnabled = viewModel.isButtonEnabled
@@ -59,7 +58,7 @@ fun BookingScreen(
             viewModel.onTimeChange(initialHour, initialMinute)
         }
         viewModel.checkUserReservationStatus()
-        viewModel.loadAndFilterVehicles(context)
+        viewModel.loadAndFilterVehicles()
         viewModel.validateBooking()
     }
 

@@ -19,6 +19,8 @@ import com.lksnext.ParkingMMartinez.model.VehicleType
 import com.lksnext.ParkingMMartinez.ui.components.*
 import com.lksnext.ParkingMMartinez.ui.theme.LksOrange
 import com.lksnext.ParkingMMartinez.ui.viewmodel.RegistrationViewModel
+import androidx.compose.ui.platform.testTag
+import com.lksnext.ParkingMMartinez.ui.constants.TestTags
 
 @Composable
 fun RegistrationScreen(
@@ -43,7 +45,8 @@ fun RegistrationScreen(
         Text(
             text = stringResource(R.string.reg_title),
             style = MaterialTheme.typography.headlineLarge,
-            color = LksOrange
+            color = LksOrange,
+            modifier = Modifier.testTag(TestTags.REG_TITLE) 
         )
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -51,20 +54,23 @@ fun RegistrationScreen(
         LksTextField(
             value = viewModel.name,
             onValueChange = { viewModel.name = it },
-            label = stringResource(R.string.reg_label_name)
+            label = stringResource(R.string.reg_label_name),
+            modifier = Modifier.testTag(TestTags.REG_NAME_FIELD)
         )
 
         LksTextField(
             value = viewModel.lastName,
             onValueChange = { viewModel.lastName = it },
-            label = "Last Name"
+            label = "Last Name",
+            modifier = Modifier.testTag(TestTags.REG_LASTNAME_FIELD)
         )
 
         LksTextField(
             value = viewModel.username,
             onValueChange = { viewModel.onUsernameChange(it) },
             label = stringResource(R.string.login_username),
-            isError = viewModel.errorCode == R.string.err_user_exists
+            isError = viewModel.errorCode == R.string.err_user_exists,
+            modifier = Modifier.testTag(TestTags.REG_USERNAME_FIELD)
         )
 
         Text(
@@ -99,7 +105,8 @@ fun RegistrationScreen(
                     colors = FilterChipDefaults.filterChipColors(
                         selectedContainerColor = LksOrange.copy(alpha = 0.2f),
                         selectedLabelColor = LksOrange
-                    )
+                    ),
+                    modifier = Modifier.testTag("${TestTags.REG_CHIP_PREFIX}${type.name}")
                 )
             }
         }
@@ -107,21 +114,24 @@ fun RegistrationScreen(
         LksTextField(
             value = viewModel.vehicleName,
             onValueChange = { viewModel.onVehicleNameChange(it) },
-            label = stringResource(R.string.reg_vehicle_name)
+            label = stringResource(R.string.reg_vehicle_name),
+            modifier = Modifier.testTag(TestTags.REG_VEHICLE_NAME_FIELD)
         )
 
         LksTextField(
             value = viewModel.plate,
             onValueChange = { viewModel.onPlateChange(it.uppercase()) },
             label = stringResource(R.string.reg_label_plate),
-            isError = viewModel.errorCode == R.string.err_invalid_plate
+            isError = viewModel.errorCode == R.string.err_invalid_plate,
+            modifier = Modifier.testTag(TestTags.REG_PLATE_FIELD)
         )
 
         LksTextField(
             value = viewModel.email,
             onValueChange = { viewModel.onEmailChange(it) },
             label = "Email",
-            isError = viewModel.errorCode == R.string.err_invalid_email
+            isError = viewModel.errorCode == R.string.err_invalid_email,
+            modifier = Modifier.testTag(TestTags.REG_EMAIL_FIELD)
         )
 
         LksPasswordField(
@@ -129,22 +139,26 @@ fun RegistrationScreen(
             onValueChange = { viewModel.onPasswordChange(it) },
             label = stringResource(R.string.login_password),
             isError = viewModel.errorCode == R.string.err_password_short ||
-                    viewModel.errorCode == R.string.err_password_mismatch
+                    viewModel.errorCode == R.string.err_password_mismatch,
+            modifier = Modifier.testTag(TestTags.REG_PASSWORD_FIELD)
         )
 
         LksPasswordField(
             value = viewModel.passwordRepeat,
             onValueChange = { viewModel.onPasswordRepeatChange(it) },
             label = "Confirm Password",
-            isError = viewModel.errorCode == R.string.err_password_mismatch
+            isError = viewModel.errorCode == R.string.err_password_mismatch,
+            modifier = Modifier.testTag(TestTags.REG_PASSWORD_REPEAT_FIELD)
         )
 
         if (errorMessage != null) {
             Text(
                 text = errorMessage,
                 color = Color.Red,
-                modifier = Modifier.padding(8.dp),
-                style = MaterialTheme.typography.bodySmall
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier
+                    .padding(8.dp)
+                    .testTag(TestTags.REG_ERROR_MSG)
             )
         }
 
@@ -155,6 +169,7 @@ fun RegistrationScreen(
             enabled = !viewModel.isLoading && viewModel.name.isNotEmpty() && viewModel.email.isNotEmpty() && viewModel.vehicleName.isNotEmpty()
                     && viewModel.username.isNotEmpty() && viewModel.plate.isNotEmpty() && viewModel.password.isNotEmpty() && viewModel.passwordRepeat.isNotEmpty()
                     && viewModel.lastName.isNotEmpty(),
+            modifier = Modifier.testTag(TestTags.REG_SUBMIT_BTN),
             onClick = {
                 focusManager.clearFocus()
                 viewModel.register { onRegisterSuccess() }
@@ -171,7 +186,8 @@ fun RegistrationScreen(
             Text(text = "Already have an account? ")
             LksClickableLabel(
                 text = "Log In",
-                onClick = onNavigateToLogin
+                onClick = onNavigateToLogin,
+                modifier = Modifier.testTag(TestTags.REG_LOGIN_LINK)
             )
         }
     }

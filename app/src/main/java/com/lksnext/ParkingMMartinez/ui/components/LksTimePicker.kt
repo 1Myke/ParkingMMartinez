@@ -26,7 +26,10 @@ import com.lksnext.ParkingMMartinez.ui.theme.mistGray
 @Composable
 fun LksTimePicker(
     onConfirm: (Int, Int) -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    modifier: Modifier = Modifier,
+    confirmButtonModifier: Modifier = Modifier,
+    dismissButtonModifier: Modifier = Modifier
 ) {
     // Definimos el estado inicial
     val state = rememberTimePickerState(
@@ -37,13 +40,14 @@ fun LksTimePicker(
 
     AlertDialog(
         onDismissRequest = onDismiss,
+        modifier = modifier,
         confirmButton = {
-            TextButton(onClick = { onConfirm(state.hour, state.minute) }) {
+            TextButton(onClick = { onConfirm(state.hour, state.minute) }, modifier = confirmButtonModifier) {
                 Text(stringResource(R.string.timepick_confirm), color = LksOrange, fontWeight = FontWeight.Bold)
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
+            TextButton(onClick = onDismiss, modifier = dismissButtonModifier) {
                 Text(stringResource(R.string.timepick_cancel), color = Color.Gray)
             }
         },

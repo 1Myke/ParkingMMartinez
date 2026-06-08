@@ -33,7 +33,9 @@ fun VehicleCard(
     name: String,
     plate: String,
     type: VehicleType,
-    onDeleteClick: (() -> Unit)? = null
+    onDeleteClick: (() -> Unit)? = null,
+    modifier: Modifier = Modifier,
+    deleteButtonModifier: Modifier = Modifier
 ) {
     // Definimos los colores dinámicos según el tipo
     val (containerColor, contentColor) = when (type) {
@@ -44,7 +46,7 @@ fun VehicleCard(
     }
 
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(4.dp),
         shape = RoundedCornerShape(20.dp) // Esquinas un poco más redondeadas
@@ -106,7 +108,7 @@ fun VehicleCard(
                 }
             }
             if (onDeleteClick != null) {
-                IconButton(onClick = onDeleteClick) {
+                IconButton(onClick = onDeleteClick , modifier = deleteButtonModifier) {
                     Icon(
                         Icons.Default.Delete,
                         contentDescription = "Delete vehicle",

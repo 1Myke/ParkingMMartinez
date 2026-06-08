@@ -24,6 +24,7 @@ import com.lksnext.ParkingMMartinez.R
 fun LksPasswordField(
     value: String,
     onValueChange: (String) -> Unit,
+    modifier: Modifier = Modifier,
     label: String = stringResource(R.string.login_password),
     isError: Boolean = false,
     leadingIcon: ImageVector? = null,
@@ -37,7 +38,7 @@ fun LksPasswordField(
         onValueChange = onValueChange,
         label = { Text(label) },
         isError = isError,
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp),
         shape = RoundedCornerShape(12.dp),

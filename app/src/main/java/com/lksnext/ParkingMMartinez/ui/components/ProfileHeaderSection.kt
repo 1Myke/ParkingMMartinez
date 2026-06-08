@@ -27,10 +27,11 @@ import com.lksnext.ParkingMMartinez.ui.theme.cremaSuave
 fun ProfileHeaderSection(
     name: String,
     role: String,
-    email: String
+    email: String,
+    modifier: Modifier = Modifier
 ) {
     Column(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Surface(

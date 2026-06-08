@@ -11,11 +11,12 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun TimePickerField(
     startTime: String,
-    onOpenPicker: () -> Unit
+    onOpenPicker: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     OutlinedCard(
         onClick = onOpenPicker,
-        modifier = Modifier.fillMaxWidth()
+        modifier = modifier.fillMaxWidth()
     ) {
         Row(modifier = Modifier.padding(16.dp)) {
             Text(text = startTime, style = MaterialTheme.typography.headlineSmall)

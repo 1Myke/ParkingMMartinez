@@ -30,10 +30,14 @@ fun ReservationCard(
     reservation: Reservation,
     onCancelClick: () -> Unit,
     onCheckInClick: () -> Unit,
-    onEditClick: () -> Unit
+    onEditClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    cancelButtonModifier: Modifier = Modifier,
+    editButtonModifier: Modifier = Modifier,
+    checkInButtonModifier: Modifier = Modifier
 ) {
     Card(
-        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+        modifier = modifier.fillMaxWidth().padding(vertical = 8.dp),
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(2.dp)
@@ -120,7 +124,7 @@ fun ReservationCard(
                 // Botón Cancelar
                 OutlinedButton(
                     onClick = onCancelClick,
-                    modifier = Modifier
+                    modifier = cancelButtonModifier
                         .weight(0.9f) // Un poco más pequeño
                         .height(48.dp),
                     shape = RoundedCornerShape(12.dp),
@@ -139,7 +143,7 @@ fun ReservationCard(
                 // Botón Editar
                 OutlinedButton(
                     onClick = onEditClick,
-                    modifier = Modifier
+                    modifier = editButtonModifier
                         .weight(0.9f) // Igual que el de cancelar
                         .height(48.dp),
                     shape = RoundedCornerShape(12.dp),
@@ -158,7 +162,7 @@ fun ReservationCard(
                 // Botón Check-in (El protagonista)
                 Button(
                     onClick = onCheckInClick,
-                    modifier = Modifier
+                    modifier = checkInButtonModifier
                         .weight(1.4f) // Le damos más peso para que el texto quepa bien
                         .height(48.dp),
                     shape = RoundedCornerShape(12.dp),

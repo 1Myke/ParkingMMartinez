@@ -92,12 +92,16 @@ object ParkingManager {
 
         if (!isSameDay) return false
 
-        val resStartClean = res.startTime.withSecond(0).withNano(0)
-        val resEndClean = res.endTime.withSecond(0).withNano(0)
-        val slotStartClean = slotStart.withSecond(0).withNano(0)
-        val slotEndClean = slotEnd.withSecond(0).withNano(0)
+        // Pasamos todas las cosas a minutos puros desde las 00:00
+        val startSlot = slotStart.hour * 60 + slotStart.minute
+        var endSlot = slotEnd.hour * 60 + slotEnd.minute
+        val startRes = res.startTime.hour * 60 + res.startTime.minute
+        var endRes = res.endTime.hour * 60 + res.endTime.minute
 
-        return slotStartClean.isBefore(resEndClean) && slotEndClean.isAfter(resStartClean)
+        if (endSlot < startSlot) endSlot += 1440
+        if (endRes < startRes) endRes += 1440
+
+        return startSlot < endRes && endSlot > startRes
     }
 
     fun syncWithReservationsForTimeSlot(

@@ -171,8 +171,28 @@ class BookingViewModel (
 
         viewModelScope.launch {
             val allBookings = repository.getAllReservations()
-            hasActiveReservation = allBookings.any { it.vehicle.userId == currentUserId }
+            val nowMillis = System.currentTimeMillis()
+
+            // 🌟 CORRECCIÓN: Solo bloquea si la reserva acaba en el futuro
+            hasActiveReservation = allBookings.any { booking ->
+                booking.vehicle.userId == currentUserId && !isReservationPast(booking, nowMillis)
+            }
         }
+    }
+    private fun isReservationPast(res: Reservation, nowMillis: Long): Boolean {
+        val endCal = Calendar.getInstance().apply {
+            time = res.date
+            set(Calendar.HOUR_OF_DAY, res.endTime.hour)
+            set(Calendar.MINUTE, res.endTime.minute)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+
+            // Si la hora de fin es menor a la de inicio, cruzó la medianoche
+            if (res.endTime.hour < res.startTime.hour) {
+                add(Calendar.DAY_OF_YEAR, 1)
+            }
+        }
+        return endCal.timeInMillis <= nowMillis
     }
 
     fun loadAndFilterVehicles() {
@@ -252,8 +272,13 @@ class BookingViewModel (
 
         val currentUserId = sessionManager.getActiveUserId() ?: return false
         val allBookings = repository.getAllReservations()
+        val nowMillis = System.currentTimeMillis()
 
-        if (allBookings.any { it.vehicle.userId == currentUserId }) return false
+        // 🌟 CORRECCIÓN CRÍTICA: Ignoramos las reservas del usuario que ya pertenecen al pasado
+        val hasRealActive = allBookings.any { booking ->
+            booking.vehicle.userId == currentUserId && !isReservationPast(booking, nowMillis)
+        }
+        if (hasRealActive) return false
 
         val proposedStart = LocalTime.of(startHour, startMinute)
         val proposedEnd = proposedStart.plusHours(duration.toLong())

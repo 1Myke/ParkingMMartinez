@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.lksnext.ParkingMMartinez.data.SessionManager
 import com.lksnext.ParkingMMartinez.data.repository.UserRepository
 import com.lksnext.ParkingMMartinez.data.repository.VehicleRepository
@@ -12,6 +13,7 @@ import com.lksnext.ParkingMMartinez.model.Vehicle
 import com.lksnext.ParkingMMartinez.model.VehicleType
 import com.lksnext.ParkingMMartinez.R
 import com.lksnext.ParkingMMartinez.data.repository.BookingRepository
+import kotlinx.coroutines.launch
 
 class ProfileViewModel(
     private val vehicleRepository: VehicleRepository,
@@ -49,22 +51,37 @@ class ProfileViewModel(
         private set
 
     fun loadUserData() {
-        val userId = sessionManager.getActiveUserId() ?: return
+        val userId = sessionManager.getActiveUserId()
 
-        val userVehicles = vehicleRepository.getVehicles(userId)
-        _vehicles.clear()
-        _vehicles.addAll(userVehicles)
+        if (userId == null) {
+            println("DEBUG: Error, no hay ID de usuario en sesión.")
+            return
+        }
 
+        viewModelScope.launch {
+            try {
+                // 1. Cargar usuario de Firestore a través del repo
+                val user = userRepository.getUserById(userId)
 
-        val user = userRepository.getUserById(userId)
-        user?.let {
-            userName = it.username
-            userEmail = it.email
-            userRole = "LKS Next Member" // MEJORAS: AÑADIR AJUSTES PARA PODER AÑADIR EL ROL ESPECIFICO
+                if (user != null) {
+                    println("DEBUG: Datos recibidos: ${user.name}, ${user.username}")
+                    userName = user.username // O user.name si prefieres el nombre real
+                    userEmail = user.email
+                    userRole = "LKS Next Member"
+                } else {
+                    println("DEBUG: Usuario con ID $userId no encontrado en Firestore.")
+                }
+
+                // 2. Cargar vehículos
+                val userVehicles = vehicleRepository.getVehicles(userId)
+                _vehicles.clear()
+                _vehicles.addAll(userVehicles)
+
+            } catch (e: Exception) {
+                println("DEBUG: Error al cargar datos: ${e.message}")
+            }
         }
     }
-
-
 
     fun onOpenDialog() {
         vehicleAddError = null
@@ -119,26 +136,43 @@ class ProfileViewModel(
             type = selectedVehicleType
         )
 
-        vehicleRepository.addVehicle(userId, newVehicle)
-        _vehicles.add(newVehicle)
-        onCloseDialog()
+        // CORRECCIÓN: Ahora es una función suspend, debe ir en un launch
+        viewModelScope.launch {
+            try {
+                vehicleRepository.addVehicle(userId, newVehicle)
+                _vehicles.add(newVehicle)
+                onCloseDialog()
+            } catch (e: Exception) {
+                vehicleAddError = R.string.error_generic
+            }
+        }
     }
 
     fun confirmDeleteVehicle() {
         val userId = sessionManager.getActiveUserId() ?: return
         val vehicle = vehicleToDelete ?: return
 
-        val hasActiveBookings = bookingRepository.getAllReservations().any { booking ->
-            booking.vehicle.plate == vehicle.plate
-        }
+        viewModelScope.launch {
+            try {
+                // Ahora esto es suspend, así que debe ir dentro de la corrutina
+                val allBookings = bookingRepository.getAllReservations()
+                val hasActiveBookings = allBookings.any { booking ->
+                    booking.vehicle.plate == vehicle.plate
+                }
 
-        if (hasActiveBookings) {
-            vehicleDeleteError = R.string.error_active_booking
-            return
-        }
+                if (hasActiveBookings) {
+                    vehicleDeleteError = R.string.error_active_booking
+                    return@launch
+                }
 
-        vehicleRepository.deleteVehicle(userId, vehicle)
-        _vehicles.remove(vehicle)
-        dismissDeleteDialog()
+                vehicleRepository.deleteVehicle(userId, vehicle)
+                _vehicles.remove(vehicle)
+                dismissDeleteDialog()
+
+            } catch (e: Exception) {
+                vehicleDeleteError = R.string.error_generic
+            }
+        }
     }
+
 }

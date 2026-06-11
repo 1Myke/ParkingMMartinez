@@ -6,6 +6,7 @@ import com.google.gson.Gson
 import com.lksnext.ParkingMMartinez.data.repository.LocalVehicleRepository
 import com.lksnext.ParkingMMartinez.model.Vehicle
 import com.lksnext.ParkingMMartinez.model.VehicleType
+import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
@@ -49,7 +50,7 @@ class LocalVehicleRepositoryTest {
         val jsonList = gson.toJson(listOf(testVehicle))
         `when`(mockPrefs.getString("vehicles_$userId", null)).thenReturn(jsonList)
 
-        val result = repository.getVehicles(userId)
+        val result = runBlocking { repository.getVehicles(userId) }
 
         assertEquals(1, result.size)
         assertEquals("9999CCC", result.first().plate)
@@ -66,7 +67,7 @@ class LocalVehicleRepositoryTest {
             type = VehicleType.STANDARD
         )
 
-        repository.addVehicle(userId, vehicle)
+        runBlocking { repository.addVehicle(userId, vehicle) }
 
         verify(mockEditor).apply()
     }

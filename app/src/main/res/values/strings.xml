@@ -19,6 +19,8 @@
     <string name="booking_next_day_warning">(+1 day)</string>
     <string name="booking_hours_unit">hours</string>
     <string name="booking_today">TODAY</string>
+    <string name="booking_error_overlap">Next booking at %1$s so you can maximum reserve %2$s hours</string>
+
 
     <!-- TEXTO BOOKING_REGISTER_SCREEN EN INGLES -->
     <string name="register_title">My Reservations</string>
@@ -46,6 +48,7 @@
     <string name="error_empty_fields">Fields cannot be empty.</string>
     <string name="error_duplicate_plate">A vehicle with this license plate already exists.</string>
     <string name="error_active_booking">Cannot delete: This vehicle has an active parking reservation.</string>
+    <string name="error_generic">An unexpected error has occurred. Please try again.</string>
 
     <!-- TEXTO LOGIN/REGISTER/RECOVERY EN INGLES -->
     <string name="login_welcome">Welcome Back</string>
@@ -62,6 +65,7 @@
     <string name="reg_label_name">Name</string>
     <string name="reg_label_plate">License Plate</string>
     <string name="reg_vehicle_type">Vehicle Type</string>
+    <string name="reg_vehicle_name">Vehicle Name</string>
     <string name="reg_btn">SIGN UP</string>
 
     <string name="rec_title">Recover your password</string>
@@ -74,6 +78,7 @@
     <string name="err_password_mismatch">Passwords do not match</string>
     <string name="err_invalid_plate">License plate format is invalid (1234ABC)</string>
     <string name="err_user_exists">This username is already taken</string>
+    <string name="err_registration_failed">Registration failed</string>
 
     <!-- TEXTO DE LOS COMPONENTES EN INGLES -->
     <string name="footer_map">Map</string>

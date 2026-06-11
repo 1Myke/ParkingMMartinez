@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -34,6 +35,7 @@ import com.lksnext.ParkingMMartinez.ui.components.LksTextField
 import com.lksnext.ParkingMMartinez.ui.theme.LksOrange
 import com.lksnext.ParkingMMartinez.ui.viewmodel.LoginViewModel
 import com.lksnext.ParkingMMartinez.R
+import com.lksnext.ParkingMMartinez.ui.constants.TestTags
 
 @Composable
 fun LoginScreen(
@@ -64,7 +66,8 @@ fun LoginScreen(
         Text(
             text = stringResource(R.string.login_welcome),
             style = MaterialTheme.typography.headlineLarge,
-            color = LksOrange
+            color = LksOrange,
+            modifier = Modifier.testTag(TestTags.LOGIN_TITLE)
         )
 
         Spacer(modifier = Modifier.height(32.dp))
@@ -77,7 +80,8 @@ fun LoginScreen(
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Email,
                 imeAction = ImeAction.Next
-            )
+            ),
+            modifier = Modifier.testTag(TestTags.LOGIN_EMAIL_FIELD)
         )
 
         LksPasswordField(
@@ -93,7 +97,8 @@ fun LoginScreen(
                 onDone = {
                     focusManager.clearFocus()
                 }
-            )
+            ),
+            modifier = Modifier.testTag(TestTags.LOGIN_PASSWORD_FIELD)
         )
 
         if (errorMessage != null) {
@@ -101,7 +106,9 @@ fun LoginScreen(
                 text = errorMessage,
                 color = Color.Red,
                 style = MaterialTheme.typography.bodySmall,
-                modifier = Modifier.padding(vertical = 8.dp)
+                modifier = Modifier
+                    .padding(vertical = 8.dp)
+                    .testTag(TestTags.LOGIN_ERROR_MSG)
             )
         }
 
@@ -115,7 +122,8 @@ fun LoginScreen(
                 onClick = {
                     focusManager.clearFocus()
                     onNavigateToPasswordRecovery()
-                }
+                },
+                modifier = Modifier.testTag(TestTags.LOGIN_FORGOT_PASSWORD_LINK)
             )
 
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -126,7 +134,8 @@ fun LoginScreen(
                 Checkbox(
                     checked = viewModel.rememberMe,
                     onCheckedChange = { viewModel.onRememberMeChange(it) },
-                    colors = CheckboxDefaults.colors(checkedColor = LksOrange)
+                    colors = CheckboxDefaults.colors(checkedColor = LksOrange),
+                    modifier = Modifier.testTag(TestTags.LOGIN_REMEMBER_ME_CHECKBOX)
                 )
             }
         }
@@ -136,6 +145,7 @@ fun LoginScreen(
         LksButton(
             text = stringResource(R.string.login_btn),
             enabled = !viewModel.isLoading && viewModel.email.isNotEmpty() && viewModel.password.isNotEmpty(),
+            modifier = Modifier.testTag(TestTags.LOGIN_SUBMIT_BTN),
             onClick = {
                 focusManager.clearFocus()
                 viewModel.login { shouldRemember ->
@@ -158,7 +168,8 @@ fun LoginScreen(
                 onClick = {
                     focusManager.clearFocus()
                     onNavigateToRegister()
-                }
+                },
+                modifier = Modifier.testTag(TestTags.LOGIN_REGISTER_LINK)
             )
         }
     }

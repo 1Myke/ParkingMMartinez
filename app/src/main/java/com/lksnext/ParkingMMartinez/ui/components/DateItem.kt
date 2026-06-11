@@ -17,13 +17,13 @@ import androidx.compose.ui.unit.sp
 import com.lksnext.ParkingMMartinez.ui.theme.LksOrange
 
 @Composable
-fun DateItem(day: String, label: String, isSelected: Boolean, onClick: () -> Unit) {
+fun DateItem(day: String, label: String, isSelected: Boolean, modifier: Modifier = Modifier, onClick: () -> Unit) {
     Surface(
         onClick = onClick,
         color = if (isSelected) LksOrange else Color.White,
         shape = RoundedCornerShape(12.dp),
         border = if (isSelected) null else BorderStroke(1.dp, Color.LightGray),
-        modifier = Modifier.size(width = 62.dp, height = 75.dp)
+        modifier = modifier.size(width = 62.dp, height = 75.dp)
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,

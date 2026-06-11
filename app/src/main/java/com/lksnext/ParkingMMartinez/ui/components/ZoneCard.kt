@@ -23,13 +23,14 @@ import com.lksnext.ParkingMMartinez.ui.theme.verdePino
 @Composable
 fun ZoneCard(
     zone: ParkingZone,
+    modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
     val isZoneFull = zone.availableSpots <= 0
 
     OutlinedCard(
         onClick = { if (!isZoneFull) onClick() },
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         border = BorderStroke(1.dp, getBorderColor(isZoneFull, zone.color)),
         colors = CardDefaults.outlinedCardColors(

@@ -15,6 +15,8 @@ import com.lksnext.ParkingMMartinez.ui.components.LksButton
 import com.lksnext.ParkingMMartinez.ui.components.LksTextField
 import com.lksnext.ParkingMMartinez.ui.theme.LksOrange
 import com.lksnext.ParkingMMartinez.ui.viewmodel.RecoveryViewModel
+import androidx.compose.ui.platform.testTag
+import com.lksnext.ParkingMMartinez.ui.constants.TestTags
 
 @Composable
 fun RecoveryScreen(
@@ -38,7 +40,8 @@ fun RecoveryScreen(
             text = stringResource(R.string.rec_title),
             style = MaterialTheme.typography.headlineLarge,
             color = LksOrange,
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
+            modifier = Modifier.testTag(TestTags.RECOVERY_TITLE)
         )
 
         Spacer(modifier = Modifier.height(32.dp))
@@ -46,9 +49,10 @@ fun RecoveryScreen(
         LksTextField(
             value = viewModel.email,
             onValueChange = { viewModel.onEmailChange(it) },
-            label = stringResource(R.string.login_email_label), // Reutilizamos si existe
+            label = stringResource(R.string.login_email_label),
             placeholder = stringResource(R.string.rec_placeholder),
-            isError = viewModel.errorCode != null
+            isError = viewModel.errorCode != null,
+            modifier = Modifier.testTag(TestTags.RECOVERY_EMAIL_FIELD)
         )
 
         if (errorMessage != null){
@@ -56,7 +60,9 @@ fun RecoveryScreen(
                 text = errorMessage,
                 color = Color.Red,
                 style = MaterialTheme.typography.bodySmall,
-                modifier = Modifier.padding(vertical = 8.dp)
+                modifier = Modifier
+                    .padding(vertical = 8.dp)
+                    .testTag(TestTags.RECOVERY_ERROR_MSG)
             )
         }
 
@@ -65,6 +71,7 @@ fun RecoveryScreen(
         LksButton(
             text = stringResource(R.string.rec_btn_continue),
             enabled = viewModel.email.isNotEmpty(),
+            modifier = Modifier.testTag(TestTags.RECOVERY_SUBMIT_BTN),
             onClick = {
                 viewModel.validateAndSend(onSuccess = { onNavigateBack() })
             }

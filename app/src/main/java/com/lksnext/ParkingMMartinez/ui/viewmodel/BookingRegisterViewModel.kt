@@ -9,26 +9,73 @@ import com.lksnext.ParkingMMartinez.data.SessionManager
 import com.lksnext.ParkingMMartinez.data.repository.BookingRepository
 import com.lksnext.ParkingMMartinez.model.Reservation
 import kotlinx.coroutines.launch
+import java.util.Calendar
 
 class BookingRegisterViewModel(
     private val repository: BookingRepository,
     private val sessionManager: SessionManager
 ) : ViewModel() {
 
-    var reservations by mutableStateOf(listOf<Reservation>())
+    var activeReservations by mutableStateOf(listOf<Reservation>())
         private set
 
-    fun loadReservations() {
-        val currentUserId = sessionManager.getActiveUserId()
+    var pastReservations by mutableStateOf(listOf<Reservation>())
+        private set
 
-        if (currentUserId == null) {
-            reservations = emptyList()
-            return
-        }
+    var selectedTab by mutableStateOf(0)
+
+    fun loadReservations() {
+        val currentUserId = sessionManager.getActiveUserId() ?: return
 
         viewModelScope.launch {
-            reservations = repository.getUserReservations(currentUserId)
+            val allReservations = repository.getUserReservations(currentUserId)
+
+            val nowMillis = System.currentTimeMillis()
+
+            // 🌟 REDUCCIÓN DE COMPLEJIDAD RADICAL (Bucle e Ifs eliminados)
+            // .partition divide automáticamente la colección según la condición
+            val (past, active) = allReservations.partition { res ->
+                getReservationEndMillis(res) <= nowMillis
+            }
+
+            // Ordenamos de manera elegante y eficiente
+            activeReservations = active.sortedBy { getReservationStartMillis(it) }
+            pastReservations = past.sortedByDescending { getReservationStartMillis(it) }
         }
+    }
+
+    /**
+     * Devuelve el instante exacto en milisegundos en el que arranca la reserva.
+     * Complejidad Sonar: 1
+     */
+    private fun getReservationStartMillis(res: Reservation): Long {
+        return Calendar.getInstance().apply {
+            time = res.date
+            set(Calendar.HOUR_OF_DAY, res.startTime.hour)
+            set(Calendar.MINUTE, res.startTime.minute)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }.timeInMillis
+    }
+
+    /**
+     * Devuelve el instante exacto en milisegundos en el que termina la reserva.
+     * Gestiona limpiamente las reservas que cruzan la medianoche.
+     * Complejidad Sonar: 2
+     */
+    private fun getReservationEndMillis(res: Reservation): Long {
+        return Calendar.getInstance().apply {
+            time = res.date
+            set(Calendar.HOUR_OF_DAY, res.endTime.hour)
+            set(Calendar.MINUTE, res.endTime.minute)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+
+            // Si la hora de fin es numéricamente menor al inicio, cruzó la medianoche (es el día siguiente)
+            if (res.endTime.hour < res.startTime.hour) {
+                add(Calendar.DAY_OF_YEAR, 1)
+            }
+        }.timeInMillis
     }
 
     fun cancelReservation(reservationId: String) {

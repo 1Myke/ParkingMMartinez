@@ -25,159 +25,183 @@ import com.lksnext.ParkingMMartinez.ui.theme.LksGreen
 import com.lksnext.ParkingMMartinez.ui.theme.cremaSuave
 import com.lksnext.ParkingMMartinez.ui.theme.mistGray
 
+data class ReservationActions(
+    val onCancelClick: () -> Unit,
+    val onCheckInClick: () -> Unit,
+    val onEditClick: () -> Unit
+)
+
+data class ReservationTestTags(
+    val cardModifier: Modifier = Modifier,
+    val cancelBtnModifier: Modifier = Modifier,
+    val editBtnModifier: Modifier = Modifier,
+    val checkInBtnModifier: Modifier = Modifier
+)
+
 @Composable
 fun ReservationCard(
     reservation: Reservation,
-    onCancelClick: () -> Unit,
-    onCheckInClick: () -> Unit,
-    onEditClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    cancelButtonModifier: Modifier = Modifier,
-    editButtonModifier: Modifier = Modifier,
-    checkInButtonModifier: Modifier = Modifier
+    isPast: Boolean,
+    actions: ReservationActions,
+    tags: ReservationTestTags = ReservationTestTags()
 ) {
     Card(
-        modifier = modifier.fillMaxWidth().padding(vertical = 8.dp),
+        modifier = tags.cardModifier.fillMaxWidth().padding(vertical = 8.dp),
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(2.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Surface(
-                    color = LksOrange,
-                    shape = RoundedCornerShape(12.dp),
-                    modifier = Modifier.size(45.dp)
-                ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Text(reservation.spotNumber.toString(), color = Color.White, fontWeight = FontWeight.Bold)
-                    }
-                }
+            ReservationHeader(reservation = reservation, isPast = isPast)
+            ReservationDetails(reservation = reservation)
 
-                Spacer(Modifier.width(12.dp))
-
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(reservation.zone.name, fontWeight = FontWeight.Bold, fontSize = 18.sp)
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Default.Place, null, modifier = Modifier.size(14.dp), tint = Color.Gray)
-                        // Aquí usamos el string del nivel
-                        Text(" ${stringResource(R.string.label_location)}", color = Color.Gray, fontSize = 12.sp)
-                    }
-                }
-
-                Surface(
-                    color = cremaSuave,
-                    shape = RoundedCornerShape(12.dp)
-                ) {
-                    Text(
-                        text = stringResource(R.string.status_active), // "ACTIVE"
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                        color = activeYelow,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 10.sp
-                    )
-                }
+            if (!isPast) {
+                ReservationActionButtons(actions = actions, tags = tags)
             }
+        }
+    }
+}
 
-            Surface(
-                modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp),
-                color = mistGray,
-                shape = RoundedCornerShape(12.dp)
-            ) {
-                Column(modifier = Modifier.padding(12.dp)) {
-                    Row(modifier = Modifier.fillMaxWidth()) {
-                        DetailItem(
-                            label = stringResource(R.string.label_date), // "DATE"
-                            value = java.text.SimpleDateFormat("MMM d, yyyy").format(reservation.date),
-                            modifier = Modifier.weight(1f)
-                        )
-                        DetailItem(
-                            label = stringResource(R.string.label_time), // "TIME"
-                            value = "${reservation.startTime} - ${reservation.endTime}",
-                            modifier = Modifier.weight(1f),
-                            isTime = true
-                        )
-                    }
-                    Spacer(Modifier.height(8.dp))
-                    Text(
-                        text = stringResource(R.string.label_vehicle), // "VEHICLE"
-                        style = MaterialTheme.typography.labelSmall,
-                        color = Color.Gray
-                    )
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Default.DirectionsCar, null, modifier = Modifier.size(16.dp), tint = Color.Gray)
-                        Text(" ${reservation.vehicle.name} (${reservation.vehicle.plate})", fontSize = 14.sp, fontWeight = FontWeight.Medium)
-                    }
-                }
+@Composable
+private fun ReservationHeader(reservation: Reservation, isPast: Boolean) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Surface(
+            color = if (isPast) Color.Gray else LksOrange,
+            shape = RoundedCornerShape(12.dp),
+            modifier = Modifier.size(45.dp)
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                Text(reservation.spotNumber.toString(), color = Color.White, fontWeight = FontWeight.Bold)
             }
+        }
 
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 8.dp), // Un poco de aire extra arriba
-                horizontalArrangement = Arrangement.spacedBy(8.dp), // Reducimos el espacio entre ellos a 8.dp
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // Botón Cancelar
-                OutlinedButton(
-                    onClick = onCancelClick,
-                    modifier = cancelButtonModifier
-                        .weight(0.9f) // Un poco más pequeño
-                        .height(48.dp),
-                    shape = RoundedCornerShape(12.dp),
-                    border = BorderStroke(1.dp, Color.LightGray),
-                    contentPadding = PaddingValues(horizontal = 4.dp) // Evita que el texto interno empuje los bordes
-                ) {
-                    Text(
-                        text = stringResource(R.string.btn_cancel),
-                        color = Color.DarkGray,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 13.sp, // Ajustamos un pelín el tamaño
-                        maxLines = 1
-                    )
-                }
+        Spacer(Modifier.width(12.dp))
 
-                // Botón Editar
-                OutlinedButton(
-                    onClick = onEditClick,
-                    modifier = editButtonModifier
-                        .weight(0.9f) // Igual que el de cancelar
-                        .height(48.dp),
-                    shape = RoundedCornerShape(12.dp),
-                    border = BorderStroke(1.dp, Color.LightGray),
-                    contentPadding = PaddingValues(horizontal = 4.dp)
-                ) {
-                    Text(
-                        text = stringResource(R.string.btn_edit),
-                        color = LksOrange,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 13.sp,
-                        maxLines = 1
-                    )
-                }
-
-                // Botón Check-in (El protagonista)
-                Button(
-                    onClick = onCheckInClick,
-                    modifier = checkInButtonModifier
-                        .weight(1.4f) // Le damos más peso para que el texto quepa bien
-                        .height(48.dp),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = LksGreen),
-                    contentPadding = PaddingValues(horizontal = 8.dp)
-                ) {
-                    Text(
-                        text = stringResource(R.string.btn_check_in),
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 13.sp,
-                        maxLines = 1,
-                        textAlign = TextAlign.Center
-                    )
-                }
+        Column(modifier = Modifier.weight(1f)) {
+            Text(reservation.zone.name, fontWeight = FontWeight.Bold, fontSize = 18.sp)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(Icons.Default.Place, null, modifier = Modifier.size(14.dp), tint = Color.Gray)
+                Text(" ${stringResource(R.string.label_location)}", color = Color.Gray, fontSize = 12.sp)
             }
+        }
+
+        Surface(
+            color = if (isPast) mistGray else cremaSuave,
+            shape = RoundedCornerShape(12.dp)
+        ) {
+            Text(
+                text = if (isPast) "PAST" else stringResource(R.string.status_active),
+                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                color = if (isPast) Color.DarkGray else activeYelow,
+                fontWeight = FontWeight.Bold,
+                fontSize = 10.sp
+            )
+        }
+    }
+}
+
+@Composable
+private fun ReservationDetails(reservation: Reservation) {
+    Surface(
+        modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp),
+        color = mistGray,
+        shape = RoundedCornerShape(12.dp)
+    ) {
+        Column(modifier = Modifier.padding(12.dp)) {
+            Row(modifier = Modifier.fillMaxWidth()) {
+                DetailItem(
+                    label = stringResource(R.string.label_date),
+                    value = java.text.SimpleDateFormat("MMM d, yyyy").format(reservation.date),
+                    modifier = Modifier.weight(1f)
+                )
+                DetailItem(
+                    label = stringResource(R.string.label_time),
+                    value = "${reservation.startTime} - ${reservation.endTime}",
+                    modifier = Modifier.weight(1f),
+                    isTime = true
+                )
+            }
+            Spacer(Modifier.height(8.dp))
+            Text(
+                text = stringResource(R.string.label_vehicle),
+                style = MaterialTheme.typography.labelSmall,
+                color = Color.Gray
+            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(Icons.Default.DirectionsCar, null, modifier = Modifier.size(16.dp), tint = Color.Gray)
+                Text(" ${reservation.vehicle.name} (${reservation.vehicle.plate})", fontSize = 14.sp, fontWeight = FontWeight.Medium)
+            }
+        }
+    }
+}
+
+@Composable
+private fun ReservationActionButtons(actions: ReservationActions, tags: ReservationTestTags) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 8.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        // Botón Cancelar
+        OutlinedButton(
+            onClick = actions.onCancelClick,
+            modifier = tags.cancelBtnModifier
+                .weight(0.9f)
+                .height(48.dp),
+            shape = RoundedCornerShape(12.dp),
+            border = BorderStroke(1.dp, Color.LightGray),
+            contentPadding = PaddingValues(horizontal = 4.dp)
+        ) {
+            Text(
+                text = stringResource(R.string.btn_cancel),
+                color = Color.DarkGray,
+                fontWeight = FontWeight.Bold,
+                fontSize = 13.sp,
+                maxLines = 1
+            )
+        }
+
+        // Botón Editar
+        OutlinedButton(
+            onClick = actions.onEditClick,
+            modifier = tags.editBtnModifier
+                .weight(0.9f)
+                .height(48.dp),
+            shape = RoundedCornerShape(12.dp),
+            border = BorderStroke(1.dp, Color.LightGray),
+            contentPadding = PaddingValues(horizontal = 4.dp)
+        ) {
+            Text(
+                text = stringResource(R.string.btn_edit),
+                color = LksOrange,
+                fontWeight = FontWeight.Bold,
+                fontSize = 13.sp,
+                maxLines = 1
+            )
+        }
+
+        // Botón Check-in
+        Button(
+            onClick = actions.onCheckInClick,
+            modifier = tags.checkInBtnModifier
+                .weight(1.4f)
+                .height(48.dp),
+            shape = RoundedCornerShape(12.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = LksGreen),
+            contentPadding = PaddingValues(horizontal = 8.dp)
+        ) {
+            Text(
+                text = stringResource(R.string.btn_check_in),
+                fontWeight = FontWeight.Bold,
+                fontSize = 13.sp,
+                maxLines = 1,
+                textAlign = TextAlign.Center
+            )
         }
     }
 }
@@ -187,7 +211,7 @@ fun DetailItem(label: String, value: String, modifier: Modifier, isTime: Boolean
     Column(modifier = modifier) {
         Text(label, style = MaterialTheme.typography.labelSmall, color = Color.Gray)
         Row(verticalAlignment = Alignment.CenterVertically) {
-            if (isTime) Icon(androidx.compose.material.icons.Icons.Default.AccessTime, null, modifier = Modifier.size(14.dp), tint = LksOrange)
+            if (isTime) Icon(Icons.Default.AccessTime, null, modifier = Modifier.size(14.dp), tint = LksOrange)
             Text(value, fontWeight = FontWeight.Bold, fontSize = 14.sp, modifier = Modifier.padding(start = if(isTime) 4.dp else 0.dp))
         }
     }

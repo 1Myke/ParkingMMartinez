@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
+import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -14,10 +15,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.lksnext.ParkingMMartinez.ui.components.ReservationCard
+import com.lksnext.ParkingMMartinez.ui.components.ReservationActions
+import com.lksnext.ParkingMMartinez.ui.components.ReservationTestTags
 import com.lksnext.ParkingMMartinez.ui.viewmodel.BookingRegisterViewModel
 import com.lksnext.ParkingMMartinez.ui.viewmodel.BookingViewModel
 import com.lksnext.ParkingMMartinez.R
 import com.lksnext.ParkingMMartinez.ui.constants.TestTags
+import com.lksnext.ParkingMMartinez.ui.theme.LksOrange
 
 @Composable
 fun BookingRegisterScreen(
@@ -29,6 +33,10 @@ fun BookingRegisterScreen(
         viewModel.loadReservations()
     }
 
+    val currentTab = viewModel.selectedTab
+    val currentReservations = if (currentTab == 0) viewModel.activeReservations else viewModel.pastReservations
+    val isPastTab = currentTab == 1
+
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
         Text(
             text = stringResource(R.string.register_title),
@@ -37,31 +45,71 @@ fun BookingRegisterScreen(
             modifier = Modifier.testTag(TestTags.BOOKING_REGISTER_TITLE)
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
-        if (viewModel.reservations.isEmpty()) {
+        // Selector de Pestañas
+        TabRow(
+            selectedTabIndex = currentTab,
+            containerColor = Color.Transparent,
+            contentColor = LksOrange,
+            indicator = { tabPositions ->
+                TabRowDefaults.SecondaryIndicator(
+                    Modifier.tabIndicatorOffset(tabPositions[currentTab]),
+                    color = LksOrange
+                )
+            },
+            modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp).testTag("BOOKING_TAB_ROW")
+        ) {
+            Tab(
+                selected = currentTab == 0,
+                onClick = { viewModel.selectedTab = 0 },
+                text = { Text("Activas (${viewModel.activeReservations.size})", fontWeight = FontWeight.Bold) },
+                selectedContentColor = LksOrange,
+                unselectedContentColor = Color.Gray,
+                modifier = Modifier.testTag("BOOKING_TAB_ACTIVE")
+            )
+            Tab(
+                selected = currentTab == 1,
+                onClick = { viewModel.selectedTab = 1 },
+                text = { Text("Historial (${viewModel.pastReservations.size})", fontWeight = FontWeight.Bold) },
+                selectedContentColor = LksOrange,
+                unselectedContentColor = Color.Gray,
+                modifier = Modifier.testTag("BOOKING_TAB_PAST")
+            )
+        }
+
+        // Listas de Reservas
+        if (currentReservations.isEmpty()) {
             Box(
                 modifier = Modifier.fillMaxSize().testTag(TestTags.BOOKING_REGISTER_EMPTY),
                 contentAlignment = Alignment.Center
             ) {
-                Text(stringResource(R.string.register_empty), color = Color.Gray)
+                Text(
+                    text = if (isPastTab) "No tienes reservas en tu historial" else stringResource(R.string.register_empty),
+                    color = Color.Gray
+                )
             }
         } else {
             LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                items(viewModel.reservations) { reservation ->
+                items(currentReservations) { reservation ->
+                    // 🌟 LLAMADA REFACTORIZADA SIMPLIFICADA (Sonar 100% OK)
                     ReservationCard(
                         reservation = reservation,
-                        onCancelClick = { viewModel.cancelReservation(reservation.id) },
-                        onCheckInClick = { viewModel.doCheckIn(reservation.id) },
-                        onEditClick = {
-                            bookingViewModel.loadReservationForEditing(reservation)
-                            onNavigateToEdit(reservation.zone.name)
-                        },
-
-                        modifier = Modifier.testTag("${TestTags.RESERVATION_CARD_PREFIX}${reservation.id}"),
-                        cancelButtonModifier = Modifier.testTag("${TestTags.RESERVATION_BTN_CANCEL_PREFIX}${reservation.id}"),
-                        editButtonModifier = Modifier.testTag("${TestTags.RESERVATION_BTN_EDIT_PREFIX}${reservation.id}"),
-                        checkInButtonModifier = Modifier.testTag("${TestTags.RESERVATION_BTN_CHECKIN_PREFIX}${reservation.id}")
+                        isPast = isPastTab,
+                        actions = ReservationActions(
+                            onCancelClick = { viewModel.cancelReservation(reservation.id) },
+                            onCheckInClick = { viewModel.doCheckIn(reservation.id) },
+                            onEditClick = {
+                                bookingViewModel.loadReservationForEditing(reservation)
+                                onNavigateToEdit(reservation.zone.name)
+                            }
+                        ),
+                        tags = ReservationTestTags(
+                            cardModifier = Modifier.testTag("${TestTags.RESERVATION_CARD_PREFIX}${reservation.id}"),
+                            cancelBtnModifier = Modifier.testTag("${TestTags.RESERVATION_BTN_CANCEL_PREFIX}${reservation.id}"),
+                            editBtnModifier = Modifier.testTag("${TestTags.RESERVATION_BTN_EDIT_PREFIX}${reservation.id}"),
+                            checkInBtnModifier = Modifier.testTag("${TestTags.RESERVATION_BTN_CHECKIN_PREFIX}${reservation.id}")
+                        )
                     )
                 }
             }

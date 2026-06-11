@@ -6,7 +6,7 @@ import com.lksnext.ParkingMMartinez.model.Vehicle
 
 class LocalVehicleRepository(context: Context) : VehicleRepository {
     private val manager = VehicleManager(context)
-    override fun getVehicles(userId: String) = manager.getVehicles(userId)
-    override fun addVehicle(userId: String, vehicle: Vehicle) = manager.addVehicle(userId, vehicle)
-    override fun deleteVehicle(userId: String, vehicle: Vehicle) = manager.deleteVehicle(userId, vehicle)
+    override suspend fun getVehicles(userId: String) = manager.getVehicles(userId)
+    override suspend fun addVehicle(userId: String, vehicle: Vehicle) = manager.addVehicle(userId, vehicle)
+    override suspend fun deleteVehicle(userId: String, vehicle: Vehicle) = manager.deleteVehicle(userId, vehicle)
 }

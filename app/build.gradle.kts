@@ -7,8 +7,8 @@ plugins {
     jacoco
 }
 
-val appVersionCode = 1
-val appVersionName = "v1.0.1"
+val appVersionCode = 3
+val appVersionName = "v1.1.0"
 val targetSdkVersion = 36
 
 // Versiones de paquetes
@@ -17,6 +17,7 @@ val navigationVersion = "2.8.0"
 val gsonVersion = "2.11.0"
 val mockitoVersion = "5.11.0"
 val archVersion = "2.2.0"
+val coroutinesVersion = "1.7.3"
 
 android {
     namespace = "com.lksnext.ParkingMMartinez"
@@ -80,8 +81,11 @@ dependencies {
     implementation(libs.firebase.analytics)
     implementation(libs.firebase.crashlytics)
     implementation(libs.firebase.auth)
+    implementation("com.google.firebase:firebase-firestore")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:$coroutinesVersion")
     testImplementation("org.mockito:mockito-core:$mockitoVersion")
     testImplementation("androidx.arch.core:core-testing:$archVersion")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutinesVersion")
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

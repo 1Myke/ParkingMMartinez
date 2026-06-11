@@ -5,6 +5,7 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -14,9 +15,11 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.lksnext.ParkingMMartinez.ui.navigation.Screen
 import com.lksnext.ParkingMMartinez.ui.theme.LksOrange
 import com.lksnext.ParkingMMartinez.R
+import androidx.compose.ui.platform.testTag
+import com.lksnext.ParkingMMartinez.ui.constants.TestTags
 
 @Composable
-fun LksFooter(navController: NavController) {
+fun LksFooter(navController: NavController, modifier: Modifier = Modifier) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
@@ -29,7 +32,8 @@ fun LksFooter(navController: NavController) {
 
     NavigationBar(
         containerColor = Color.White,
-        tonalElevation = 8.dp
+        tonalElevation = 8.dp,
+        modifier = modifier
     ) {
         items.forEach { (route, icon, label) ->
             val isSelected = isTabSelected(route, currentRoute)
@@ -43,6 +47,7 @@ fun LksFooter(navController: NavController) {
                 },
                 label = { Text(label) },
                 icon = { Icon(icon, contentDescription = label) },
+                modifier = Modifier.testTag("${TestTags.FOOTER_TAB_PREFIX}$route"),
                 colors = NavigationBarItemDefaults.colors(
                     selectedIconColor = LksOrange,
                     selectedTextColor = LksOrange,

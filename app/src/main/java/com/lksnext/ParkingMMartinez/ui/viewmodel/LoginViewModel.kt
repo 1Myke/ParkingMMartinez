@@ -4,9 +4,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
 import com.lksnext.ParkingMMartinez.data.SessionManager
 import com.lksnext.ParkingMMartinez.data.repository.UserRepository
+import kotlinx.coroutines.launch
 
 class LoginViewModel(
     private val userRepository: UserRepository,
@@ -24,15 +26,18 @@ class LoginViewModel(
 
     fun login(onSuccess: (Boolean) -> Unit) {
         isLoading = true
-        val user = userRepository.authenticate(email, password)
 
-        if (user != null) {
-            sessionManager.saveSession(rememberMe, user.id)
-            onSuccess(rememberMe)
-        } else {
-            errorCode = "error_invalid_credentials"
+        viewModelScope.launch {
+            val user = userRepository.authenticate(email, password)
+
+            if (user != null) {
+                sessionManager.saveSession(rememberMe, user.id)
+                onSuccess(rememberMe)
+            } else {
+                errorCode = "error_invalid_credentials"
+            }
+            isLoading = false
         }
-        isLoading = false
     }
 
     fun resetLoginFields() {

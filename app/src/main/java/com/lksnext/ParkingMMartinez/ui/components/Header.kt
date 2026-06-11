@@ -11,9 +11,9 @@ import androidx.compose.ui.unit.dp
 import com.lksnext.ParkingMMartinez.ui.theme.LksOrange
 
 @Composable
-fun LksHeader(title: String, subtitle: String){
+fun LksHeader(title: String, subtitle: String, modifier: Modifier = Modifier){
     Surface(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         color = LksOrange
     ) {
         Column(

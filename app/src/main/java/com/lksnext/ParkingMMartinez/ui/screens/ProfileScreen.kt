@@ -57,6 +57,8 @@ import com.lksnext.ParkingMMartinez.ui.viewmodel.ProfileViewModel
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.ui.platform.testTag
+import com.lksnext.ParkingMMartinez.ui.constants.TestTags
 
 @Composable
 fun ProfileScreen(
@@ -76,7 +78,8 @@ fun ProfileScreen(
                 onClick = { viewModel.onOpenDialog() },
                 containerColor = LksOrange,
                 contentColor = Color.White,
-                shape = RoundedCornerShape(12.dp)
+                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier.testTag(TestTags.PROFILE_FAB_ADD_VEHICLE)
             ) {
                 Icon(Icons.Default.Add, contentDescription = "Add")
             }
@@ -101,7 +104,10 @@ fun ProfileScreen(
                     .padding(horizontal = 8.dp, vertical = 8.dp),
                 horizontalArrangement = Arrangement.End
             ) {
-                IconButton(onClick = onLogoutClick) {
+                IconButton(
+                    onClick = onLogoutClick,
+                    modifier = Modifier.testTag(TestTags.PROFILE_LOGOUT_BTN)
+                ) {
                     Icon(
                         Icons.AutoMirrored.Default.Logout,
                         null,
@@ -139,7 +145,6 @@ fun ProfileScreen(
                 )
             }
 
-            // LISTA DE VEHÍCULOS
             Column(
                 modifier = Modifier.padding(24.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -153,7 +158,8 @@ fun ProfileScreen(
                         type = vehicle.type,
                         onDeleteClick = if (canDelete) {
                             { viewModel.askDeleteVehicle(vehicle) }
-                        } else null
+                        } else null,
+                        modifier = Modifier.testTag("${TestTags.PROFILE_VEHICLE_CARD_PREFIX}${vehicle.plate}")
                     )
                 }
             }
@@ -178,7 +184,8 @@ fun AddVehicleDialog(viewModel: ProfileViewModel) {
         Card(
             modifier = Modifier
                 .fillMaxWidth(0.95f)
-                .padding(16.dp),
+                .padding(16.dp)
+                .testTag(TestTags.PROFILE_ADD_DIALOG),
             shape = RoundedCornerShape(24.dp),
             colors = CardDefaults.cardColors(containerColor = Color.White)
         ) {
@@ -205,7 +212,8 @@ fun AddVehicleDialog(viewModel: ProfileViewModel) {
                     value = viewModel.newVehicleName,
                     onValueChange = { viewModel.newVehicleName = it },
                     label = stringResource(R.string.profile_hint_nickname),
-                    placeholder = stringResource(R.string.profile_placeholder_nickname)
+                    placeholder = stringResource(R.string.profile_placeholder_nickname),
+                    modifier = Modifier.testTag(TestTags.PROFILE_ADD_NAME_FIELD)
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -220,7 +228,8 @@ fun AddVehicleDialog(viewModel: ProfileViewModel) {
                     onValueChange = { viewModel.newVehiclePlate = it.uppercase() },
                     label = stringResource(R.string.profile_hint_plate),
                     placeholder = stringResource(R.string.profile_placeholder_plate),
-                    isError = viewModel.vehicleAddError != null
+                    isError = viewModel.vehicleAddError != null,
+                    modifier = Modifier.testTag(TestTags.PROFILE_ADD_PLATE_FIELD)
                 )
 
                 Spacer(modifier = Modifier.height(24.dp))
@@ -249,7 +258,8 @@ fun AddVehicleDialog(viewModel: ProfileViewModel) {
                             colors = FilterChipDefaults.filterChipColors(
                                 selectedContainerColor = LksOrange.copy(alpha = 0.2f),
                                 selectedLabelColor = LksOrange
-                            )
+                            ),
+                            modifier = Modifier.testTag("${TestTags.PROFILE_ADD_CHIP_PREFIX}${type.name}")
                         )
                     }
                 }
@@ -259,7 +269,9 @@ fun AddVehicleDialog(viewModel: ProfileViewModel) {
                         text = stringResource(id = resId),
                         color = Color.Red,
                         style = MaterialTheme.typography.bodySmall,
-                        modifier = Modifier.padding(bottom = 16.dp)
+                        modifier = Modifier
+                            .padding(bottom = 16.dp)
+                            .testTag(TestTags.PROFILE_ADD_ERROR_MSG)
                     )
                 }
 
@@ -269,7 +281,9 @@ fun AddVehicleDialog(viewModel: ProfileViewModel) {
                 ) {
                     OutlinedButton(
                         onClick = { viewModel.onCloseDialog() },
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier
+                            .weight(1f)
+                            .testTag(TestTags.PROFILE_ADD_CANCEL_BTN),
                         shape = RoundedCornerShape(12.dp)
                     ) {
                         Text(stringResource(R.string.btn_cancel))
@@ -278,7 +292,9 @@ fun AddVehicleDialog(viewModel: ProfileViewModel) {
                     LksButton(
                         text = stringResource(R.string.profile_btn_save),
                         onClick = { viewModel.addVehicle() },
-                        modifier = Modifier.weight(1.3f)
+                        modifier = Modifier
+                            .weight(1.3f)
+                            .testTag(TestTags.PROFILE_ADD_SAVE_BTN)
                     )
                 }
             }
@@ -306,13 +322,17 @@ fun DeleteConfirmationDialog(viewModel: ProfileViewModel) {
                         text = stringResource(id = resId),
                         color = Color.Red,
                         style = MaterialTheme.typography.bodySmall,
-                        fontWeight = FontWeight.Medium
+                        fontWeight = FontWeight.Medium,
+                        modifier = Modifier.testTag(TestTags.PROFILE_DELETE_ERROR_MSG)
                     )
                 }
             }
         },
         confirmButton = {
-            TextButton(onClick = { viewModel.confirmDeleteVehicle() }) {
+            TextButton(
+                onClick = { viewModel.confirmDeleteVehicle() },
+                modifier = Modifier.testTag(TestTags.PROFILE_DELETE_CONFIRM_BTN)
+            ) {
                 Text(
                     text = stringResource(R.string.btn_delete),
                     color = Color.Red,
@@ -321,11 +341,15 @@ fun DeleteConfirmationDialog(viewModel: ProfileViewModel) {
             }
         },
         dismissButton = {
-            TextButton(onClick = { viewModel.dismissDeleteDialog() }) {
+            TextButton(
+                onClick = { viewModel.dismissDeleteDialog() },
+                modifier = Modifier.testTag(TestTags.PROFILE_DELETE_CANCEL_BTN)
+            ) {
                 Text(text = stringResource(R.string.btn_cancel), color = Color.Gray)
             }
         },
         shape = RoundedCornerShape(16.dp),
-        containerColor = Color.White
+        containerColor = Color.White,
+        modifier = Modifier.testTag(TestTags.PROFILE_DELETE_DIALOG)
     )
 }

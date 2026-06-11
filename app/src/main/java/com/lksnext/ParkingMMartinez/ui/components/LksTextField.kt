@@ -22,6 +22,7 @@ fun LksTextField(
     value: String,
     onValueChange: (String) -> Unit,
     label: String,
+    modifier: Modifier = Modifier,
     placeholder: String = "",
     isError: Boolean = false,
     leadingIcon: ImageVector? = null,
@@ -37,7 +38,7 @@ fun LksTextField(
         leadingIcon = leadingIcon?.let {
             { Icon(imageVector = it, contentDescription = null)}
         },
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp),
         shape = RoundedCornerShape(12.dp),

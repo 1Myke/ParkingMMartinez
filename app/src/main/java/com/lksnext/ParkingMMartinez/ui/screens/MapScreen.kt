@@ -11,9 +11,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -28,6 +30,9 @@ import com.lksnext.ParkingMMartinez.ui.theme.mistGray
 import com.lksnext.ParkingMMartinez.ui.viewmodel.MapViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import com.lksnext.ParkingMMartinez.ui.viewmodel.BookingViewModel
+import com.lksnext.ParkingMMartinez.ui.constants.TestTags
+import kotlinx.coroutines.launch
+import java.util.Calendar
 
 @Composable
 fun MapScreen(
@@ -37,10 +42,15 @@ fun MapScreen(
 ) {
     val todayStr = stringResource(R.string.booking_today)
 
+    val scope = rememberCoroutineScope()
+
     LifecycleResumeEffect(Unit) {
         bookingViewModel.cancelEditing()
         bookingViewModel.checkUserReservationStatus()
-        viewModel.refreshParkingStatus()
+
+        scope.launch {
+            viewModel.refreshParking()
+        }
 
         onPauseOrDispose {
             // Limpieza si fuera necesario
@@ -53,7 +63,10 @@ fun MapScreen(
                 viewModel.onTimeChange(h, m)
                 viewModel.showTimePicker = false
             },
-            onDismiss = { viewModel.showTimePicker = false }
+            onDismiss = { viewModel.showTimePicker = false },
+            modifier = Modifier.testTag(TestTags.TIME_PICKER_DIALOG),
+            confirmButtonModifier = Modifier.testTag(TestTags.TIME_PICKER_CONFIRM),
+            dismissButtonModifier = Modifier.testTag(TestTags.TIME_PICKER_CANCEL)
         )
     }
 
@@ -64,7 +77,8 @@ fun MapScreen(
     ) {
         LksHeader(
             title = stringResource(R.string.map_header_title),
-            subtitle = stringResource(R.string.map_header_subtitle)
+            subtitle = stringResource(R.string.map_header_subtitle),
+            modifier = Modifier.testTag(TestTags.MAP_HEADER)
         )
 
         Column(
@@ -83,13 +97,18 @@ fun MapScreen(
                     .horizontalScroll(rememberScrollState()),
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                viewModel.availableDates.forEach { (day, label) ->
+                viewModel.availableDates.forEach { (fullDate, label) ->
                     val displayLabel = if (label == "TODAY") todayStr else label
+
+                    val cal = Calendar.getInstance().apply { time = fullDate }
+                    val dayNumStr = cal.get(Calendar.DAY_OF_MONTH).toString()
+
                     DateItem(
-                        day = day.toString(),
+                        day = dayNumStr,
                         label = displayLabel,
-                        isSelected = viewModel.selectedDayNumber == day,
-                        onClick = { viewModel.onDateSelected(day) }
+                        isSelected = viewModel.selectedDate == fullDate,
+                        modifier = Modifier.testTag("${TestTags.MAP_DATE_ITEM_PREFIX}$dayNumStr"),
+                        onClick = { viewModel.onDateSelected(fullDate) }
                     )
                 }
             }
@@ -112,7 +131,8 @@ fun MapScreen(
                         onClick = { viewModel.showTimePicker = true },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(top = 8.dp),
+                            .padding(top = 8.dp)
+                            .testTag(TestTags.MAP_TIME_PICKER_TRIGGER),
                         shape = RoundedCornerShape(12.dp),
                         colors = CardDefaults.outlinedCardColors(containerColor = bookingCardColor),
                         border = BorderStroke(1.dp, lightGray)
@@ -134,17 +154,20 @@ fun MapScreen(
 
             // --- ZONAS DE APARCAMIENTO ---
             Column(
-                modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 viewModel.zones.forEach { zone ->
-                    // 🎯 CALCULAMOS SI ESTÁ LLENO AQUÍ TAMBIÉN
                     val isZoneFull = zone.availableSpots <= 0
 
                     ZoneCard(
                         zone = zone,
+                        modifier = Modifier.testTag("${TestTags.MAP_ZONE_CARD_PREFIX}${zone.name}"),
                         onClick = {
                             if (!isZoneFull) {
+                                bookingViewModel.onDateSelected(viewModel.selectedDate)
                                 onZoneClick(zone.name)
                             }
                         }

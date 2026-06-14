@@ -16,6 +16,8 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mockito.*
+import java.time.LocalTime
+import java.util.Date
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class BookingRegisterViewModelTest {
@@ -57,14 +59,22 @@ class BookingRegisterViewModelTest {
         testDispatcher.scheduler.advanceUntilIdle() // Asegura que la corrutina interna termine
 
         // Assert
-        assertTrue(viewModel.reservations.isEmpty())
+        // 🌟 CORREGIDO: Verificamos que ambas listas reales de tu ViewModel queden vacías
+        assertTrue(viewModel.activeReservations.isEmpty())
+        assertTrue(viewModel.pastReservations.isEmpty())
         verifyNoInteractions(mockRepository)
     }
 
     @Test
     fun loadReservations_whenUserLogged_populatesState() = runTest {
         // Arrange
-        val fakeList = listOf(mock(Reservation::class.java))
+        val mockReservation = mock(Reservation::class.java)
+        // Simulamos tiempos en el futuro para que la partición lo clasifique en activas
+        `when`(mockReservation.date).thenReturn(Date())
+        `when`(mockReservation.startTime).thenReturn(LocalTime.now().plusHours(1))
+        `when`(mockReservation.endTime).thenReturn(LocalTime.now().plusHours(2))
+
+        val fakeList = listOf(mockReservation)
 
         // SOLUCCIÓN NATIVA: doAnswer intercepta las funciones suspend de manera segura en Mockito puro
         doAnswer { fakeList }.`when`(mockRepository).getUserReservations(userId)
@@ -74,7 +84,8 @@ class BookingRegisterViewModelTest {
         testDispatcher.scheduler.advanceUntilIdle() // Forzamos la ejecución de la corrutina
 
         // Assert
-        assertEquals(1, viewModel.reservations.size)
+        // 🌟 CORREGIDO: Comprobamos el tamaño de activeReservations ya que se calcula en el futuro
+        assertEquals(1, viewModel.activeReservations.size)
         verify(mockRepository).getUserReservations(userId)
     }
 
@@ -92,6 +103,9 @@ class BookingRegisterViewModelTest {
         verify(mockRepository).cancelReservation(resId)
         // También verifica que se volvió a pedir la lista actualizada
         verify(mockRepository).getUserReservations(userId)
-        assertTrue(viewModel.reservations.isEmpty())
+
+        // 🌟 CORREGIDO: Verificamos el estado de tus listas reales tras la cancelación
+        assertTrue(viewModel.activeReservations.isEmpty())
+        assertTrue(viewModel.pastReservations.isEmpty())
     }
 }

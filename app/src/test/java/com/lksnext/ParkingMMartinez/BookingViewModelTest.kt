@@ -1,10 +1,11 @@
 package com.lksnext.parkingmmartinez
 
+import android.content.Context
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.compose.ui.graphics.Color
 import com.lksnext.ParkingMMartinez.data.SessionManager
 import com.lksnext.ParkingMMartinez.data.repository.BookingRepository
-import com.lksnext.ParkingMMartinez.data.repository.VehicleRepository // Asegúrate de que el import sea correcto
+import com.lksnext.ParkingMMartinez.data.repository.VehicleRepository
 import com.lksnext.ParkingMMartinez.model.ParkingZone
 import com.lksnext.ParkingMMartinez.model.Reservation
 import com.lksnext.ParkingMMartinez.model.Vehicle
@@ -33,8 +34,9 @@ class BookingViewModelTest {
     val instantTaskExecutorRule = InstantTaskExecutorRule()
 
     private lateinit var mockRepository: BookingRepository
-    private lateinit var mockVehicleRepository: VehicleRepository // CORRECCIÓN: Añadido repositorio faltante
+    private lateinit var mockVehicleRepository: VehicleRepository
     private lateinit var mockSessionManager: SessionManager
+    private lateinit var mockContext: Context
     private lateinit var viewModel: BookingViewModel
 
     private val testDispatcher = StandardTestDispatcher()
@@ -49,26 +51,50 @@ class BookingViewModelTest {
     )
     private val fakeZone = ParkingZone(ZoneNames.STANDARD, 24, 24, 0, Color(0xFF455A64))
 
+    private var mockedPendingIntent: org.mockito.MockedStatic<android.app.PendingIntent>? = null
+
     @Before
-    fun setUp() = runTest { // CORRECCIÓN: runTest aquí permite inicializar stubs asíncronos de forma segura
+    fun setUp() = runTest {
         Dispatchers.setMain(testDispatcher)
 
         mockRepository = mock(BookingRepository::class.java)
-        mockVehicleRepository = mock(VehicleRepository::class.java) // Inicializamos el mock
+        mockVehicleRepository = mock(VehicleRepository::class.java)
         mockSessionManager = mock(SessionManager::class.java)
+        mockContext = mock(Context::class.java)
+
+        // Mock del servicio de alarmas
+        val mockAlarmManager = mock(android.app.AlarmManager::class.java)
+        `when`(mockContext.getSystemService(Context.ALARM_SERVICE)).thenReturn(mockAlarmManager)
+
+        // 🌟 CORREGIDO CI/CD: Mockeamos estáticamente PendingIntent para evitar el error "not mocked"
+        mockedPendingIntent = org.mockito.Mockito.mockStatic(android.app.PendingIntent::class.java)
+        val mockPendingIntent = mock(android.app.PendingIntent::class.java)
+
+        // Indicamos que cualquier llamada a getBroadcast devuelva nuestro objeto simulado seguro
+        mockedPendingIntent?.`when`<android.app.PendingIntent> {
+            android.app.PendingIntent.getBroadcast(
+                any(android.content.Context::class.java),
+                anyInt(),
+                any(android.content.Intent::class.java),
+                anyInt()
+            )
+        }?.thenReturn(mockPendingIntent)
 
         `when`(mockSessionManager.getActiveUserId()).thenReturn(userId)
 
-        // CORRECCIÓN: Estructura nativa segura para la función suspendida
+        // Configuraciones auxiliares de strings
+        `when`(mockContext.getString(anyInt())).thenReturn("Mocked String")
+        `when`(mockContext.getString(anyInt(), any(), any())).thenReturn("Mocked Body String")
+
         doAnswer { emptyList<Reservation>() }.`when`(mockRepository).getAllReservations()
 
-        // CORRECCIÓN: Pasamos los 3 parámetros en el orden exacto que espera tu ViewModel real
         viewModel = BookingViewModel(mockRepository, mockVehicleRepository, mockSessionManager)
     }
 
     @After
     fun tearDown() {
         Dispatchers.resetMain()
+        mockedPendingIntent?.close()
     }
 
     // ==========================================
@@ -232,7 +258,7 @@ class BookingViewModelTest {
         viewModel.onTimeChange(10, 0)
         viewModel.onDurationChange(3.0f)
 
-        viewModel.confirmReservation(fakeVehicle, fakeZone) {
+        viewModel.confirmReservation(mockContext, fakeVehicle, fakeZone) {
             onCompleteCalled = true
         }
         testDispatcher.scheduler.advanceUntilIdle()
@@ -250,7 +276,7 @@ class BookingViewModelTest {
         )
         viewModel.loadReservationForEditing(oldReservation)
 
-        viewModel.confirmReservation(fakeVehicle, fakeZone) {}
+        viewModel.confirmReservation(mockContext, fakeVehicle, fakeZone) {}
         testDispatcher.scheduler.advanceUntilIdle()
 
         verify(mockRepository).cancelReservation("old_res_id")

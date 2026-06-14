@@ -1,24 +1,35 @@
 package com.lksnext.ParkingMMartinez.ui.viewmodel
 
+import android.app.AlarmManager
+import android.app.PendingIntent
+import android.content.Context
+import android.content.Intent
+import android.os.Build
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.lksnext.ParkingMMartinez.R
 import com.lksnext.ParkingMMartinez.data.ParkingManager
 import com.lksnext.ParkingMMartinez.data.SessionManager
+import com.lksnext.ParkingMMartinez.data.receiver.BookingAlarmReceiver
 import com.lksnext.ParkingMMartinez.data.repository.BookingRepository
 import com.lksnext.ParkingMMartinez.data.repository.VehicleRepository
 import com.lksnext.ParkingMMartinez.model.ParkingZone
 import com.lksnext.ParkingMMartinez.model.Reservation
 import com.lksnext.ParkingMMartinez.model.Vehicle
-import com.lksnext.ParkingMMartinez.model.ZoneNames
 import com.lksnext.ParkingMMartinez.model.VehicleType
+import com.lksnext.ParkingMMartinez.model.ZoneNames
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.time.LocalTime
-import java.util.*
+import java.util.Calendar
+import java.util.Date
+import java.util.Locale
+import java.util.UUID
 
+private const val TIME_FORMAT = "%02d:%02d"
 class BookingViewModel (
     private val repository: BookingRepository,
     private val vehicleRepository: VehicleRepository,
@@ -34,7 +45,8 @@ class BookingViewModel (
         private set
     var showTimePicker by mutableStateOf(false)
         private set
-    var parkingZone by mutableStateOf("Standard Zone")
+
+    var parkingZone by mutableStateOf(ZoneNames.STANDARD)
         private set
     var hasActiveReservation by mutableStateOf(false)
         private set
@@ -58,7 +70,6 @@ class BookingViewModel (
     var isButtonEnabled by mutableStateOf(false)
         private set
 
-    // Logica para los proximos 7 dias
     val availableDates: List<Pair<Int, String>> by lazy {
         val calendar = Calendar.getInstance()
         (0..7).map { offset ->
@@ -77,8 +88,6 @@ class BookingViewModel (
     }
 
     fun onDurationChange(newDuration: Float) {
-        // duration = if (newDuration > 9f) 9f else newDuration
-        // Para forzar que nunca pase de 8.0f aunque el slider se mueva raro (Por si acaso)
         duration = newDuration.coerceIn(1.0f, 8.0f)
     }
 
@@ -86,20 +95,16 @@ class BookingViewModel (
         selectedDate = date
     }
 
-    // Cálculos derivados (Lo que dice el PDF sobre reactividad)
     fun getEndTime(): String {
-        // Usamos Calendar para que él haga el trabajo sucio de las horas y minutos
         val calendar = Calendar.getInstance()
         calendar.set(Calendar.HOUR_OF_DAY, startHour)
         calendar.set(Calendar.MINUTE, startMinute)
-
-        // Sumamos la duración (en horas)
         calendar.add(Calendar.HOUR_OF_DAY, duration.toInt())
 
         val endHour = calendar.get(Calendar.HOUR_OF_DAY)
         val endMinute = calendar.get(Calendar.MINUTE)
 
-        return String.format("%02d:%02d", endHour, endMinute)
+        return String.format(Locale.getDefault(), TIME_FORMAT, endHour, endMinute)
     }
 
     fun isNextDay(): Boolean {
@@ -115,6 +120,7 @@ class BookingViewModel (
     }
 
     fun confirmReservation(
+        context: Context,
         vehicle: Vehicle,
         zone: ParkingZone,
         onComplete: () -> Unit
@@ -133,10 +139,8 @@ class BookingViewModel (
         }
 
         viewModelScope.launch {
-            // CORRECCIÓN CRÍTICA: Nos descargamos las reservas actuales para calcular la plaza libre real
             val allBookings = repository.getAllReservations()
 
-            // Calculamos de forma inteligente el primer número de plaza desocupado en ese tramo
             val calculatedSpotNumber = ParkingManager.findFirstAvailableSpotNumber(
                 allBookings = allBookings,
                 zoneName = parkingZone,
@@ -155,17 +159,20 @@ class BookingViewModel (
                 startTime = start,
                 endTime = end,
                 isCheckedIn = false,
-                spotNumber = calculatedSpotNumber // <--- ¡Y le asignamos su plaza real! (1, 35, etc.)
+                spotNumber = calculatedSpotNumber
             )
 
             editingReservationId?.let { repository.cancelReservation(it) }
             repository.saveReservation(newReservation)
+
+            programarAlertasDeReserva(context, newReservation)
 
             editingReservationId = null
             hasActiveReservation = true
             onComplete()
         }
     }
+
     fun checkUserReservationStatus() {
         val currentUserId = sessionManager.getActiveUserId() ?: return
 
@@ -173,12 +180,12 @@ class BookingViewModel (
             val allBookings = repository.getAllReservations()
             val nowMillis = System.currentTimeMillis()
 
-            // 🌟 CORRECCIÓN: Solo bloquea si la reserva acaba en el futuro
             hasActiveReservation = allBookings.any { booking ->
                 booking.vehicle.userId == currentUserId && !isReservationPast(booking, nowMillis)
             }
         }
     }
+
     private fun isReservationPast(res: Reservation, nowMillis: Long): Boolean {
         val endCal = Calendar.getInstance().apply {
             time = res.date
@@ -187,7 +194,6 @@ class BookingViewModel (
             set(Calendar.SECOND, 0)
             set(Calendar.MILLISECOND, 0)
 
-            // Si la hora de fin es menor a la de inicio, cruzó la medianoche
             if (res.endTime.hour < res.startTime.hour) {
                 add(Calendar.DAY_OF_YEAR, 1)
             }
@@ -246,14 +252,12 @@ class BookingViewModel (
         startHour = reservation.startTime.hour
         startMinute = reservation.startTime.minute
         selectedDate = reservation.date
-        // Calculamos la duración más o menos
         val diff = java.time.Duration.between(reservation.startTime, reservation.endTime).toHours()
         duration = diff.toFloat().coerceIn(1f, 8f)
     }
 
     fun cancelEditing() {
         editingReservationId = null
-
     }
 
     fun validateBooking() {
@@ -274,7 +278,6 @@ class BookingViewModel (
         val allBookings = repository.getAllReservations()
         val nowMillis = System.currentTimeMillis()
 
-        // 🌟 CORRECCIÓN CRÍTICA: Ignoramos las reservas del usuario que ya pertenecen al pasado
         val hasRealActive = allBookings.any { booking ->
             booking.vehicle.userId == currentUserId && !isReservationPast(booking, nowMillis)
         }
@@ -282,7 +285,7 @@ class BookingViewModel (
 
         val proposedStart = LocalTime.of(startHour, startMinute)
         val proposedEnd = proposedStart.plusHours(duration.toLong())
-        val mockZone = com.lksnext.ParkingMMartinez.data.ParkingManager.zones.find { it.name == parkingZone }
+        val mockZone = ParkingManager.zones.find { it.name == parkingZone }
         val maxSpotsInZone = mockZone?.totalSpots ?: 4
 
         val conflictingBookings = allBookings.filter { booking ->
@@ -308,11 +311,101 @@ class BookingViewModel (
 
         if (earliestCollision != null) {
             isOverlapConflict = true
-            nextCollisionTime = String.format("%02d:%02d", earliestCollision.hour, earliestCollision.minute)
+            nextCollisionTime = String.format(Locale.getDefault(), TIME_FORMAT, earliestCollision.hour, earliestCollision.minute)
             maxAllowedHours = (java.time.Duration.between(proposedStart, earliestCollision).toMinutes() / 60).toInt()
             return false
         }
         return true
     }
 
+    fun programarAlertasDeReserva(context: Context, reservation: Reservation) {
+        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+
+        val idAlertaInicio = reservation.id.hashCode() + 1
+        val idAlertaFin = reservation.id.hashCode() + 2
+
+        // --- CANCELAR ALARMAS VIEJAS POR SI ES UNA EDICIÓN ---
+        cancelarAlarmaExistente(context, alarmManager, idAlertaInicio)
+        cancelarAlarmaExistente(context, alarmManager, idAlertaFin)
+
+        // --- 1. CONFIGURAR NUEVA ALERTA DE INICIO (15 minutos antes) ---
+        val calInicio = Calendar.getInstance().apply {
+            time = reservation.date
+            set(Calendar.HOUR_OF_DAY, reservation.startTime.hour)
+            set(Calendar.MINUTE, reservation.startTime.minute)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+            add(Calendar.MINUTE, -15)
+        }
+
+        if (calInicio.timeInMillis > System.currentTimeMillis()) {
+            val tituloInicio = context.getString(R.string.notification_title_start)
+            // 🌟 CORREGIDO SONAR: Usamos la constante aquí para formatear la hora
+            val horaFormateada = String.format(Locale.getDefault(), TIME_FORMAT, reservation.startTime.hour, reservation.startTime.minute)
+            val cuerpoInicio = context.getString(R.string.notification_body_start, reservation.zone.name, horaFormateada)
+
+            configurarAlertaNativa(context, alarmManager, calInicio.timeInMillis, idAlertaInicio, tituloInicio, cuerpoInicio)
+        }
+
+        // --- 2. CONFIGURAR NUEVA ALERTA DE FIN (15 minutos antes de salir) ---
+        val calFin = Calendar.getInstance().apply {
+            time = reservation.date
+            set(Calendar.HOUR_OF_DAY, reservation.endTime.hour)
+            set(Calendar.MINUTE, reservation.endTime.minute)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+
+            if (reservation.endTime.hour < reservation.startTime.hour) {
+                add(Calendar.DAY_OF_YEAR, 1)
+            }
+            add(Calendar.MINUTE, -15)
+        }
+
+        if (calFin.timeInMillis > System.currentTimeMillis()) {
+            val tituloFin = context.getString(R.string.notification_title_end)
+            val cuerpoFin = context.getString(R.string.notification_body_end)
+
+            configurarAlertaNativa(context, alarmManager, calFin.timeInMillis, idAlertaFin, tituloFin, cuerpoFin)
+        }
+    }
+
+    // Funcion para configurar la alerta nativa
+    private fun configurarAlertaNativa(
+        context: Context,
+        alarmManager: AlarmManager,
+        triggerAtMillis: Long,
+        notificationId: Int,
+        title: String,
+        body: String
+    ) {
+        val intent = Intent(context, BookingAlarmReceiver::class.java).apply {
+            putExtra("NOTIFICATION_TITLE", title)
+            putExtra("NOTIFICATION_BODY", body)
+        }
+        val pendingIntent = PendingIntent.getBroadcast(
+            context, notificationId, intent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        )
+
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent)
+            } else {
+                alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent)
+            }
+        } catch (e: SecurityException) {
+            alarmManager.set(AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent)
+        }
+    }
+
+    // Función auxiliar para mantener limpio el flujo de cancelación
+    private fun cancelarAlarmaExistente(context: Context, alarmManager: AlarmManager, idAlerta: Int) {
+        val intentCancel = Intent(context, BookingAlarmReceiver::class.java)
+        val piCancel = PendingIntent.getBroadcast(
+            context, idAlerta, intentCancel, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_NO_CREATE
+        )
+        if (piCancel != null) {
+            alarmManager.cancel(piCancel)
+            piCancel.cancel()
+        }
+    }
 }

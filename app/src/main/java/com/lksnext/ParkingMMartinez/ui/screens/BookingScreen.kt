@@ -19,6 +19,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -299,6 +300,8 @@ fun DurationBlock(viewModel: BookingViewModel) {
 
 @Composable
 fun BookingActionSection(viewModel: BookingViewModel, isButtonEnabled: Boolean, onConfirmBooking: () -> Unit) {
+    val context = LocalContext.current
+
     Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
 
         if (!isButtonEnabled) {
@@ -339,7 +342,7 @@ fun BookingActionSection(viewModel: BookingViewModel, isButtonEnabled: Boolean, 
             onClick = {
                 val realZone = ParkingManager.zones.find { it.name == viewModel.parkingZone } ?: ParkingManager.zones.first()
                 viewModel.selectedVehicle?.let { vehicle ->
-                    viewModel.confirmReservation(vehicle, realZone) {
+                    viewModel.confirmReservation(context, vehicle, realZone) {
                         onConfirmBooking()
                     }
                 }

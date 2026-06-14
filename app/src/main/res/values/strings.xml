@@ -93,6 +93,16 @@
     <string name="notification_screen_body">You will receive real-time alerts on your device when your reservations are about to start, expire, or if there are structural changes in the parking lot.</string>
     <string name="notification_screen_icon_desc">Active alerts icon</string>
 
+    <string name="notification_channel_id">parking_alerts_channel</string>
+    <string name="notification_title_start">Your booking starts soon!</string>
+    <string name="notification_body_start">There are 15 minutes left until your booking begins in %1$s (%2$s).</string>
+
+    <string name="notification_title_end">Your time is running out!</string>
+    <string name="notification_body_end">There are 15 minutes left until your booking ends. Remember to remove your vehicle.</string>
+    <string name="notification_title_default">Parking Alert</string>
+
+    <string name="zone_default_standard">Standard Zone</string>
+
     <!-- TEXTO DE LOS COMPONENTES EN INGLES -->
     <string name="footer_map">Map</string>
     <string name="footer_bookings">Bookings</string>

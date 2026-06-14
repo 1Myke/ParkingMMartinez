@@ -60,18 +60,30 @@ fun BookingRegisterScreen(
             },
             modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp).testTag("BOOKING_TAB_ROW")
         ) {
+            // Pestaña Activas
             Tab(
                 selected = currentTab == 0,
                 onClick = { viewModel.selectedTab = 0 },
-                text = { Text("Activas (${viewModel.activeReservations.size})", fontWeight = FontWeight.Bold) },
+                text = {
+                    Text(
+                        text = stringResource(R.string.notification_tab_active, viewModel.activeReservations.size),
+                        fontWeight = FontWeight.Bold
+                    )
+                },
                 selectedContentColor = LksOrange,
                 unselectedContentColor = Color.Gray,
                 modifier = Modifier.testTag("BOOKING_TAB_ACTIVE")
             )
+            // Pestaña Historial
             Tab(
                 selected = currentTab == 1,
                 onClick = { viewModel.selectedTab = 1 },
-                text = { Text("Historial (${viewModel.pastReservations.size})", fontWeight = FontWeight.Bold) },
+                text = {
+                    Text(
+                        text = stringResource(R.string.notification_tab_past, viewModel.pastReservations.size),
+                        fontWeight = FontWeight.Bold
+                    )
+                },
                 selectedContentColor = LksOrange,
                 unselectedContentColor = Color.Gray,
                 modifier = Modifier.testTag("BOOKING_TAB_PAST")
@@ -85,7 +97,7 @@ fun BookingRegisterScreen(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = if (isPastTab) "No tienes reservas en tu historial" else stringResource(R.string.register_empty),
+                    text = if (isPastTab) stringResource(R.string.notification_past_empty) else stringResource(R.string.register_empty),
                     color = Color.Gray
                 )
             }

@@ -26,6 +26,10 @@
     <string name="register_title">My Reservations</string>
     <string name="register_empty">No active reservations</string>
 
+    <string name="notification_tab_active">Active (%1$d)</string>
+    <string name="notification_tab_past">History (%1$d)</string>
+    <string name="notification_past_empty">No history logs found</string>
+
     <!-- TEXTO MAP SCREEN EN INGLES -->
     <string name="map_header_title">LKS Next Parking</string>
     <string name="map_header_subtitle">Select a zone to book instantly</string>
@@ -79,6 +83,15 @@
     <string name="err_invalid_plate">License plate format is invalid (1234ABC)</string>
     <string name="err_user_exists">This username is already taken</string>
     <string name="err_registration_failed">Registration failed</string>
+
+    <!-- TEXTO DE LAS NOTIFICACIONES -->
+    <string name="notification_channel_name">Parking Alerts</string>
+    <string name="notification_default_title">Parking Update</string>
+    <string name="notification_default_body">You have received a new update.</string>
+
+    <string name="notification_screen_title">Alerts Center Active</string>
+    <string name="notification_screen_body">You will receive real-time alerts on your device when your reservations are about to start, expire, or if there are structural changes in the parking lot.</string>
+    <string name="notification_screen_icon_desc">Active alerts icon</string>
 
     <!-- TEXTO DE LOS COMPONENTES EN INGLES -->
     <string name="footer_map">Map</string>

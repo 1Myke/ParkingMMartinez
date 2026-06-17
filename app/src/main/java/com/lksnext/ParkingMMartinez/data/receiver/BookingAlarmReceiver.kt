@@ -10,10 +10,18 @@ import android.os.Build
 import androidx.core.app.NotificationCompat
 import com.lksnext.ParkingMMartinez.MainActivity
 import com.lksnext.ParkingMMartinez.R
+import com.lksnext.ParkingMMartinez.data.SessionManager
 
 class BookingAlarmReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
+
+        val sessionManager = SessionManager(context.applicationContext)
+        if (sessionManager.getActiveUserId() == null) {
+            // El usuario cerró sesión entonces frenamos el Receiver por completo. No se muestra la notificación.
+            return
+        }
+
         val defaultTitle = context.getString(R.string.notification_title_default)
         val title = intent.getStringExtra("NOTIFICATION_TITLE") ?: defaultTitle
         val body = intent.getStringExtra("NOTIFICATION_BODY") ?: ""

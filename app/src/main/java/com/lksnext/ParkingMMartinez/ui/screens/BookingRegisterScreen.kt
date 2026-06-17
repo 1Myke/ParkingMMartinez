@@ -10,6 +10,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -32,6 +33,7 @@ fun BookingRegisterScreen(
     LaunchedEffect(Unit) {
         viewModel.loadReservations()
     }
+    val context = LocalContext.current
 
     val currentTab = viewModel.selectedTab
     val currentReservations = if (currentTab == 0) viewModel.activeReservations else viewModel.pastReservations
@@ -109,7 +111,7 @@ fun BookingRegisterScreen(
                         reservation = reservation,
                         isPast = isPastTab,
                         actions = ReservationActions(
-                            onCancelClick = { viewModel.cancelReservation(reservation.id) },
+                            onCancelClick = { viewModel.cancelReservation(context, reservation.id) },
                             onCheckInClick = { viewModel.doCheckIn(reservation.id) },
                             onEditClick = {
                                 bookingViewModel.loadReservationForEditing(reservation)

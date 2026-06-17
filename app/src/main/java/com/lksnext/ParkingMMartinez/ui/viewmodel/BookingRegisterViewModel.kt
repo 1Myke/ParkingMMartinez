@@ -1,11 +1,16 @@
 package com.lksnext.ParkingMMartinez.ui.viewmodel
 
+import android.app.AlarmManager
+import android.app.PendingIntent
+import android.content.Context
+import android.content.Intent
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.lksnext.ParkingMMartinez.data.SessionManager
+import com.lksnext.ParkingMMartinez.data.receiver.BookingAlarmReceiver
 import com.lksnext.ParkingMMartinez.data.repository.BookingRepository
 import com.lksnext.ParkingMMartinez.model.Reservation
 import kotlinx.coroutines.launch
@@ -78,10 +83,30 @@ class BookingRegisterViewModel(
         }.timeInMillis
     }
 
-    fun cancelReservation(reservationId: String) {
+    fun cancelReservation(context: Context, reservationId: String) {
         viewModelScope.launch {
             repository.cancelReservation(reservationId)
+
+            val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+
+            val idAlertaInicio = reservationId.hashCode() + 1
+            val idAlertaFin = reservationId.hashCode() + 2
+
+            cancelarAlarmaExistente(context, alarmManager, idAlertaInicio)
+            cancelarAlarmaExistente(context, alarmManager, idAlertaFin)
+
             loadReservations()
+        }
+    }
+
+    private fun cancelarAlarmaExistente(context: Context, alarmManager: AlarmManager, idAlerta: Int) {
+        val intentCancel = Intent(context, BookingAlarmReceiver::class.java)
+        val piCancel = PendingIntent.getBroadcast(
+            context, idAlerta, intentCancel, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_NO_CREATE
+        )
+        if (piCancel != null) {
+            alarmManager.cancel(piCancel)
+            piCancel.cancel()
         }
     }
 

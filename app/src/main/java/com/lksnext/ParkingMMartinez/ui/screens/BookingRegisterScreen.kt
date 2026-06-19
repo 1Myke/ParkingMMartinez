@@ -62,7 +62,6 @@ fun BookingRegisterScreen(
             },
             modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp).testTag("BOOKING_TAB_ROW")
         ) {
-            // Pestaña Activas
             Tab(
                 selected = currentTab == 0,
                 onClick = { viewModel.selectedTab = 0 },
@@ -76,7 +75,6 @@ fun BookingRegisterScreen(
                 unselectedContentColor = Color.Gray,
                 modifier = Modifier.testTag("BOOKING_TAB_ACTIVE")
             )
-            // Pestaña Historial
             Tab(
                 selected = currentTab == 1,
                 onClick = { viewModel.selectedTab = 1 },
@@ -106,13 +104,21 @@ fun BookingRegisterScreen(
         } else {
             LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 items(currentReservations) { reservation ->
-                    // 🌟 LLAMADA REFACTORIZADA SIMPLIFICADA (Sonar 100% OK)
+
+                    // Puede que esto haya que borrarlo MIKEL
+                    val isCheckInEnabled = viewModel.isCheckInWindowActive(reservation) && !reservation.isCheckedIn
+
                     ReservationCard(
                         reservation = reservation,
                         isPast = isPastTab,
+                        isCheckInWindowActive = viewModel.isCheckInWindowActive(reservation),
                         actions = ReservationActions(
                             onCancelClick = { viewModel.cancelReservation(context, reservation.id) },
-                            onCheckInClick = { viewModel.doCheckIn(reservation.id) },
+                            onCheckInClick = {
+                                if (isCheckInEnabled) {
+                                    viewModel.doCheckIn(reservation)
+                                }
+                            },
                             onEditClick = {
                                 bookingViewModel.loadReservationForEditing(reservation)
                                 onNavigateToEdit(reservation.zone.name)

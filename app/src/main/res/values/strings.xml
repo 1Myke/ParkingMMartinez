@@ -26,6 +26,11 @@
     <string name="register_title">My Reservations</string>
     <string name="register_empty">No active reservations</string>
 
+    <string name="reservation_missed">MISSED</string>
+    <string name="reservation_past">PAST</string>
+    <string name="reservation_checked_in">CHECKED IN</string>
+    <string name="reservation_done">DONE</string>
+
     <string name="notification_tab_active">Active (%1$d)</string>
     <string name="notification_tab_past">History (%1$d)</string>
     <string name="notification_past_empty">No history logs found</string>
@@ -102,6 +107,10 @@
     <string name="notification_title_default">Parking Alert</string>
 
     <string name="zone_default_standard">Standard Zone</string>
+
+    <string name="notification_system_alerts">System Alerts</string>
+    <string name="notification_missed_title">Reservation Automatically Cancelled</string>
+    <string name="notification_missed_body">Your reservation for vehicle %1$s (%2$s) in Zone %3$s on %4$s (%5$s to %6$s) was cancelled due to missing the check-in time.</string>
 
     <!-- TEXTO DE LOS COMPONENTES EN INGLES -->
     <string name="footer_map">Map</string>

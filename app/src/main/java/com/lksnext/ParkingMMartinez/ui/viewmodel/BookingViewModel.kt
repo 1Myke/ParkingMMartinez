@@ -59,6 +59,9 @@ class BookingViewModel (
     var editingReservationId by mutableStateOf<String?>(null)
         private set
 
+    var isEditingCheckedIn by mutableStateOf(false)
+        private set
+
     var nextCollisionTime by mutableStateOf<String?>(null)
         private set
 
@@ -158,7 +161,7 @@ class BookingViewModel (
                 date = calendar.time,
                 startTime = start,
                 endTime = end,
-                isCheckedIn = false,
+                isCheckedIn = isEditingCheckedIn,
                 spotNumber = calculatedSpotNumber
             )
 
@@ -168,6 +171,7 @@ class BookingViewModel (
             programarAlertasDeReserva(context, newReservation)
 
             editingReservationId = null
+            isEditingCheckedIn = false
             hasActiveReservation = true
             onComplete()
         }
@@ -181,9 +185,26 @@ class BookingViewModel (
             val nowMillis = System.currentTimeMillis()
 
             hasActiveReservation = allBookings.any { booking ->
-                booking.vehicle.userId == currentUserId && !isReservationPast(booking, nowMillis)
+                val isUserReservation = booking.vehicle.userId == currentUserId
+
+                val isLiveOrCheckedIn = !isCheckInWindowExpired(booking, nowMillis) || booking.isCheckedIn
+
+                val isTotallyFinished = isReservationPastEntirely(booking, nowMillis)
+
+                isUserReservation && isLiveOrCheckedIn && !isTotallyFinished
             }
         }
+    }
+
+    private fun isReservationPastEntirely(res: Reservation, nowMillis: Long): Boolean {
+        val endCal = Calendar.getInstance().apply {
+            time = res.date
+            set(Calendar.HOUR_OF_DAY, res.endTime.hour)
+            set(Calendar.MINUTE, res.endTime.minute)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }
+        return endCal.timeInMillis <= nowMillis
     }
 
     private fun isReservationPast(res: Reservation, nowMillis: Long): Boolean {
@@ -232,6 +253,10 @@ class BookingViewModel (
     }
 
     fun isDateTimeValid(): Boolean {
+        if (editingReservationId != null && isEditingCheckedIn) {
+            return true
+        }
+
         val now = Calendar.getInstance()
         now.add(Calendar.MINUTE, -5)
 
@@ -248,6 +273,7 @@ class BookingViewModel (
 
     fun loadReservationForEditing(reservation: Reservation) {
         editingReservationId = reservation.id
+        isEditingCheckedIn = reservation.isCheckedIn
         parkingZone = reservation.zone.name
         startHour = reservation.startTime.hour
         startMinute = reservation.startTime.minute
@@ -258,6 +284,7 @@ class BookingViewModel (
 
     fun cancelEditing() {
         editingReservationId = null
+        isEditingCheckedIn = false
     }
 
     fun validateBooking() {
@@ -279,7 +306,11 @@ class BookingViewModel (
         val nowMillis = System.currentTimeMillis()
 
         val hasRealActive = allBookings.any { booking ->
-            booking.vehicle.userId == currentUserId && !isReservationPast(booking, nowMillis)
+            val isUserReservation = booking.vehicle.userId == currentUserId
+            val isLiveOrCheckedIn = !isCheckInWindowExpired(booking, nowMillis) || booking.isCheckedIn
+            val isTotallyFinished = isReservationPastEntirely(booking, nowMillis)
+
+            isUserReservation && isLiveOrCheckedIn && !isTotallyFinished
         }
         if (hasRealActive) return false
 
@@ -291,10 +322,12 @@ class BookingViewModel (
         val conflictingBookings = allBookings.filter { booking ->
             val calProposed = Calendar.getInstance().apply { time = selectedDate }
             val calBooking = Calendar.getInstance().apply { time = booking.date }
+            val isConflictingUserPresent = !isReservationPast(booking, nowMillis) || booking.isCheckedIn
 
             calProposed.get(Calendar.YEAR) == calBooking.get(Calendar.YEAR) &&
                     calProposed.get(Calendar.DAY_OF_YEAR) == calBooking.get(Calendar.DAY_OF_YEAR) &&
-                    booking.zone.name == parkingZone
+                    booking.zone.name == parkingZone &&
+                    isConflictingUserPresent
         }
 
         var tempTime = proposedStart
@@ -340,7 +373,6 @@ class BookingViewModel (
 
         if (calInicio.timeInMillis > System.currentTimeMillis()) {
             val tituloInicio = context.getString(R.string.notification_title_start)
-            // 🌟 CORREGIDO SONAR: Usamos la constante aquí para formatear la hora
             val horaFormateada = String.format(Locale.getDefault(), TIME_FORMAT, reservation.startTime.hour, reservation.startTime.minute)
             val cuerpoInicio = context.getString(R.string.notification_body_start, reservation.zone.name, horaFormateada)
 
@@ -410,5 +442,16 @@ class BookingViewModel (
             alarmManager.cancel(piCancel)
             piCancel.cancel()
         }
+    }
+
+    private fun isCheckInWindowExpired(res: Reservation, nowMillis: Long): Boolean {
+        val startCal = Calendar.getInstance().apply {
+            time = res.date
+            set(Calendar.HOUR_OF_DAY, res.startTime.hour)
+            set(Calendar.MINUTE, res.startTime.minute)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }
+        return startCal.timeInMillis < nowMillis
     }
 }

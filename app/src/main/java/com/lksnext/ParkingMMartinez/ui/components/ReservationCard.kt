@@ -22,6 +22,7 @@ import com.lksnext.ParkingMMartinez.ui.theme.LksOrange
 import com.lksnext.ParkingMMartinez.R
 import com.lksnext.ParkingMMartinez.ui.theme.activeYelow
 import com.lksnext.ParkingMMartinez.ui.theme.LksGreen
+import com.lksnext.ParkingMMartinez.ui.theme.automaticRed
 import com.lksnext.ParkingMMartinez.ui.theme.cremaSuave
 import com.lksnext.ParkingMMartinez.ui.theme.mistGray
 
@@ -42,34 +43,48 @@ data class ReservationTestTags(
 fun ReservationCard(
     reservation: Reservation,
     isPast: Boolean,
+    isCheckInWindowActive: Boolean = false,
     actions: ReservationActions,
     tags: ReservationTestTags = ReservationTestTags()
 ) {
+    val isMissed = isPast && !reservation.isCheckedIn
+    val cardBorder = if (isMissed) BorderStroke(2.dp, Color.Red) else null
+
     Card(
         modifier = tags.cardModifier.fillMaxWidth().padding(vertical = 8.dp),
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(2.dp)
+        elevation = CardDefaults.cardElevation(2.dp),
+        border = cardBorder
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            ReservationHeader(reservation = reservation, isPast = isPast)
+            ReservationHeader(reservation = reservation, isPast = isPast, isMissed = isMissed)
             ReservationDetails(reservation = reservation)
 
             if (!isPast) {
-                ReservationActionButtons(actions = actions, tags = tags)
+                ReservationActionButtons(
+                    reservation = reservation,
+                    isCheckInWindowActive = isCheckInWindowActive,
+                    actions = actions,
+                    tags = tags
+                )
             }
         }
     }
 }
 
 @Composable
-private fun ReservationHeader(reservation: Reservation, isPast: Boolean) {
+private fun ReservationHeader(reservation: Reservation, isPast: Boolean, isMissed: Boolean) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Surface(
-            color = if (isPast) Color.Gray else LksOrange,
+            color = when {
+                isMissed -> Color.Red
+                isPast -> Color.Gray
+                else -> LksOrange
+            },
             shape = RoundedCornerShape(12.dp),
             modifier = Modifier.size(45.dp)
         ) {
@@ -89,13 +104,27 @@ private fun ReservationHeader(reservation: Reservation, isPast: Boolean) {
         }
 
         Surface(
-            color = if (isPast) mistGray else cremaSuave,
+            color = when {
+                isMissed -> automaticRed
+                isPast -> mistGray
+                else -> cremaSuave
+            },
             shape = RoundedCornerShape(12.dp)
         ) {
             Text(
-                text = if (isPast) "PAST" else stringResource(R.string.status_active),
+                text = when {
+                    isMissed -> stringResource(R.string.reservation_missed)
+                    isPast -> stringResource(R.string.reservation_past)
+                    reservation.isCheckedIn -> stringResource(R.string.reservation_checked_in)
+                    else -> stringResource(R.string.status_active)
+                },
                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                color = if (isPast) Color.DarkGray else activeYelow,
+                color = when {
+                    isMissed -> Color.Red
+                    isPast -> Color.DarkGray
+                    reservation.isCheckedIn -> LksGreen
+                    else -> activeYelow
+                },
                 fontWeight = FontWeight.Bold,
                 fontSize = 10.sp
             )
@@ -139,7 +168,14 @@ private fun ReservationDetails(reservation: Reservation) {
 }
 
 @Composable
-private fun ReservationActionButtons(actions: ReservationActions, tags: ReservationTestTags) {
+private fun ReservationActionButtons(
+    reservation: Reservation,
+    isCheckInWindowActive: Boolean,
+    actions: ReservationActions,
+    tags: ReservationTestTags
+) {
+    val canDoCheckIn = isCheckInWindowActive && !reservation.isCheckedIn
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -188,19 +224,24 @@ private fun ReservationActionButtons(actions: ReservationActions, tags: Reservat
         // Botón Check-in
         Button(
             onClick = actions.onCheckInClick,
+            enabled = canDoCheckIn,
             modifier = tags.checkInBtnModifier
                 .weight(1.4f)
                 .height(48.dp),
             shape = RoundedCornerShape(12.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = LksGreen),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = if (reservation.isCheckedIn) Color.Gray else LksGreen,
+                disabledContainerColor = Color(0xFFE0E0E0)
+            ),
             contentPadding = PaddingValues(horizontal = 8.dp)
         ) {
             Text(
-                text = stringResource(R.string.btn_check_in),
+                text = if (reservation.isCheckedIn) stringResource(R.string.reservation_done) else stringResource(R.string.btn_check_in),
                 fontWeight = FontWeight.Bold,
                 fontSize = 13.sp,
                 maxLines = 1,
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
+                color = if (canDoCheckIn || reservation.isCheckedIn) Color.White else Color.Gray
             )
         }
     }

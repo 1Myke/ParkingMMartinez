@@ -34,25 +34,40 @@ class BookingRegisterViewModel(
 
         viewModelScope.launch {
             val allReservations = repository.getUserReservations(currentUserId)
-
             val nowMillis = System.currentTimeMillis()
 
-            // 🌟 REDUCCIÓN DE COMPLEJIDAD RADICAL (Bucle e Ifs eliminados)
-            // .partition divide automáticamente la colección según la condición
             val (past, active) = allReservations.partition { res ->
-                getReservationEndMillis(res) <= nowMillis
+                val endPast = getReservationEndMillis(res) <= nowMillis
+                val missedCheckIn = !res.isCheckedIn && (getReservationStartMillis(res) + 15 * 60 * 1000 < nowMillis)
+
+                if (missedCheckIn && !res.isCheckedIn) {
+                    // Opcional: Aquí podrías disparar un borrado/actualización en background si tu arquitectura lo requiere
+                }
+
+                endPast || missedCheckIn
             }
 
-            // Ordenamos de manera elegante y eficiente
             activeReservations = active.sortedBy { getReservationStartMillis(it) }
             pastReservations = past.sortedByDescending { getReservationStartMillis(it) }
         }
     }
 
-    /**
-     * Devuelve el instante exacto en milisegundos en el que arranca la reserva.
-     * Complejidad Sonar: 1
-     */
+    fun isCheckInWindowActive(res: Reservation): Boolean {
+        val now = System.currentTimeMillis()
+        val startMillis = getReservationStartMillis(res)
+        val windowStart = startMillis - 15 * 60 * 1000
+        val windowEnd = startMillis + 15 * 60 * 1000
+        return now in windowStart..windowEnd
+    }
+
+    fun doCheckIn(reservation: Reservation) {
+        viewModelScope.launch {
+            val updatedReservation = reservation.copy(isCheckedIn = true)
+            repository.saveReservation(updatedReservation) // Actualiza en la base de datos / repo
+            loadReservations() // Refresca las listas de la UI
+        }
+    }
+
     private fun getReservationStartMillis(res: Reservation): Long {
         return Calendar.getInstance().apply {
             time = res.date
@@ -63,11 +78,6 @@ class BookingRegisterViewModel(
         }.timeInMillis
     }
 
-    /**
-     * Devuelve el instante exacto en milisegundos en el que termina la reserva.
-     * Gestiona limpiamente las reservas que cruzan la medianoche.
-     * Complejidad Sonar: 2
-     */
     private fun getReservationEndMillis(res: Reservation): Long {
         return Calendar.getInstance().apply {
             time = res.date
@@ -76,7 +86,6 @@ class BookingRegisterViewModel(
             set(Calendar.SECOND, 0)
             set(Calendar.MILLISECOND, 0)
 
-            // Si la hora de fin es numéricamente menor al inicio, cruzó la medianoche (es el día siguiente)
             if (res.endTime.hour < res.startTime.hour) {
                 add(Calendar.DAY_OF_YEAR, 1)
             }
@@ -88,7 +97,6 @@ class BookingRegisterViewModel(
             repository.cancelReservation(reservationId)
 
             val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-
             val idAlertaInicio = reservationId.hashCode() + 1
             val idAlertaFin = reservationId.hashCode() + 2
 
@@ -108,9 +116,5 @@ class BookingRegisterViewModel(
             alarmManager.cancel(piCancel)
             piCancel.cancel()
         }
-    }
-
-    fun doCheckIn(reservationId: String) {
-        android.util.Log.d("CHECKIN", "Haciendo check-in de: $reservationId")
     }
 }

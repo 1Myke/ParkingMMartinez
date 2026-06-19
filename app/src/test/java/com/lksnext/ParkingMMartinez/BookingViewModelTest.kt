@@ -51,7 +51,9 @@ class BookingViewModelTest {
     )
     private val fakeZone = ParkingZone(ZoneNames.STANDARD, 24, 24, 0, Color(0xFF455A64))
 
+    // Controladores de Mocks estáticos y de construcción de Android SDK
     private var mockedPendingIntent: org.mockito.MockedStatic<android.app.PendingIntent>? = null
+    private var mockedIntent: org.mockito.MockedConstruction<android.content.Intent>? = null
 
     @Before
     fun setUp() = runTest {
@@ -62,12 +64,17 @@ class BookingViewModelTest {
         mockSessionManager = mock(SessionManager::class.java)
         mockContext = mock(Context::class.java)
 
-        // Mock del servicio de alarmas
+        // Mock del servicio de alarmas nativo
         val mockAlarmManager = mock(android.app.AlarmManager::class.java)
         `when`(mockContext.getSystemService(Context.ALARM_SERVICE)).thenReturn(mockAlarmManager)
 
-        // 🌟 CORREGIDO CI/CD: Mockeamos estáticamente PendingIntent para evitar el error "not mocked"
-        mockedPendingIntent = org.mockito.Mockito.mockStatic(android.app.PendingIntent::class.java)
+        // Interceptamos la creación de cualquier 'new Intent(...)' para que putExtra no rompa el entorno de la JVM
+        mockedIntent = mockConstruction(android.content.Intent::class.java) { mock, _ ->
+            `when`(mock.putExtra(anyString(), anyString())).thenReturn(mock)
+        }
+
+        // Mockeamos estáticamente PendingIntent para evitar el error "not mocked" en CI/CD y local
+        mockedPendingIntent = mockStatic(android.app.PendingIntent::class.java)
         val mockPendingIntent = mock(android.app.PendingIntent::class.java)
 
         // Indicamos que cualquier llamada a getBroadcast devuelva nuestro objeto simulado seguro
@@ -80,13 +87,13 @@ class BookingViewModelTest {
             )
         }?.thenReturn(mockPendingIntent)
 
+        // Configuraciones y respuestas base por defecto de los componentes
         `when`(mockSessionManager.getActiveUserId()).thenReturn(userId)
-
-        // Configuraciones auxiliares de strings
         `when`(mockContext.getString(anyInt())).thenReturn("Mocked String")
         `when`(mockContext.getString(anyInt(), any(), any())).thenReturn("Mocked Body String")
 
-        doAnswer { emptyList<Reservation>() }.`when`(mockRepository).getAllReservations()
+        // Evitamos que las corrutinas del repositorio queden en un limbo asíncrono
+        `when`(mockRepository.getAllReservations()).thenReturn(emptyList())
 
         viewModel = BookingViewModel(mockRepository, mockVehicleRepository, mockSessionManager)
     }
@@ -94,7 +101,9 @@ class BookingViewModelTest {
     @After
     fun tearDown() {
         Dispatchers.resetMain()
+        // Liberamos los mocks del framework para evitar fugas de memoria entre tests
         mockedPendingIntent?.close()
+        mockedIntent?.close()
     }
 
     // ==========================================
@@ -206,7 +215,7 @@ class BookingViewModelTest {
             isCheckedIn = false
         )
 
-        doAnswer { listOf(matchingReservation) }.`when`(mockRepository).getAllReservations()
+        `when`(mockRepository.getAllReservations()).thenReturn(listOf(matchingReservation))
 
         viewModel.checkUserReservationStatus()
         testDispatcher.scheduler.advanceUntilIdle()
@@ -258,6 +267,9 @@ class BookingViewModelTest {
         viewModel.onTimeChange(10, 0)
         viewModel.onDurationChange(3.0f)
 
+        // Garantizamos que devuelva lista vacía al calcular huecos disponibles
+        `when`(mockRepository.getAllReservations()).thenReturn(emptyList())
+
         viewModel.confirmReservation(mockContext, fakeVehicle, fakeZone) {
             onCompleteCalled = true
         }
@@ -274,6 +286,8 @@ class BookingViewModelTest {
             id = "old_res_id", spotNumber = 12, vehicle = fakeVehicle, zone = fakeZone,
             date = Date(), startTime = LocalTime.of(9, 0), endTime = LocalTime.of(11, 0), isCheckedIn = false
         )
+
+        `when`(mockRepository.getAllReservations()).thenReturn(emptyList())
         viewModel.loadReservationForEditing(oldReservation)
 
         viewModel.confirmReservation(mockContext, fakeVehicle, fakeZone) {}

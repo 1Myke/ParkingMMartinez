@@ -296,4 +296,83 @@ class BookingViewModelTest {
         verify(mockRepository).cancelReservation("old_res_id")
         assertTrue(viewModel.hasActiveReservation)
     }
+
+    // ==========================================
+    // 4. TESTS DE FILTRADO DE VEHÍCULOS POR ZONA
+    // ==========================================
+
+    @Test
+    fun loadAndFilterVehicles_whenZoneIsEV_filtersElectricVehicles() = runTest {
+        // Configuramos la zona de la pantalla en Eléctricos (EV)
+        viewModel.setZone(ZoneNames.EV)
+
+        val electricCar = Vehicle("id1", userId, "Tesla", "1111AAA", VehicleType.ELECTRIC)
+        val standardCar = Vehicle("id2", userId, "Golf", "2222BBB", VehicleType.STANDARD)
+
+        // El repositorio devuelve una lista mixta
+        `when`(mockVehicleRepository.getVehicles(userId)).thenReturn(listOf(electricCar, standardCar))
+
+        // Ejecutamos la carga
+        viewModel.loadAndFilterVehicles()
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        // Verificamos que solo se ha quedado con el eléctrico y lo ha seleccionado por defecto
+        assertEquals(1, viewModel.userVehicles.size)
+        assertEquals(VehicleType.ELECTRIC, viewModel.userVehicles[0].type)
+        assertEquals(electricCar, viewModel.selectedVehicle)
+    }
+
+    @Test
+    fun loadAndFilterVehicles_whenRepositoryFails_clearsVehicleListsSilently() = runTest {
+        viewModel.setZone(ZoneNames.STANDARD)
+
+        mockStatic(android.util.Log::class.java).use { mockedLog ->
+            mockedLog.`when`<Int> {
+                android.util.Log.e(anyString(), anyString())
+            }.thenReturn(0)
+
+            `when`(mockVehicleRepository.getVehicles(userId))
+                .thenThrow(RuntimeException("Firebase connection timeout"))
+
+            viewModel.loadAndFilterVehicles()
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            assertTrue(viewModel.userVehicles.isEmpty())
+            assertNull(viewModel.selectedVehicle)
+        }
+    }
+
+    // ==========================================
+    // 5. TESTS DE INTEGRACIÓN DE ALERTAS NATIVAS
+    // ==========================================
+
+    @Test
+    fun programarAlertasDeReserva_schedulesNativeAndroidAlarmsCorrectly() {
+        // Definimos de forma explícita todas las firmas posibles de getString()
+        `when`(mockContext.getString(anyInt())).thenReturn("Título de Alerta Fijo")
+        `when`(mockContext.getString(anyInt(), any(), any())).thenReturn("Cuerpo de Alerta con parámetros")
+        `when`(mockContext.getString(anyInt(), anyString())).thenReturn("Cuerpo Alternativo")
+
+        val futureDate = GregorianCalendar().apply { add(Calendar.DAY_OF_YEAR, 2) }.time
+
+        val testReservation = Reservation(
+            id = "alert_test_uuid",
+            spotNumber = 1,
+            vehicle = fakeVehicle,
+            zone = fakeZone,
+            date = futureDate,
+            startTime = LocalTime.of(14, 0),
+            endTime = LocalTime.of(16, 0),
+            isCheckedIn = false // Pasa por los tres flujos obligatorios: inicio, recordatorio de check-in y fin
+        )
+
+        val alarmManager = mockContext.getSystemService(Context.ALARM_SERVICE) as android.app.AlarmManager
+
+        // Ejecutamos la programación de las 3 alarmas
+        viewModel.programarAlertasDeReserva(mockContext, testReservation)
+
+        // 🌟 CORRECCIÓN CRÍTICA: La traza demuestra que interactúa perfectamente 3 veces llamando a setExact().
+        // Comprobamos que el AlarmManager nativo de Android recibe la orden de registrar las alarmas en el SO.
+        verify(alarmManager, times(3)).setExact(anyInt(), anyLong(), any())
+    }
 }

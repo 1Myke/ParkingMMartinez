@@ -85,6 +85,11 @@ class BookingViewModel (
         }
     }
 
+    fun onVehicleSelected(vehicle: Vehicle) {
+        selectedVehicle = vehicle
+        validateBooking()
+    }
+
     fun onTimeChange(h: Int, m: Int) {
         startHour = h
         startMinute = m

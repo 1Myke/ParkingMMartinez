@@ -31,6 +31,7 @@ import com.lksnext.ParkingMMartinez.ui.viewmodel.BookingViewModel
 import com.lksnext.ParkingMMartinez.data.ParkingManager
 import com.lksnext.ParkingMMartinez.model.VehicleType
 import com.lksnext.ParkingMMartinez.R
+import com.lksnext.ParkingMMartinez.model.Vehicle
 import com.lksnext.ParkingMMartinez.ui.components.DateItem
 import com.lksnext.ParkingMMartinez.ui.components.TimeSlider
 import com.lksnext.ParkingMMartinez.ui.theme.lightGray
@@ -195,7 +196,13 @@ fun BookingTopHeader(zone: String) {
 }
 
 @Composable
-fun VehicleSection(viewModel: BookingViewModel, onManageVehicles: () -> Unit, isEnabled: Boolean = true) {
+fun VehicleSection(
+    viewModel: BookingViewModel,
+    onManageVehicles: () -> Unit,
+    isEnabled: Boolean = true
+) {
+    var expanded by remember { mutableStateOf(false) }
+
     SectionHeader(
         title = stringResource(R.string.booking_select_vehicle),
         actionText = if (isEnabled) stringResource(R.string.booking_manage) else null,
@@ -203,44 +210,134 @@ fun VehicleSection(viewModel: BookingViewModel, onManageVehicles: () -> Unit, is
         actionModifier = Modifier.testTag(TestTags.BOOKING_MANAGE_VEHICLES_BTN)
     )
 
-    viewModel.selectedVehicle?.let { vehicle ->
-        val vehicleIcon = when (vehicle.type) {
-            VehicleType.MOTORCYCLE -> Icons.Default.TwoWheeler
-            VehicleType.ELECTRIC -> Icons.Default.ElectricCar
-            VehicleType.ADAPTED -> Icons.AutoMirrored.Filled.Accessible
-            else -> Icons.Default.DirectionsCar
-        }
-        OutlinedCard(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp)
-                .testTag(TestTags.BOOKING_SELECTED_VEHICLE_CARD),
-            border = BorderStroke(2.dp, if (isEnabled) LksOrange else Color.LightGray),
-            shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.outlinedCardColors(containerColor = Color.White)
-        ) {
-            Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                Icon(vehicleIcon, null, tint = if (isEnabled) LksOrange else Color.Gray)
-                Spacer(Modifier.width(16.dp))
-                Column {
-                    Text(vehicle.name, fontWeight = FontWeight.Bold, color = if (isEnabled) Color.Unspecified else Color.Gray)
-                    Text(vehicle.plate, color = Color.Gray)
+    val currentVehicle = viewModel.selectedVehicle
+    if (currentVehicle != null) {
+        Box(modifier = Modifier.fillMaxWidth()) {
+            SelectedVehicleCard(
+                vehicle = currentVehicle,
+                hasMultipleOptions = isEnabled && viewModel.userVehicles.size > 1,
+                isEnabled = isEnabled,
+                onClick = { expanded = true }
+            )
+
+            VehicleDropdownMenu(
+                expanded = expanded,
+                vehicles = viewModel.userVehicles,
+                onDismiss = { expanded = false },
+                onVehicleSelected = { vehicle ->
+                    viewModel.onVehicleSelected(vehicle)
+                    expanded = false
                 }
+            )
+        }
+    } else {
+        NoVehiclesErrorCard(parkingZone = viewModel.parkingZone)
+    }
+}
+
+@Composable
+private fun SelectedVehicleCard(
+    vehicle: Vehicle,
+    hasMultipleOptions: Boolean,
+    isEnabled: Boolean,
+    onClick: () -> Unit
+) {
+    OutlinedCard(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp)
+            .clickable(enabled = hasMultipleOptions, onClick = onClick)
+            .testTag(TestTags.BOOKING_SELECTED_VEHICLE_CARD),
+        border = BorderStroke(2.dp, if (isEnabled) LksOrange else Color.LightGray),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.outlinedCardColors(containerColor = Color.White)
+    ) {
+        Row(
+            modifier = Modifier.padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = getVehicleIcon(vehicle.type),
+                contentDescription = null,
+                tint = if (isEnabled) LksOrange else Color.Gray
+            )
+            Spacer(Modifier.width(16.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = vehicle.name,
+                    fontWeight = FontWeight.Bold,
+                    color = if (isEnabled) Color.Unspecified else Color.Gray
+                )
+                Text(text = vehicle.plate, color = Color.Gray)
+            }
+            if (hasMultipleOptions) {
+                Text(
+                    text = stringResource(R.string.booking_change_vehicle_hint),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = LksOrange
+                )
             }
         }
-    } ?: run {
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp)
-                .testTag(TestTags.BOOKING_NO_VEHICLES_ERROR),
-            colors = CardDefaults.cardColors(containerColor = palePink),
-            border = BorderStroke(1.dp, Color.Red.copy(alpha = 0.5f))
-        ) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Text(text = stringResource(R.string.booking_no_vehicles, viewModel.parkingZone), color = Color.Red, fontWeight = FontWeight.Bold)
-                Text(text = stringResource(R.string.booking_add_vehicle_hint), style = MaterialTheme.typography.bodySmall)
-            }
+    }
+}
+
+@Composable
+private fun VehicleDropdownMenu(
+    expanded: Boolean,
+    vehicles: List<Vehicle>,
+    onDismiss: () -> Unit,
+    onVehicleSelected: (Vehicle) -> Unit
+) {
+    DropdownMenu(
+        expanded = expanded,
+        onDismissRequest = onDismiss,
+        modifier = Modifier
+            .fillMaxWidth(0.9f)
+            .background(Color.White)
+    ) {
+        vehicles.forEach { option ->
+            DropdownMenuItem(
+                text = {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = getVehicleIcon(option.type),
+                            contentDescription = null,
+                            tint = LksOrange,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Column {
+                            Text(text = option.name, fontWeight = FontWeight.SemiBold)
+                            Text(text = option.plate, style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                        }
+                    }
+                },
+                onClick = { onVehicleSelected(option) }
+            )
+        }
+    }
+}
+
+@Composable
+private fun NoVehiclesErrorCard(parkingZone: String) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp)
+            .testTag(TestTags.BOOKING_NO_VEHICLES_ERROR),
+        colors = CardDefaults.cardColors(containerColor = palePink),
+        border = BorderStroke(1.dp, Color.Red.copy(alpha = 0.5f))
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                text = stringResource(R.string.booking_no_vehicles, parkingZone),
+                color = Color.Red,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                text = stringResource(R.string.booking_add_vehicle_hint),
+                style = MaterialTheme.typography.bodySmall
+            )
         }
     }
 }
@@ -421,4 +518,11 @@ private fun calculateTargetDate(dayInt: Int): Date {
     targetCal.set(Calendar.MILLISECOND, 0)
 
     return targetCal.time
+}
+
+private fun getVehicleIcon(type: VehicleType) = when (type) {
+    VehicleType.MOTORCYCLE -> Icons.Default.TwoWheeler
+    VehicleType.ELECTRIC -> Icons.Default.ElectricCar
+    VehicleType.ADAPTED -> Icons.AutoMirrored.Filled.Accessible
+    else -> Icons.Default.DirectionsCar
 }

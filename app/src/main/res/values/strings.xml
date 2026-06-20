@@ -19,6 +19,7 @@
     <string name="booking_next_day_warning">(+1 day)</string>
     <string name="booking_hours_unit">hours</string>
     <string name="booking_today">TODAY</string>
+    <string name="booking_change_vehicle_hint">Click here to change your vehicle!</string>
     <string name="booking_error_overlap">Next booking at %1$s so you can maximum reserve %2$s hours</string>
 
 

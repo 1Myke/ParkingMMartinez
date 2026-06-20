@@ -1,42 +1,62 @@
 package com.lksnext.ParkingMMartinez.ui.viewmodel
 
+import android.content.Context
+import android.os.Handler
+import android.os.Looper
+import android.os.PowerManager
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.lksnext.ParkingMMartinez.data.SessionManager
-import com.lksnext.ParkingMMartinez.data.repository.BookingRepository
-import com.lksnext.ParkingMMartinez.model.Reservation
-import kotlinx.coroutines.launch
-import java.util.Calendar
+import com.lksnext.ParkingMMartinez.data.repository.NotificationRepository
+import com.lksnext.ParkingMMartinez.model.NotificationItem
 
 class NotificationViewModel(
-    private val repository: BookingRepository,
+    private val repository: NotificationRepository,
     private val sessionManager: SessionManager
 ) : ViewModel() {
 
-    var missedNotifications by mutableStateOf<List<Reservation>>(emptyList())
+    var notifications by mutableStateOf<List<NotificationItem>>(emptyList())
         private set
 
-    fun loadMissedReservations() {
-        val currentUserId = sessionManager.getActiveUserId() ?: return
-        val nowMillis = System.currentTimeMillis()
+    var isBatteryOptimized by mutableStateOf(false)
+        private set
 
-        viewModelScope.launch {
-            val allBookings = repository.getAllReservations()
+    fun initViewModel(context: Context) {
+        checkBatteryStatus(context)
+        loadNotifications()
+    }
 
-            missedNotifications = allBookings.filter { booking ->
-                val isStartHourPast = Calendar.getInstance().apply {
-                    time = booking.date
-                    set(Calendar.HOUR_OF_DAY, booking.startTime.hour)
-                    set(Calendar.MINUTE, booking.startTime.minute)
-                    set(Calendar.SECOND, 0)
-                    set(Calendar.MILLISECOND, 0)
-                }.timeInMillis < nowMillis
-
-                booking.vehicle.userId == currentUserId && !booking.isCheckedIn && isStartHourPast
+    private fun loadNotifications() {
+        val userId = sessionManager.getActiveUserId() ?: return
+        repository.getNotificationsFlow(userId) { list ->
+            Handler(Looper.getMainLooper()).post {
+                notifications = list
             }
         }
+    }
+
+    fun checkBatteryStatus(context: Context) {
+        val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            isBatteryOptimized = !powerManager.isIgnoringBatteryOptimizations(context.packageName)
+        } else {
+            isBatteryOptimized = false
+        }
+    }
+
+    fun markAllAsRead() {
+        val userId = sessionManager.getActiveUserId() ?: return
+        repository.markAllAsRead(userId)
+    }
+
+    fun deleteNotification(notificationId: String) {
+        repository.deleteNotification(notificationId)
+    }
+
+    fun deleteAllNotifications() {
+        val userId = sessionManager.getActiveUserId() ?: return
+        repository.deleteAllNotifications(userId)
     }
 }

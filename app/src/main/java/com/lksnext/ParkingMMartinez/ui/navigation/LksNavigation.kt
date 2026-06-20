@@ -28,6 +28,9 @@ import com.lksnext.ParkingMMartinez.ui.viewmodel.RecoveryViewModel
 import com.lksnext.ParkingMMartinez.ui.viewmodel.RegistrationViewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.google.firebase.Firebase
+import com.lksnext.ParkingMMartinez.data.repository.FirebaseNotificationRepository
+import com.lksnext.ParkingMMartinez.ui.screens.NotificationScreen
 import com.lksnext.ParkingMMartinez.ui.viewmodel.NotificationViewModel
 
 @Composable
@@ -37,6 +40,7 @@ fun LksNavigation() {
     val bookingRepository = FirebaseBookingRepository()
     val userRepository = FirebaseUserRepository()
     val vehicleRepository = FirebaseVehicleRepository()
+    val notificationRepository = FirebaseNotificationRepository()
     val session = SessionManager(context)
 
     val navController = rememberNavController()
@@ -94,7 +98,7 @@ fun LksNavigation() {
     val notificationViewModel: NotificationViewModel = viewModel(
         factory = viewModelFactory {
             addInitializer(NotificationViewModel::class) {
-                NotificationViewModel(bookingRepository, session)
+                NotificationViewModel(notificationRepository, session)
             }
         }
     )

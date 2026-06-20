@@ -11,25 +11,32 @@ import androidx.core.app.NotificationCompat
 import com.lksnext.ParkingMMartinez.MainActivity
 import com.lksnext.ParkingMMartinez.R
 import com.lksnext.ParkingMMartinez.data.SessionManager
+import com.lksnext.ParkingMMartinez.data.repository.FirebaseNotificationRepository
+import com.lksnext.ParkingMMartinez.data.repository.NotificationRepository
+import com.lksnext.ParkingMMartinez.model.NotificationItem
+import java.util.Date
 
 class BookingAlarmReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
         val sessionManager = SessionManager(context.applicationContext)
-        val userId = try {
-            sessionManager.getActiveUserId()
-        } catch (e: Exception) {
-            null
-        }
-
-        if (userId == null) {
-            android.util.Log.d("ALARM_RECEIVER", "UserId es null en frío. Forzamos muestra para testeo.")
-        }
+        val userId = sessionManager.getActiveUserId() ?: return // Si no hay sesión activa, ignoramos
 
         val defaultTitle = context.getString(R.string.notification_title_default)
         val title = intent.getStringExtra("NOTIFICATION_TITLE") ?: defaultTitle
         val body = intent.getStringExtra("NOTIFICATION_BODY") ?: ""
 
+        val notificationRepo: NotificationRepository = FirebaseNotificationRepository()
+        val newNotification = NotificationItem(
+            userId = userId,
+            title = title,
+            body = body,
+            timestamp = Date(),
+            isRead = false
+        )
+        notificationRepo.saveNotification(newNotification)
+
+        // 2. MOSTRAR ALERTA VISUAL NATIVA
         val channelId = context.getString(R.string.notification_channel_id)
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
@@ -50,7 +57,7 @@ class BookingAlarmReceiver : BroadcastReceiver() {
         )
 
         val notificationBuilder = NotificationCompat.Builder(context, channelId)
-            .setSmallIcon(android.R.drawable.sym_def_app_icon)
+            .setSmallIcon(android.R.drawable.ic_dialog_info)
             .setContentTitle(title)
             .setContentText(body)
             .setAutoCancel(true)

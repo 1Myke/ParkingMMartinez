@@ -95,7 +95,7 @@
     <string name="notification_default_body">You have received a new update.</string>
 
     <string name="notification_screen_title">Alerts Center Active</string>
-    <string name="notification_screen_body">You will receive real-time alerts on your device when your reservations are about to start, expire, or if there are structural changes in the parking lot.</string>
+    <string name="notification_screen_body">You will receive real-time alerts on your device when your reservations are about to start, expire, or when you forgot about doing the check-in.</string>
     <string name="notification_screen_icon_desc">Active alerts icon</string>
 
     <string name="notification_channel_id">parking_alerts_channel</string>
@@ -110,6 +110,7 @@
 
     <string name="notification_title_checkin_reminder">Pending Check-In</string>
     <string name="notification_body_checkin_reminder">You have a reservation active in %1$s. Please check in now or cancel your booking if you are not using it.</string>
+    <string name="notification_unrestricted_battery">To receive alerts with the app closed, tap here and enable "Unrestricted battery" and restart the app.</string>
 
     <string name="notification_system_alerts">System Alerts</string>
     <string name="notification_missed_title">Reservation Automatically Cancelled</string>

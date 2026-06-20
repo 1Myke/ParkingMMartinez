@@ -370,7 +370,7 @@ class BookingViewModel (
             set(Calendar.MINUTE, reservation.startTime.minute)
             set(Calendar.SECOND, 0)
             set(Calendar.MILLISECOND, 0)
-            add(Calendar.MINUTE, -15)
+            add(Calendar.MINUTE, -15) //- 15
         }
 
         if (calInicio.timeInMillis > System.currentTimeMillis()) {
@@ -389,7 +389,7 @@ class BookingViewModel (
                 set(Calendar.MINUTE, reservation.startTime.minute)
                 set(Calendar.SECOND, 0)
                 set(Calendar.MILLISECOND, 0)
-                add(Calendar.MINUTE, 15) // 15 minutos (ahora mismo esta en 1 minuto)
+                add(Calendar.MINUTE, 15) // 15
             }
 
             if (calCheckIn.timeInMillis > nowMillis) {
@@ -411,7 +411,7 @@ class BookingViewModel (
             if (reservation.endTime.hour < reservation.startTime.hour) {
                 add(Calendar.DAY_OF_YEAR, 1)
             }
-            add(Calendar.MINUTE, -15)
+            add(Calendar.MINUTE, -15) // - 15
         }
 
         if (calFin.timeInMillis > nowMillis) {

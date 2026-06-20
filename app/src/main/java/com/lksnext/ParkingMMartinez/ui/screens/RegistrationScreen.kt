@@ -46,7 +46,7 @@ fun RegistrationScreen(
             text = stringResource(R.string.reg_title),
             style = MaterialTheme.typography.headlineLarge,
             color = LksOrange,
-            modifier = Modifier.testTag(TestTags.REG_TITLE) 
+            modifier = Modifier.testTag(TestTags.REG_TITLE)
         )
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -61,7 +61,7 @@ fun RegistrationScreen(
         LksTextField(
             value = viewModel.lastName,
             onValueChange = { viewModel.lastName = it },
-            label = "Last Name",
+            label = stringResource(R.string.reg_label_lastname),
             modifier = Modifier.testTag(TestTags.REG_LASTNAME_FIELD)
         )
 
@@ -91,17 +91,12 @@ fun RegistrationScreen(
             VehicleType.values().forEach { type ->
                 val isSelected = viewModel.selectedVehicleType == type
 
-                val typeLabel = when (type) {
-                    VehicleType.STANDARD -> "Standard Car"
-                    VehicleType.ELECTRIC -> "Electric Car"
-                    VehicleType.MOTORCYCLE -> "Motorcycle"
-                    VehicleType.ADAPTED -> "Adapted Car"
-                }
-
                 FilterChip(
                     selected = isSelected,
                     onClick = { viewModel.onVehicleTypeChange(type) },
-                    label = { Text(typeLabel) },
+                    label = {
+                        Text(text = stringResource(id = getVehicleTypeDisplayNameRes(type)))
+                    },
                     colors = FilterChipDefaults.filterChipColors(
                         selectedContainerColor = LksOrange.copy(alpha = 0.2f),
                         selectedLabelColor = LksOrange
@@ -129,7 +124,7 @@ fun RegistrationScreen(
         LksTextField(
             value = viewModel.email,
             onValueChange = { viewModel.onEmailChange(it) },
-            label = "Email",
+            label = stringResource(R.string.reg_label_email),
             isError = viewModel.errorCode == R.string.err_invalid_email,
             modifier = Modifier.testTag(TestTags.REG_EMAIL_FIELD)
         )
@@ -146,7 +141,7 @@ fun RegistrationScreen(
         LksPasswordField(
             value = viewModel.passwordRepeat,
             onValueChange = { viewModel.onPasswordRepeatChange(it) },
-            label = "Confirm Password",
+            label = stringResource(R.string.reg_label_confirm_password),
             isError = viewModel.errorCode == R.string.err_password_mismatch,
             modifier = Modifier.testTag(TestTags.REG_PASSWORD_REPEAT_FIELD)
         )
@@ -183,9 +178,10 @@ fun RegistrationScreen(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
         ) {
-            Text(text = "Already have an account? ")
+
+            Text(text = stringResource(R.string.reg_already_have_account))
             LksClickableLabel(
-                text = "Log In",
+                text = stringResource(R.string.reg_login_link),
                 onClick = onNavigateToLogin,
                 modifier = Modifier.testTag(TestTags.REG_LOGIN_LINK)
             )

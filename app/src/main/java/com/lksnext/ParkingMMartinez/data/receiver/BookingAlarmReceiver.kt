@@ -14,6 +14,7 @@ import com.lksnext.ParkingMMartinez.data.SessionManager
 import com.lksnext.ParkingMMartinez.data.repository.FirebaseNotificationRepository
 import com.lksnext.ParkingMMartinez.data.repository.NotificationRepository
 import com.lksnext.ParkingMMartinez.model.NotificationItem
+import com.lksnext.ParkingMMartinez.model.ZoneNames
 import java.util.Date
 
 class BookingAlarmReceiver : BroadcastReceiver() {
@@ -22,9 +23,24 @@ class BookingAlarmReceiver : BroadcastReceiver() {
         val sessionManager = SessionManager(context.applicationContext)
         val userId = sessionManager.getActiveUserId() ?: return // Si no hay sesión activa, ignoramos
 
-        val defaultTitle = context.getString(R.string.notification_title_default)
-        val title = intent.getStringExtra("NOTIFICATION_TITLE") ?: defaultTitle
-        val body = intent.getStringExtra("NOTIFICATION_BODY") ?: ""
+        val titleRes = intent.getIntExtra("NOTIFICATION_TITLE_RES", 0)
+        val bodyRes = intent.getIntExtra("NOTIFICATION_BODY_RES", 0)
+        val args = intent.getStringArrayExtra("NOTIFICATION_ARGS") ?: emptyArray()
+
+        if (titleRes == 0 || bodyRes == 0) return
+
+        val processedArgs = args.map { arg ->
+            when (arg) {
+                ZoneNames.DISABILITY -> context.getString(R.string.zone_disability)
+                ZoneNames.EV -> context.getString(R.string.zone_ev)
+                ZoneNames.MOTORCYCLE -> context.getString(R.string.zone_motorcycle)
+                ZoneNames.STANDARD -> context.getString(R.string.zone_standard)
+                else -> arg
+            }
+        }.toTypedArray()
+
+        val title = context.getString(titleRes)
+        val body = context.getString(bodyRes, *processedArgs)
 
         val notificationRepo: NotificationRepository = FirebaseNotificationRepository()
         val newNotification = NotificationItem(
@@ -36,7 +52,6 @@ class BookingAlarmReceiver : BroadcastReceiver() {
         )
         notificationRepo.saveNotification(newNotification)
 
-        // 2. MOSTRAR ALERTA VISUAL NATIVA
         val channelId = context.getString(R.string.notification_channel_id)
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 

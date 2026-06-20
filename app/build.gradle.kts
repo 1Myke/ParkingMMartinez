@@ -18,6 +18,7 @@ val gsonVersion = "2.11.0"
 val mockitoVersion = "5.11.0"
 val archVersion = "2.2.0"
 val coroutinesVersion = "1.7.3"
+val appcompatVersion = "1.7.0"
 
 android {
     namespace = "com.lksnext.ParkingMMartinez"
@@ -77,6 +78,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycleVersion")
     implementation("androidx.navigation:navigation-compose:$navigationVersion")
     implementation("com.google.code.gson:gson:$gsonVersion")
+    implementation("androidx.appcompat:appcompat:$appcompatVersion")
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.analytics)
     implementation(libs.firebase.crashlytics)

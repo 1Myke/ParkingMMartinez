@@ -14,6 +14,7 @@ import com.lksnext.ParkingMMartinez.model.VehicleType
 import com.lksnext.ParkingMMartinez.R
 import com.lksnext.ParkingMMartinez.data.repository.BookingRepository
 import kotlinx.coroutines.launch
+import com.lksnext.ParkingMMartinez.ui.screens.isPlateInvalid
 
 class ProfileViewModel(
     private val vehicleRepository: VehicleRepository,
@@ -123,6 +124,11 @@ class ProfileViewModel(
             return
         }
 
+        if (isPlateInvalid(cleanPlate)) {
+            vehicleAddError = R.string.err_invalid_plate // O como lo tengas en tu strings.xml (ej: R.string.err_invalid_plate)
+            return
+        }
+
         val isDuplicate = _vehicles.any { it.plate == cleanPlate }
         if (isDuplicate) {
             vehicleAddError = R.string.error_duplicate_plate
@@ -136,7 +142,7 @@ class ProfileViewModel(
             type = selectedVehicleType
         )
 
-        // CORRECCIÓN: Ahora es una función suspend, debe ir en un launch
+        // Proceso de guardado asíncrono
         viewModelScope.launch {
             try {
                 vehicleRepository.addVehicle(userId, newVehicle)

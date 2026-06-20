@@ -378,12 +378,20 @@ class BookingViewModel (
             add(Calendar.MINUTE, -15) //- 15
         }
 
-        if (calInicio.timeInMillis > System.currentTimeMillis()) {
-            val tituloInicio = context.getString(R.string.notification_title_start)
+        if (calInicio.timeInMillis > nowMillis) {
             val horaFormateada = String.format(Locale.getDefault(), TIME_FORMAT, reservation.startTime.hour, reservation.startTime.minute)
-            val cuerpoInicio = context.getString(R.string.notification_body_start, reservation.zone.name, horaFormateada)
 
-            configurarAlertaNativa(context, alarmManager, calInicio.timeInMillis, idAlertaInicio, tituloInicio, cuerpoInicio)
+            // 🔒 Pasamos solo IDs lógicos y argumentos, nada de Strings fijos
+            configurarAlertaNativa(
+                context = context,
+                alarmManager = alarmManager,
+                triggerAtMillis = calInicio.timeInMillis,
+                notificationId = idAlertaInicio,
+                titleResId = R.string.notification_title_start,
+                bodyResId = R.string.notification_body_start,
+                // Pasamos los argumentos que necesita el string (la zona y la hora)
+                args = arrayOf(reservation.zone.name, horaFormateada)
+            )
         }
 
         // --- 2. CONFIGURAR NUEVA ALERTA DE RECORDATORIO CHECK-IN (+15 minutos de la hora de inicio) ---
@@ -398,10 +406,15 @@ class BookingViewModel (
             }
 
             if (calCheckIn.timeInMillis > nowMillis) {
-                val tituloCheckIn = context.getString(R.string.notification_title_checkin_reminder)
-                val cuerpoCheckIn = context.getString(R.string.notification_body_checkin_reminder, reservation.zone.name)
-
-                configurarAlertaNativa(context, alarmManager, calCheckIn.timeInMillis, idAlertaCheckIn, tituloCheckIn, cuerpoCheckIn)
+                configurarAlertaNativa(
+                    context = context,
+                    alarmManager = alarmManager,
+                    triggerAtMillis = calCheckIn.timeInMillis,
+                    notificationId = idAlertaCheckIn,
+                    titleResId = R.string.notification_title_checkin_reminder,
+                    bodyResId = R.string.notification_body_checkin_reminder,
+                    args = arrayOf(reservation.zone.name)
+                )
             }
         }
 
@@ -420,10 +433,14 @@ class BookingViewModel (
         }
 
         if (calFin.timeInMillis > nowMillis) {
-            val tituloFin = context.getString(R.string.notification_title_end)
-            val cuerpoFin = context.getString(R.string.notification_body_end)
-
-            configurarAlertaNativa(context, alarmManager, calFin.timeInMillis, idAlertaFin, tituloFin, cuerpoFin)
+            configurarAlertaNativa(
+                context = context,
+                alarmManager = alarmManager,
+                triggerAtMillis = calFin.timeInMillis,
+                notificationId = idAlertaFin,
+                titleResId = R.string.notification_title_end,
+                bodyResId = R.string.notification_body_end
+            )
         }
     }
 
@@ -433,14 +450,17 @@ class BookingViewModel (
         alarmManager: AlarmManager,
         triggerAtMillis: Long,
         notificationId: Int,
-        title: String,
-        body: String
+        titleResId: Int,
+        bodyResId: Int,
+        args: Array<String> = emptyArray()
     ) {
         val appContext = context.applicationContext
 
         val intent = Intent(appContext, BookingAlarmReceiver::class.java).apply {
-            putExtra("NOTIFICATION_TITLE", title)
-            putExtra("NOTIFICATION_BODY", body)
+            // Mandamos los recursos lógicos, no textos fijos pre-renderizados
+            putExtra("NOTIFICATION_TITLE_RES", titleResId)
+            putExtra("NOTIFICATION_BODY_RES", bodyResId)
+            putExtra("NOTIFICATION_ARGS", args)
             addFlags(Intent.FLAG_RECEIVER_FOREGROUND)
         }
 

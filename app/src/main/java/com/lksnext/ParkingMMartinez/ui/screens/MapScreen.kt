@@ -98,7 +98,11 @@ fun MapScreen(
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 viewModel.availableDates.forEach { (fullDate, label) ->
-                    val displayLabel = if (label == "TODAY") todayStr else label
+                    val displayLabel = if (label == "TODAY") todayStr else {
+                        val sdf = java.text.SimpleDateFormat("EEE", java.util.Locale.getDefault())
+
+                        sdf.format(fullDate).replaceFirstChar { it.uppercase() }
+                    }
 
                     val cal = Calendar.getInstance().apply { time = fullDate }
                     val dayNumStr = cal.get(Calendar.DAY_OF_MONTH).toString()

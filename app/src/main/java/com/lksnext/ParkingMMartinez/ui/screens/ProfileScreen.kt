@@ -50,6 +50,7 @@ import com.lksnext.ParkingMMartinez.ui.components.LksButton
 import com.lksnext.ParkingMMartinez.ui.components.LksTextField
 import com.lksnext.ParkingMMartinez.ui.components.ProfileHeaderSection
 import com.lksnext.ParkingMMartinez.ui.components.VehicleCard
+import com.lksnext.ParkingMMartinez.ui.components.LanguageSelectorSection
 import com.lksnext.ParkingMMartinez.ui.theme.LksOrange
 import com.lksnext.ParkingMMartinez.ui.theme.lightGray
 import com.lksnext.ParkingMMartinez.ui.theme.navyBlue
@@ -101,9 +102,12 @@ fun ProfileScreen(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 8.dp, vertical = 8.dp),
-                horizontalArrangement = Arrangement.End
+                    .padding(horizontal = 24.dp, vertical = 12.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
+                LanguageSelectorSection()
+
                 IconButton(
                     onClick = onLogoutClick,
                     modifier = Modifier.testTag(TestTags.PROFILE_LOGOUT_BTN)
@@ -247,13 +251,14 @@ fun AddVehicleDialog(viewModel: ProfileViewModel) {
                         .horizontalScroll(rememberScrollState()),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
+
                     VehicleType.values().forEach { type ->
                         val isSelected = viewModel.selectedVehicleType == type
                         FilterChip(
                             selected = isSelected,
                             onClick = { viewModel.onVehicleTypeChange(type) },
                             label = {
-                                Text(type.name.replace("_", " ").lowercase().replaceFirstChar { it.uppercase() })
+                                Text(text = stringResource(id = getVehicleTypeDisplayNameRes(type)))
                             },
                             colors = FilterChipDefaults.filterChipColors(
                                 selectedContainerColor = LksOrange.copy(alpha = 0.2f),
@@ -352,4 +357,15 @@ fun DeleteConfirmationDialog(viewModel: ProfileViewModel) {
         containerColor = Color.White,
         modifier = Modifier.testTag(TestTags.PROFILE_DELETE_DIALOG)
     )
+}
+
+fun getVehicleTypeDisplayNameRes(type: VehicleType): Int {
+    return when (type) {
+        VehicleType.STANDARD -> R.string.vehicle_type_standard
+        VehicleType.MOTORCYCLE -> R.string.vehicle_type_motorcycle
+        VehicleType.ELECTRIC -> R.string.vehicle_type_electric
+        VehicleType.ADAPTED -> R.string.vehicle_type_adapted
+        // Por si acaso hay algún fallback o tipo por defecto:
+        else -> R.string.vehicle_type_standard
+    }
 }

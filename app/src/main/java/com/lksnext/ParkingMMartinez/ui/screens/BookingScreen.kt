@@ -184,7 +184,7 @@ fun BookingTopHeader(zone: String) {
             Column {
                 Text(stringResource(R.string.booking_header_label), style = MaterialTheme.typography.labelSmall, color = Color.White.copy(alpha = 0.8f))
                 Text(
-                    text = zone,
+                    text = stringResource(id = getZoneDisplayNameRes(zone)),
                     style = MaterialTheme.typography.titleLarge,
                     color = Color.White,
                     fontWeight = FontWeight.Bold,
@@ -329,8 +329,10 @@ private fun NoVehiclesErrorCard(parkingZone: String) {
         border = BorderStroke(1.dp, Color.Red.copy(alpha = 0.5f))
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
+            val translatedZone = stringResource(id = getZoneDisplayNameRes(parkingZone))
+
             Text(
-                text = stringResource(R.string.booking_no_vehicles, parkingZone),
+                text = stringResource(R.string.booking_no_vehicles, translatedZone),
                 color = Color.Red,
                 fontWeight = FontWeight.Bold
             )
@@ -353,7 +355,7 @@ fun TimeAndDurationSection(viewModel: BookingViewModel, isReadOnly: Boolean) {
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
-                text = if (isReadOnly) "Selected Start Time" else stringResource(R.string.booking_start_time),
+                text = if (isReadOnly) stringResource(R.string.booking_selected_start_time) else stringResource(R.string.booking_start_time),
                 style = MaterialTheme.typography.labelSmall,
                 color = Color.Gray
             )
@@ -406,7 +408,7 @@ fun DurationBlock(viewModel: BookingViewModel) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Row(verticalAlignment = Alignment.Bottom) {
                 Text(text = viewModel.duration.toInt().toString(), style = MaterialTheme.typography.displayMedium, color = LksOrange, fontWeight = FontWeight.Bold)
-                Text(stringResource(R.string.booking_hours_unit), modifier = Modifier.padding(bottom = 12.dp), color = LksOrange, fontWeight = FontWeight.Medium)
+                Text(" " + stringResource(R.string.booking_hours_unit), modifier = Modifier.padding(bottom = 12.dp), color = LksOrange, fontWeight = FontWeight.Medium)
             }
             TimeSlider(
                 currentHours = viewModel.duration,
@@ -525,4 +527,13 @@ private fun getVehicleIcon(type: VehicleType) = when (type) {
     VehicleType.ELECTRIC -> Icons.Default.ElectricCar
     VehicleType.ADAPTED -> Icons.AutoMirrored.Filled.Accessible
     else -> Icons.Default.DirectionsCar
+}
+
+fun getZoneDisplayNameRes(zoneName: String): Int {
+    return when (zoneName) {
+        com.lksnext.ParkingMMartinez.model.ZoneNames.DISABILITY -> R.string.zone_disability
+        com.lksnext.ParkingMMartinez.model.ZoneNames.EV -> R.string.zone_ev
+        com.lksnext.ParkingMMartinez.model.ZoneNames.MOTORCYCLE -> R.string.zone_motorcycle
+        else -> R.string.zone_standard
+    }
 }

@@ -1,0 +1,149 @@
+<resources>
+    <string name="app_name">lksParking</string>
+
+    <string name="booking_header_label">STAI PRENOTANDO UN POSTO IN</string>
+    <string name="booking_select_vehicle">Seleziona veicolo</string>
+    <string name="booking_selected_start_time">Orario di inizio selezionato</string>
+    <string name="booking_manage">Gestisci</string>
+    <string name="booking_error_active">Hai già una prenotazione attiva.</string>
+    <string name="booking_error_past">Impossibile prenotare nel passato. Seleziona un orario futuro.</string>
+    <string name="booking_btn_confirm">Conferma prenotazione</string>
+    <string name="booking_btn_update">Aggiorna prenotazione</string>
+    <string name="booking_no_vehicles">Nessun veicolo compatibile trovato per %1$s.</string>
+    <string name="booking_add_vehicle_hint">Per favore, aggiungi un veicolo di questo tipo in \'Gestisci\' per continuare.</string>
+    <string name="booking_select_date">Seleziona data</string>
+    <string name="booking_time_duration">Orario e durata</string>
+    <string name="booking_start_time">ORARIO DI INIZIO</string>
+    <string name="booking_duration_label">DURATA</string>
+    <string name="booking_ending_at">TERMINA ALLE %1$s</string>
+    <string name="booking_next_day_warning">(+1 giorno)</string>
+    <string name="booking_hours_unit">ore</string>
+    <string name="booking_today">OGGI</string>
+    <string name="booking_change_vehicle_hint">Clicca qui per cambiare il tuo veicolo!</string>
+    <string name="booking_error_overlap">Prossima prenotazione alle %1$s, quindi puoi prenotare al massimo %2$s ore</string>
+
+
+    <string name="register_title">Le mie prenotazioni</string>
+    <string name="register_empty">Nessuna prenotazione attiva</string>
+
+    <string name="reservation_missed">NON PRESENTATO</string>
+    <string name="reservation_past">PASSATA</string>
+    <string name="reservation_checked_in">CHECK-IN EFFETTUATO</string>
+    <string name="reservation_done">COMPLETATA</string>
+
+    <string name="notification_tab_active">Attive (%1$d)</string>
+    <string name="notification_tab_past">Cronologia (%1$d)</string>
+    <string name="notification_past_empty">Nessun registro trovato nella cronologia</string>
+
+    <string name="map_header_title">LKS Next Parking</string>
+    <string name="map_header_subtitle">Seleziona una zona per prenotare istantaneamente</string>
+
+    <string name="profile_vehicles">I miei veicoli</string>
+    <string name="profile_add_vehicle_title">+ Aggiungi nuovo veicolo</string>
+    <string name="profile_label_nickname">NOME RECAPITO</string>
+    <string name="profile_hint_nickname">Nome recapito (es. Auto lavoro)</string>
+    <string name="profile_placeholder_nickname">es. Auto lavoro</string>
+    <string name="profile_label_plate">TARGA</string>
+    <string name="profile_hint_plate">Targa</string>
+    <string name="profile_placeholder_plate">1234 ABC</string>
+    <string name="profile_label_type">TIPO DI VEICOLO</string>
+    <string name="profile_btn_save">Salva veicolo</string>
+    <string name="profile_delete_title">Conferma eliminazione</string>
+    <string name="profile_delete_msg">Sei sicuro di voler rimuovere %1$s? Questa azione non può essere annullata.</string>
+    <string name="btn_cancel">Annulla</string>
+    <string name="btn_delete">Elimina</string>
+    <string name="error_empty_fields">I campi non possono essere vuoti.</string>
+    <string name="error_duplicate_plate">Esiste già un veicolo con questa targa.</string>
+    <string name="error_active_booking">Impossibile eliminare: questo veicolo ha una prenotazione di parcheggio attiva.</string>
+    <string name="error_generic">Si è verificato un errore imprevisto. Per favore, riprova.</string>
+
+    <string name="login_welcome">Bentornato</string>
+    <string name="login_username">Nome utente</string>
+    <string name="login_password">Password</string>
+    <string name="login_remember">Ricordami</string>
+    <string name="login_forgot">Password dimenticata?</string>
+    <string name="login_btn">ACCEDI</string>
+    <string name="login_no_account">Non hai un account?</string>
+    <string name="login_register_link">Registrati qui!</string>
+    <string name="login_email_label">Email</string>
+
+    <string name="reg_title">Registrati</string>
+    <string name="reg_label_name">Nome</string>
+    <string name="reg_label_plate">Targa</string>
+    <string name="reg_vehicle_type">Tipo di veicolo</string>
+    <string name="reg_vehicle_name">Nome veicolo</string>
+    <string name="reg_btn">REGISTRATI</string>
+    <string name="reg_label_lastname">Cognome</string>
+    <string name="reg_label_email">Email</string>
+    <string name="reg_label_confirm_password">Conferma password</string>
+    <string name="reg_already_have_account">Hai già un account? </string>
+    <string name="reg_login_link">Accedi</string>
+
+    <string name="rec_title">Recupera la tua password</string>
+    <string name="rec_placeholder">Usa la tua email di registrazione</string>
+    <string name="rec_btn_continue">Continua</string>
+
+    <string name="err_login_failed">Email o password non valida</string>
+    <string name="err_invalid_email">Inserisci un indirizzo email valido</string>
+    <string name="err_password_short">La password deve contenere almeno 6 caratteri</string>
+    <string name="err_password_mismatch">Le password non corrispondono</string>
+    <string name="err_invalid_plate">Il formato della targa non è valido (1234ABC)</string>
+    <string name="err_user_exists">Questo nome utente è già utilizzato</string>
+    <string name="err_registration_failed">Registrazione fallita</string>
+
+    <string name="notification_channel_name">Avvisi di parcheggio</string>
+    <string name="notification_default_title">Aggiornamento parcheggio</string>
+    <string name="notification_default_body">Hai ricevuto un nuovo aggiornamento.</string>
+
+    <string name="notification_screen_title">Centro avvisi attivo</string>
+    <string name="notification_screen_body">Riceverai avvisi in tempo reale sul tuo dispositivo quando le tue prenotazioni stanno per iniziare, scadere o quando hai dimenticato di effettuare il check-in.</string>
+    <string name="notification_screen_icon_desc">Icona avvisi attivi</string>
+
+    <string name="notification_channel_id">parking_alerts_channel</string>
+    <string name="notification_title_start">La tua prenotazione inizia presto!</string>
+    <string name="notification_body_start">Mancano 15 minuti all\'inizio della tua prenotazione in %1$s (%2$s).</string>
+
+    <string name="notification_title_end">Il tempo a disposizione sta per scadere!</string>
+    <string name="notification_body_end">Mancano 15 minuti alla fine della tua prenotazione. Ricordati di spostare il veicolo.</string>
+    <string name="notification_title_default">Avviso di parcheggio</string>
+
+    <string name="zone_default_standard">Zona Standard</string>
+
+    <string name="notification_title_checkin_reminder">Check-In in sospeso</string>
+    <string name="notification_body_checkin_reminder">Hai una prenotazione attiva in %1$s. Effettua il check-in ora o cancella la prenotazione se non intendi utilizzarla.</string>
+    <string name="notification_unrestricted_battery">Per ricevere gli avvisi con l\'app chiusa, tocca qui, abilita \"Batteria senza restrizioni\" e riavvia l\'app.</string>
+
+    <string name="notification_system_alerts">Avvisi di sistema</string>
+    <string name="notification_missed_title">Prenotazione cancellata automaticamente</string>
+    <string name="notification_missed_body">La tua prenotazione per il veicolo %1$s (%2$s) nella Zona %3$s il %4$s (dalle %5$s alle %6$s) è stata cancellata per mancato check-in entro l\'orario stabilito.</string>
+
+    <string name="footer_map">Mappa</string>
+    <string name="footer_bookings">Prenotazioni</string>
+    <string name="footer_alerts">Avvisi</string>
+    <string name="footer_profile">Profilo</string>
+
+    <string name="timepick_confirm">Conferma</string>
+    <string name="timepick_cancel">Annulla</string>
+    <string name="timepick_selecttime">Seleziona orario</string>
+
+    <string name="label_location">Livello 1</string>
+    <string name="label_date">DATA</string>
+    <string name="label_time">ORA</string>
+    <string name="label_vehicle">VEICOLO</string>
+    <string name="label_available">DISPONIBILE</string>
+    <string name="label_full">PIENO</string>
+    <string name="status_active">ATTIVA</string>
+    <string name="btn_edit">Modifica</string>
+    <string name="btn_check_in">Fai check-in ora</string>
+
+    <string name="zone_standard">Zona Standard</string>
+    <string name="zone_disability">Zona Disabili</string>
+    <string name="zone_ev">Zona di ricarica EV</string>
+    <string name="zone_motorcycle">Zona Moto</string>
+
+    <string name="vehicle_type_standard">Standard</string>
+    <string name="vehicle_type_motorcycle">Moto</string>
+    <string name="vehicle_type_electric">Elettrico</string>
+    <string name="vehicle_type_adapted">Accessibile</string>
+
+</resources>

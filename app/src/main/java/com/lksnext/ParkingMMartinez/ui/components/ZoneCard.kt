@@ -17,6 +17,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.lksnext.ParkingMMartinez.model.ParkingZone
 import com.lksnext.ParkingMMartinez.R
+import com.lksnext.ParkingMMartinez.model.ZoneNames
 import com.lksnext.ParkingMMartinez.ui.theme.LksGreen
 import com.lksnext.ParkingMMartinez.ui.theme.verdePino
 
@@ -77,7 +78,7 @@ private fun ZoneIconSection(zoneName: String, zoneColor: Color, isZoneFull: Bool
 private fun ZoneInfoSection(zone: ParkingZone, isZoneFull: Boolean, modifier: Modifier = Modifier) {
     Column(modifier = modifier) {
         Text(
-            text = zone.name,
+            text = stringResource(id = getZoneDisplayNameRes(zone.name)),
             fontWeight = FontWeight.Bold,
             color = if (isZoneFull) Color.Gray else zone.color
         )
@@ -100,7 +101,7 @@ private fun ZoneBadgeSection(isZoneFull: Boolean) {
         shape = RoundedCornerShape(8.dp)
     ) {
         Text(
-            text = if (isZoneFull) "FULL" else stringResource(R.string.label_available),
+            text = if (isZoneFull) stringResource(R.string.label_full) else stringResource(R.string.label_available),
             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
             color = Color.White,
             style = MaterialTheme.typography.labelSmall,
@@ -123,5 +124,14 @@ fun getIconForZone(zoneName: String): ImageVector {
         zoneName.contains("Disability", ignoreCase = true) || zoneName.contains("Accessible", ignoreCase = true) -> Icons.AutoMirrored.Default.Accessible
         zoneName.contains("Motorcycle", ignoreCase = true) -> Icons.Default.TwoWheeler
         else -> Icons.Default.LocalParking
+    }
+}
+
+fun getZoneDisplayNameRes(zoneName: String): Int {
+    return when (zoneName) {
+        ZoneNames.DISABILITY -> R.string.zone_disability
+        ZoneNames.EV -> R.string.zone_ev
+        ZoneNames.MOTORCYCLE -> R.string.zone_motorcycle
+        else -> R.string.zone_standard
     }
 }

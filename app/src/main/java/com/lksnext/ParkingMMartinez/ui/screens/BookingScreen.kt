@@ -19,6 +19,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -49,9 +50,62 @@ fun BookingScreen(
     onConfirmBooking: () -> Unit = {},
     onManageVehicles: () -> Unit = {}
 ) {
-    val todayStr = stringResource(R.string.booking_today)
     val isButtonEnabled = viewModel.isButtonEnabled
+    val isCheckedIn = viewModel.isEditingCheckedIn
 
+    BookingInitializationEffect(viewModel, initialZone, initialHour, initialMinute)
+
+    DisposableEffect(Unit) {
+        onDispose { viewModel.cancelEditing() }
+    }
+
+    if (viewModel.showTimePicker) {
+        BookingTimePickerWrapper(viewModel)
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+    ) {
+        BookingTopHeader(zone = viewModel.parkingZone)
+
+        Column(modifier = Modifier.padding(20.dp)) {
+            VehicleSection(
+                viewModel = viewModel,
+                onManageVehicles = onManageVehicles,
+                isEnabled = !isCheckedIn
+            )
+
+            Spacer(Modifier.height(16.dp))
+
+            DateSelectionSection(viewModel = viewModel, isCheckedIn = isCheckedIn)
+
+            TimeAndDurationSection(
+                viewModel = viewModel,
+                isReadOnly = viewModel.editingReservationId == null || isCheckedIn
+            )
+
+            Spacer(Modifier.height(32.dp))
+
+            BookingActionSection(
+                viewModel = viewModel,
+                isButtonEnabled = isButtonEnabled,
+                onConfirmBooking = onConfirmBooking
+            )
+
+            Spacer(Modifier.height(24.dp))
+        }
+    }
+}
+
+@Composable
+private fun BookingInitializationEffect(
+    viewModel: BookingViewModel,
+    initialZone: String,
+    initialHour: Int,
+    initialMinute: Int
+) {
     LaunchedEffect(initialZone, initialHour, initialMinute) {
         viewModel.setZone(initialZone)
 
@@ -63,85 +117,54 @@ fun BookingScreen(
         viewModel.loadAndFilterVehicles()
         viewModel.validateBooking()
     }
+}
 
-    DisposableEffect(Unit) {
-        onDispose { viewModel.cancelEditing() }
-    }
+@Composable
+private fun BookingTimePickerWrapper(viewModel: BookingViewModel) {
+    LksTimePicker(
+        onConfirm = { h, m ->
+            viewModel.onTimeChange(h, m)
+            viewModel.onShowTimePickerChange(false)
+        },
+        onDismiss = { viewModel.onShowTimePickerChange(false) },
+        modifier = Modifier.testTag(TestTags.TIME_PICKER_DIALOG),
+        confirmButtonModifier = Modifier.testTag(TestTags.TIME_PICKER_CONFIRM),
+        dismissButtonModifier = Modifier.testTag(TestTags.TIME_PICKER_CANCEL)
+    )
+}
 
-    if (viewModel.showTimePicker) {
-        LksTimePicker(
-            onConfirm = { h, m ->
-                viewModel.onTimeChange(h, m)
-                viewModel.onShowTimePickerChange(false)
-            },
-            onDismiss = { viewModel.onShowTimePickerChange(false) },
-            modifier = Modifier.testTag(TestTags.TIME_PICKER_DIALOG),
-            confirmButtonModifier = Modifier.testTag(TestTags.TIME_PICKER_CONFIRM),
-            dismissButtonModifier = Modifier.testTag(TestTags.TIME_PICKER_CANCEL)
-        )
-    }
+@Composable
+fun DateSelectionSection(viewModel: BookingViewModel, isCheckedIn: Boolean) {
+    if (viewModel.editingReservationId == null) return
 
-    Column(
+    val todayStr = stringResource(R.string.booking_today)
+
+    SectionHeader(title = stringResource(R.string.booking_select_date))
+    Row(
         modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
+            .fillMaxWidth()
+            .padding(vertical = 8.dp)
+            .horizontalScroll(rememberScrollState()),
+        horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        BookingTopHeader(zone = viewModel.parkingZone)
+        viewModel.availableDates.forEach { (dayInt, label) ->
+            val displayLabel = if (label == "TODAY") todayStr else label
+            val isSelected = isDateMatchingDay(viewModel.selectedDate, dayInt)
 
-        Column(modifier = Modifier.padding(20.dp)) {
-
-            // --- VEHÍCULO ---
-            VehicleSection(viewModel = viewModel, onManageVehicles = onManageVehicles)
-
-            Spacer(Modifier.height(16.dp))
-
-            // --- FECHAS (EDICIÓN) ---
-            if (viewModel.editingReservationId != null) {
-                SectionHeader(title = stringResource(R.string.booking_select_date))
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 8.dp)
-                        .horizontalScroll(rememberScrollState()),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-                    viewModel.availableDates.forEach { (dayInt, label) ->
-                        val displayLabel = if (label == "TODAY") todayStr else label
-                        val isSelected = isDateMatchingDay(viewModel.selectedDate, dayInt)
-
-                        DateItem(
-                            day = dayInt.toString(),
-                            label = displayLabel,
-                            isSelected = isSelected,
-                            modifier = Modifier.testTag("${TestTags.BOOKING_DATE_ITEM_PREFIX}$dayInt"),
-                            onClick = {
-                                val targetDate = calculateTargetDate(dayInt)
-                                viewModel.onDateSelected(targetDate)
-                            }
-                        )
+            DateItem(
+                day = dayInt.toString(),
+                label = displayLabel,
+                isSelected = isSelected,
+                modifier = Modifier.testTag("${TestTags.BOOKING_DATE_ITEM_PREFIX}$dayInt"),
+                onClick = {
+                    if (!isCheckedIn) {
+                        viewModel.onDateSelected(calculateTargetDate(dayInt))
                     }
                 }
-                Spacer(Modifier.height(24.dp))
-            }
-
-            // --- TIEMPO Y DURACIÓN ---
-            TimeAndDurationSection(
-                viewModel = viewModel,
-                isReadOnly = viewModel.editingReservationId == null
             )
-
-            Spacer(Modifier.height(32.dp))
-
-            // --- CONFIRMACIÓN ---
-            BookingActionSection(
-                viewModel = viewModel,
-                isButtonEnabled = isButtonEnabled,
-                onConfirmBooking = onConfirmBooking
-            )
-
-            Spacer(Modifier.height(24.dp))
         }
     }
+    Spacer(Modifier.height(24.dp))
 }
 
 @Composable
@@ -172,10 +195,10 @@ fun BookingTopHeader(zone: String) {
 }
 
 @Composable
-fun VehicleSection(viewModel: BookingViewModel, onManageVehicles: () -> Unit) {
+fun VehicleSection(viewModel: BookingViewModel, onManageVehicles: () -> Unit, isEnabled: Boolean = true) {
     SectionHeader(
         title = stringResource(R.string.booking_select_vehicle),
-        actionText = stringResource(R.string.booking_manage),
+        actionText = if (isEnabled) stringResource(R.string.booking_manage) else null,
         onActionClick = onManageVehicles,
         actionModifier = Modifier.testTag(TestTags.BOOKING_MANAGE_VEHICLES_BTN)
     )
@@ -192,15 +215,15 @@ fun VehicleSection(viewModel: BookingViewModel, onManageVehicles: () -> Unit) {
                 .fillMaxWidth()
                 .padding(vertical = 8.dp)
                 .testTag(TestTags.BOOKING_SELECTED_VEHICLE_CARD),
-            border = BorderStroke(2.dp, LksOrange),
+            border = BorderStroke(2.dp, if (isEnabled) LksOrange else Color.LightGray),
             shape = RoundedCornerShape(16.dp),
             colors = CardDefaults.outlinedCardColors(containerColor = Color.White)
         ) {
             Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                Icon(vehicleIcon, null, tint = LksOrange)
+                Icon(vehicleIcon, null, tint = if (isEnabled) LksOrange else Color.Gray)
                 Spacer(Modifier.width(16.dp))
                 Column {
-                    Text(vehicle.name, fontWeight = FontWeight.Bold)
+                    Text(vehicle.name, fontWeight = FontWeight.Bold, color = if (isEnabled) Color.Unspecified else Color.Gray)
                     Text(vehicle.plate, color = Color.Gray)
                 }
             }
@@ -246,8 +269,8 @@ fun TimeAndDurationSection(viewModel: BookingViewModel, isReadOnly: Boolean) {
                     border = BorderStroke(1.dp, lightGray)
                 ) {
                     Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
-                        Text(String.format("%02d:%02d", viewModel.startHour, viewModel.startMinute), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                        Icon(Icons.Default.AccessTime, null, tint = LksOrange)
+                        Text(String.format("%02d:%02d", viewModel.startHour, viewModel.startMinute), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = Color.DarkGray)
+                        Icon(Icons.Default.AccessTime, null, tint = Color.Gray)
                     }
                 }
             } else {
@@ -260,7 +283,7 @@ fun TimeAndDurationSection(viewModel: BookingViewModel, isReadOnly: Boolean) {
                 ) {
                     Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
                         Text(String.format("%02d:%02d", viewModel.startHour, viewModel.startMinute), style = MaterialTheme.typography.titleLarge)
-                        Icon(Icons.Default.AccessTime, null, tint = Color.Gray)
+                        Icon(Icons.Default.AccessTime, null, tint = LksOrange)
                     }
                 }
             }
@@ -299,37 +322,11 @@ fun DurationBlock(viewModel: BookingViewModel) {
 
 @Composable
 fun BookingActionSection(viewModel: BookingViewModel, isButtonEnabled: Boolean, onConfirmBooking: () -> Unit) {
+    val context = LocalContext.current
+
     Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-
         if (!isButtonEnabled) {
-            when {
-                viewModel.isOverlapConflict -> {
-                    Text(
-                        text = stringResource(R.string.booking_error_overlap, viewModel.nextCollisionTime ?: "", viewModel.maxAllowedHours ?: 0f),
-                        color = Color.Red,
-                        style = MaterialTheme.typography.bodySmall,
-                        modifier = Modifier.padding(bottom = 8.dp).testTag(TestTags.BOOKING_ERROR_OVERLAP)
-                    )
-                }
-
-                viewModel.isDateTimeValid() && viewModel.selectedVehicle != null -> {
-                    Text(
-                        text = stringResource(R.string.booking_error_active),
-                        color = Color.Red,
-                        style = MaterialTheme.typography.bodySmall,
-                        modifier = Modifier.padding(bottom = 8.dp).testTag(TestTags.BOOKING_ERROR_ACTIVE)
-                    )
-                }
-
-                !viewModel.isDateTimeValid() -> {
-                    Text(
-                        text = stringResource(R.string.booking_error_past),
-                        color = Color.Red,
-                        style = MaterialTheme.typography.bodySmall,
-                        modifier = Modifier.padding(bottom = 8.dp).testTag(TestTags.BOOKING_ERROR_PAST)
-                    )
-                }
-            }
+            BookingErrorMessages(viewModel)
         }
 
         LksButton(
@@ -339,12 +336,42 @@ fun BookingActionSection(viewModel: BookingViewModel, isButtonEnabled: Boolean, 
             onClick = {
                 val realZone = ParkingManager.zones.find { it.name == viewModel.parkingZone } ?: ParkingManager.zones.first()
                 viewModel.selectedVehicle?.let { vehicle ->
-                    viewModel.confirmReservation(vehicle, realZone) {
+                    viewModel.confirmReservation(context, vehicle, realZone) {
                         onConfirmBooking()
                     }
                 }
             }
         )
+    }
+}
+
+@Composable
+private fun BookingErrorMessages(viewModel: BookingViewModel) {
+    when {
+        viewModel.isOverlapConflict -> {
+            Text(
+                text = stringResource(R.string.booking_error_overlap, viewModel.nextCollisionTime ?: "", viewModel.maxAllowedHours ?: 0f),
+                color = Color.Red,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(bottom = 8.dp).testTag(TestTags.BOOKING_ERROR_OVERLAP)
+            )
+        }
+        viewModel.isDateTimeValid() && viewModel.selectedVehicle != null -> {
+            Text(
+                text = stringResource(R.string.booking_error_active),
+                color = Color.Red,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(bottom = 8.dp).testTag(TestTags.BOOKING_ERROR_ACTIVE)
+            )
+        }
+        !viewModel.isDateTimeValid() -> {
+            Text(
+                text = stringResource(R.string.booking_error_past),
+                color = Color.Red,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(bottom = 8.dp).testTag(TestTags.BOOKING_ERROR_PAST)
+            )
+        }
     }
 }
 

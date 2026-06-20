@@ -26,6 +26,15 @@
     <string name="register_title">My Reservations</string>
     <string name="register_empty">No active reservations</string>
 
+    <string name="reservation_missed">MISSED</string>
+    <string name="reservation_past">PAST</string>
+    <string name="reservation_checked_in">CHECKED IN</string>
+    <string name="reservation_done">DONE</string>
+
+    <string name="notification_tab_active">Active (%1$d)</string>
+    <string name="notification_tab_past">History (%1$d)</string>
+    <string name="notification_past_empty">No history logs found</string>
+
     <!-- TEXTO MAP SCREEN EN INGLES -->
     <string name="map_header_title">LKS Next Parking</string>
     <string name="map_header_subtitle">Select a zone to book instantly</string>
@@ -79,6 +88,33 @@
     <string name="err_invalid_plate">License plate format is invalid (1234ABC)</string>
     <string name="err_user_exists">This username is already taken</string>
     <string name="err_registration_failed">Registration failed</string>
+
+    <!-- TEXTO DE LAS NOTIFICACIONES -->
+    <string name="notification_channel_name">Parking Alerts</string>
+    <string name="notification_default_title">Parking Update</string>
+    <string name="notification_default_body">You have received a new update.</string>
+
+    <string name="notification_screen_title">Alerts Center Active</string>
+    <string name="notification_screen_body">You will receive real-time alerts on your device when your reservations are about to start, expire, or when you forgot about doing the check-in.</string>
+    <string name="notification_screen_icon_desc">Active alerts icon</string>
+
+    <string name="notification_channel_id">parking_alerts_channel</string>
+    <string name="notification_title_start">Your booking starts soon!</string>
+    <string name="notification_body_start">There are 15 minutes left until your booking begins in %1$s (%2$s).</string>
+
+    <string name="notification_title_end">Your time is running out!</string>
+    <string name="notification_body_end">There are 15 minutes left until your booking ends. Remember to remove your vehicle.</string>
+    <string name="notification_title_default">Parking Alert</string>
+
+    <string name="zone_default_standard">Standard Zone</string>
+
+    <string name="notification_title_checkin_reminder">Pending Check-In</string>
+    <string name="notification_body_checkin_reminder">You have a reservation active in %1$s. Please check in now or cancel your booking if you are not using it.</string>
+    <string name="notification_unrestricted_battery">To receive alerts with the app closed, tap here and enable "Unrestricted battery" and restart the app.</string>
+
+    <string name="notification_system_alerts">System Alerts</string>
+    <string name="notification_missed_title">Reservation Automatically Cancelled</string>
+    <string name="notification_missed_body">Your reservation for vehicle %1$s (%2$s) in Zone %3$s on %4$s (%5$s to %6$s) was cancelled due to missing the check-in time.</string>
 
     <!-- TEXTO DE LOS COMPONENTES EN INGLES -->
     <string name="footer_map">Map</string>

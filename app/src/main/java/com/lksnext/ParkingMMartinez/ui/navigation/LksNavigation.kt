@@ -28,6 +28,10 @@ import com.lksnext.ParkingMMartinez.ui.viewmodel.RecoveryViewModel
 import com.lksnext.ParkingMMartinez.ui.viewmodel.RegistrationViewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.google.firebase.Firebase
+import com.lksnext.ParkingMMartinez.data.repository.FirebaseNotificationRepository
+import com.lksnext.ParkingMMartinez.ui.screens.NotificationScreen
+import com.lksnext.ParkingMMartinez.ui.viewmodel.NotificationViewModel
 
 @Composable
 fun LksNavigation() {
@@ -36,6 +40,7 @@ fun LksNavigation() {
     val bookingRepository = FirebaseBookingRepository()
     val userRepository = FirebaseUserRepository()
     val vehicleRepository = FirebaseVehicleRepository()
+    val notificationRepository = FirebaseNotificationRepository()
     val session = SessionManager(context)
 
     val navController = rememberNavController()
@@ -86,6 +91,14 @@ fun LksNavigation() {
         factory = viewModelFactory {
             addInitializer(ProfileViewModel::class) {
                 ProfileViewModel(vehicleRepository, userRepository, bookingRepository, session)
+            }
+        }
+    )
+
+    val notificationViewModel: NotificationViewModel = viewModel(
+        factory = viewModelFactory {
+            addInitializer(NotificationViewModel::class) {
+                NotificationViewModel(notificationRepository, session)
             }
         }
     )
@@ -176,7 +189,6 @@ fun LksNavigation() {
                 )
             ) { backStackEntry ->
                 val zoneName = backStackEntry.arguments?.getString("zoneName") ?: "Standard Zone"
-                val day = backStackEntry.arguments?.getInt("day") ?: 0
                 val hour = backStackEntry.arguments?.getInt("hour") ?: 8
                 val minute = backStackEntry.arguments?.getInt("minute") ?: 0
 
@@ -218,7 +230,10 @@ fun LksNavigation() {
                 )
             }
 
-            composable(Screen.Alerts.route) { NotificationScreen() }
+            // --- ALERTS ---
+            composable(Screen.Alerts.route) {
+                NotificationScreen(viewModel = notificationViewModel)
+            }
         }
     }
 }

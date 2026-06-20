@@ -83,6 +83,7 @@ dependencies {
     implementation(libs.firebase.auth)
     implementation("com.google.firebase:firebase-firestore")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:$coroutinesVersion")
+    implementation("com.google.firebase:firebase-messaging")
     testImplementation("org.mockito:mockito-core:$mockitoVersion")
     testImplementation("androidx.arch.core:core-testing:$archVersion")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutinesVersion")

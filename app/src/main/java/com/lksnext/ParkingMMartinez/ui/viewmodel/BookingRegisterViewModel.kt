@@ -37,14 +37,7 @@ class BookingRegisterViewModel(
             val nowMillis = System.currentTimeMillis()
 
             val (past, active) = allReservations.partition { res ->
-                val endPast = getReservationEndMillis(res) <= nowMillis
-                val missedCheckIn = !res.isCheckedIn && (getReservationStartMillis(res) + 15 * 60 * 1000 < nowMillis)
-
-                if (missedCheckIn && !res.isCheckedIn) {
-                    // Opcional: Aquí podrías disparar un borrado/actualización en background si tu arquitectura lo requiere
-                }
-
-                endPast || missedCheckIn
+                getReservationEndMillis(res) <= nowMillis
             }
 
             activeReservations = active.sortedBy { getReservationStartMillis(it) }
@@ -56,15 +49,15 @@ class BookingRegisterViewModel(
         val now = System.currentTimeMillis()
         val startMillis = getReservationStartMillis(res)
         val windowStart = startMillis - 15 * 60 * 1000
-        val windowEnd = startMillis + 15 * 60 * 1000
+        val windowEnd = getReservationEndMillis(res) // Activo desde 15 min antes hasta que termine por completo
         return now in windowStart..windowEnd
     }
 
     fun doCheckIn(reservation: Reservation) {
         viewModelScope.launch {
             val updatedReservation = reservation.copy(isCheckedIn = true)
-            repository.saveReservation(updatedReservation) // Actualiza en la base de datos / repo
-            loadReservations() // Refresca las listas de la UI
+            repository.saveReservation(updatedReservation)
+            loadReservations()
         }
     }
 
@@ -99,9 +92,11 @@ class BookingRegisterViewModel(
             val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
             val idAlertaInicio = reservationId.hashCode() + 1
             val idAlertaFin = reservationId.hashCode() + 2
+            val idAlertaCheckIn = reservationId.hashCode() + 3
 
             cancelarAlarmaExistente(context, alarmManager, idAlertaInicio)
             cancelarAlarmaExistente(context, alarmManager, idAlertaFin)
+            cancelarAlarmaExistente(context, alarmManager, idAlertaCheckIn)
 
             loadReservations()
         }

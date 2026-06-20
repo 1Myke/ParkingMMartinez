@@ -187,11 +187,10 @@ class BookingViewModel (
             hasActiveReservation = allBookings.any { booking ->
                 val isUserReservation = booking.vehicle.userId == currentUserId
 
-                val isLiveOrCheckedIn = !isCheckInWindowExpired(booking, nowMillis) || booking.isCheckedIn
 
                 val isTotallyFinished = isReservationPastEntirely(booking, nowMillis)
 
-                isUserReservation && isLiveOrCheckedIn && !isTotallyFinished
+                isUserReservation && !isTotallyFinished
             }
         }
     }
@@ -307,10 +306,9 @@ class BookingViewModel (
 
         val hasRealActive = allBookings.any { booking ->
             val isUserReservation = booking.vehicle.userId == currentUserId
-            val isLiveOrCheckedIn = !isCheckInWindowExpired(booking, nowMillis) || booking.isCheckedIn
             val isTotallyFinished = isReservationPastEntirely(booking, nowMillis)
 
-            isUserReservation && isLiveOrCheckedIn && !isTotallyFinished
+            isUserReservation && !isTotallyFinished
         }
         if (hasRealActive) return false
 
@@ -356,10 +354,14 @@ class BookingViewModel (
 
         val idAlertaInicio = reservation.id.hashCode() + 1
         val idAlertaFin = reservation.id.hashCode() + 2
+        val idAlertaCheckIn = reservation.id.hashCode() + 3
 
         // --- CANCELAR ALARMAS VIEJAS POR SI ES UNA EDICIÓN ---
         cancelarAlarmaExistente(context, alarmManager, idAlertaInicio)
         cancelarAlarmaExistente(context, alarmManager, idAlertaFin)
+        cancelarAlarmaExistente(context, alarmManager, idAlertaCheckIn)
+
+        val nowMillis = System.currentTimeMillis()
 
         // --- 1. CONFIGURAR NUEVA ALERTA DE INICIO (15 minutos antes) ---
         val calInicio = Calendar.getInstance().apply {
@@ -379,7 +381,26 @@ class BookingViewModel (
             configurarAlertaNativa(context, alarmManager, calInicio.timeInMillis, idAlertaInicio, tituloInicio, cuerpoInicio)
         }
 
-        // --- 2. CONFIGURAR NUEVA ALERTA DE FIN (15 minutos antes de salir) ---
+        // --- 2. CONFIGURAR NUEVA ALERTA DE RECORDATORIO CHECK-IN (+15 minutos de la hora de inicio) ---
+        if (!reservation.isCheckedIn) {
+            val calCheckIn = Calendar.getInstance().apply {
+                time = reservation.date
+                set(Calendar.HOUR_OF_DAY, reservation.startTime.hour)
+                set(Calendar.MINUTE, reservation.startTime.minute)
+                set(Calendar.SECOND, 0)
+                set(Calendar.MILLISECOND, 0)
+                add(Calendar.MINUTE, 15) // 15 minutos (ahora mismo esta en 1 minuto)
+            }
+
+            if (calCheckIn.timeInMillis > nowMillis) {
+                val tituloCheckIn = context.getString(R.string.notification_title_checkin_reminder)
+                val cuerpoCheckIn = context.getString(R.string.notification_body_checkin_reminder, reservation.zone.name)
+
+                configurarAlertaNativa(context, alarmManager, calCheckIn.timeInMillis, idAlertaCheckIn, tituloCheckIn, cuerpoCheckIn)
+            }
+        }
+
+        // --- 3. CONFIGURAR NUEVA ALERTA DE FIN (15 minutos antes de salir) ---
         val calFin = Calendar.getInstance().apply {
             time = reservation.date
             set(Calendar.HOUR_OF_DAY, reservation.endTime.hour)
@@ -393,7 +414,7 @@ class BookingViewModel (
             add(Calendar.MINUTE, -15)
         }
 
-        if (calFin.timeInMillis > System.currentTimeMillis()) {
+        if (calFin.timeInMillis > nowMillis) {
             val tituloFin = context.getString(R.string.notification_title_end)
             val cuerpoFin = context.getString(R.string.notification_body_end)
 
@@ -410,12 +431,19 @@ class BookingViewModel (
         title: String,
         body: String
     ) {
-        val intent = Intent(context, BookingAlarmReceiver::class.java).apply {
+        val appContext = context.applicationContext
+
+        val intent = Intent(appContext, BookingAlarmReceiver::class.java).apply {
             putExtra("NOTIFICATION_TITLE", title)
             putExtra("NOTIFICATION_BODY", body)
+            addFlags(Intent.FLAG_RECEIVER_FOREGROUND)
         }
+
         val pendingIntent = PendingIntent.getBroadcast(
-            context, notificationId, intent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+            appContext,
+            notificationId,
+            intent,
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
 
         try {
@@ -434,24 +462,14 @@ class BookingViewModel (
 
     // Función auxiliar para mantener limpio el flujo de cancelación
     private fun cancelarAlarmaExistente(context: Context, alarmManager: AlarmManager, idAlerta: Int) {
-        val intentCancel = Intent(context, BookingAlarmReceiver::class.java)
+        val appContext = context.applicationContext
+        val intentCancel = Intent(appContext, BookingAlarmReceiver::class.java)
         val piCancel = PendingIntent.getBroadcast(
-            context, idAlerta, intentCancel, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_NO_CREATE
+            appContext, idAlerta, intentCancel, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_NO_CREATE
         )
         if (piCancel != null) {
             alarmManager.cancel(piCancel)
             piCancel.cancel()
         }
-    }
-
-    private fun isCheckInWindowExpired(res: Reservation, nowMillis: Long): Boolean {
-        val startCal = Calendar.getInstance().apply {
-            time = res.date
-            set(Calendar.HOUR_OF_DAY, res.startTime.hour)
-            set(Calendar.MINUTE, res.startTime.minute)
-            set(Calendar.SECOND, 0)
-            set(Calendar.MILLISECOND, 0)
-        }
-        return startCal.timeInMillis < nowMillis
     }
 }

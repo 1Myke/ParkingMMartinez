@@ -15,11 +15,15 @@ import com.lksnext.ParkingMMartinez.data.SessionManager
 class BookingAlarmReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
-
         val sessionManager = SessionManager(context.applicationContext)
-        if (sessionManager.getActiveUserId() == null) {
-            // El usuario cerró sesión entonces frenamos el Receiver por completo. No se muestra la notificación.
-            return
+        val userId = try {
+            sessionManager.getActiveUserId()
+        } catch (e: Exception) {
+            null
+        }
+
+        if (userId == null) {
+            android.util.Log.d("ALARM_RECEIVER", "UserId es null en frío. Forzamos muestra para testeo.")
         }
 
         val defaultTitle = context.getString(R.string.notification_title_default)
@@ -27,7 +31,6 @@ class BookingAlarmReceiver : BroadcastReceiver() {
         val body = intent.getStringExtra("NOTIFICATION_BODY") ?: ""
 
         val channelId = context.getString(R.string.notification_channel_id)
-
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {

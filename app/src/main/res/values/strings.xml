@@ -108,6 +108,9 @@
 
     <string name="zone_default_standard">Standard Zone</string>
 
+    <string name="notification_title_checkin_reminder">Pending Check-In</string>
+    <string name="notification_body_checkin_reminder">You have a reservation active in %1$s. Please check in now or cancel your booking if you are not using it.</string>
+
     <string name="notification_system_alerts">System Alerts</string>
     <string name="notification_missed_title">Reservation Automatically Cancelled</string>
     <string name="notification_missed_body">Your reservation for vehicle %1$s (%2$s) in Zone %3$s on %4$s (%5$s to %6$s) was cancelled due to missing the check-in time.</string>

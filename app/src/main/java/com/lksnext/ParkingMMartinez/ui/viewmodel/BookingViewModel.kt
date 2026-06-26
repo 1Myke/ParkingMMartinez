@@ -244,7 +244,13 @@ class BookingViewModel (
                 val filtered = allVehicles.filter { it.type == requiredType }
 
                 userVehicles = filtered
-                selectedVehicle = if (filtered.isNotEmpty()) filtered[0] else null
+                val currentSelectionStillValid = filtered.any { it.plate == selectedVehicle?.plate }
+
+                if (!currentSelectionStillValid) {
+                    selectedVehicle = if (filtered.isNotEmpty()) filtered[0] else null
+                } else {
+                    selectedVehicle = filtered.find { it.plate == selectedVehicle?.plate }
+                }
 
                 validateBooking()
 

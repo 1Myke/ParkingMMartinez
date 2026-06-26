@@ -95,6 +95,11 @@
     <string name="err_invalid_plate">Ungültiges Kennzeichenformat (1234ABC)</string>
     <string name="err_user_exists">Dieser Benutzername ist bereits vergeben</string>
     <string name="err_registration_failed">Registrierung fehlgeschlagen</string>
+    <string name="error_invalid_email_or_not_found">Diese E-Mail ist in unserem System nicht registriert.</string>
+
+    <string name="rec_success_title">E-Mail Gesendet</string>
+    <string name="rec_success_body">Wenn die E-Mail registriert ist, erhalten Sie in Kürze einen Link. Bitte überprüfen Sie Ihren Posteingang und Ihren Spam-Ordner.</string>
+    <string name="btn_understood">Verstanden</string>
 
     <!-- TEXTO DE LAS NOTIFICACIONES EN ALEMÁN -->
     <string name="notification_channel_name">Parkbenachrichtigungen</string>
@@ -153,5 +158,19 @@
     <string name="vehicle_type_motorcycle">Motorrad</string>
     <string name="vehicle_type_electric">Elektro</string>
     <string name="vehicle_type_adapted">Barrierefrei</string>
+
+    <string name="settings_title">Einstellungen</string>
+    <string name="settings_language_section">App-Sprache</string>
+    <string name="settings_profile_section">Profil-Details</string>
+    <string name="settings_password_section">Passwort ändern</string>
+    <string name="settings_label_username">Benutzername</string>
+    <string name="settings_label_old_password">Aktuelles Passwort</string>
+    <string name="settings_label_new_password">Neues Passwort</string>
+    <string name="settings_btn_save_profile">Profil speichern</string>
+    <string name="settings_btn_change_password">Passwort aktualisieren</string>
+    <string name="error_password_too_short">Das Passwort muss mindestens 6 Zeichen lang sein.</string>
+    <string name="error_wrong_old_password">Das eingegebene aktuelle Passwort ist falsch.</string>
+    <string name="success_profile_updated">Profil erfolgreich aktualisiert!</string>
+    <string name="success_password_changed">Passwort erfolgreich aktualisiert!</string>
 
 </resources>

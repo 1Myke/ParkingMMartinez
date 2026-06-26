@@ -95,6 +95,11 @@
     <string name="err_invalid_plate">Le format de la plaque est invalide (1234ABC)</string>
     <string name="err_user_exists">Ce nom d\'utilisateur est déjà pris</string>
     <string name="err_registration_failed">L\'inscription a échoué</string>
+    <string name="error_invalid_email_or_not_found">Cet e-mail ne correspond à aucun utilisateur enregistré.</string>
+
+    <string name="rec_success_title">E-mail Envoyé</string>
+    <string name="rec_success_body">Si l\'e-mail est enregistré, vous recevrez un lien sous peu. Veuillez vérifier votre boîte de réception et votre dossier spam.</string>
+    <string name="btn_understood">Compris</string>
 
     <!-- TEXTO DE LAS NOTIFICACIONES EN FRANÇAIS -->
     <string name="notification_channel_name">Alertes de stationnement</string>
@@ -153,5 +158,19 @@
     <string name="vehicle_type_motorcycle">Moto</string>
     <string name="vehicle_type_electric">Électrique</string>
     <string name="vehicle_type_adapted">Adapté</string>
+
+    <string name="settings_title">Paramètres</string>
+    <string name="settings_language_section">Langue de l\'application</string>
+    <string name="settings_profile_section">Détails du profil</string>
+    <string name="settings_password_section">Modifier le mot de passe</string>
+    <string name="settings_label_username">Nom d\'utilisateur</string>
+    <string name="settings_label_old_password">Mot de passe actuel</string>
+    <string name="settings_label_new_password">Nouveau mot de passe</string>
+    <string name="settings_btn_save_profile">Enregistrer le profil</string>
+    <string name="settings_btn_change_password">Mettre à jour le mot de passe</string>
+    <string name="error_password_too_short">Le mot de passe doit contenir au moins 6 caractères.</string>
+    <string name="error_wrong_old_password">Le mot de passe actuel saisi est incorrect.</string>
+    <string name="success_profile_updated">Profil mis à jour avec succès !</string>
+    <string name="success_password_changed">Mot de passe mis à jour avec succès !</string>
 
 </resources>

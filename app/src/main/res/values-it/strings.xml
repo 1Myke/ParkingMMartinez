@@ -90,6 +90,11 @@
     <string name="err_invalid_plate">Il formato della targa non è valido (1234ABC)</string>
     <string name="err_user_exists">Questo nome utente è già utilizzato</string>
     <string name="err_registration_failed">Registrazione fallita</string>
+    <string name="error_invalid_email_or_not_found">Questa email non corrisponde a nessun utente registrato.</string>
+
+    <string name="rec_success_title">Email Inviata</string>
+    <string name="rec_success_body">Se l\'email è registrata, riceverai presto un link. Controlla la tua casella di posta e la cartella dello spam.</string>
+    <string name="btn_understood">Ho capito</string>
 
     <string name="notification_channel_name">Avvisi di parcheggio</string>
     <string name="notification_default_title">Aggiornamento parcheggio</string>
@@ -145,5 +150,19 @@
     <string name="vehicle_type_motorcycle">Moto</string>
     <string name="vehicle_type_electric">Elettrico</string>
     <string name="vehicle_type_adapted">Accessibile</string>
+
+    <string name="settings_title">Impostazioni</string>
+    <string name="settings_language_section">Lingua dell\'applicazione</string>
+    <string name="settings_profile_section">Dettagli del profilo</string>
+    <string name="settings_password_section">Cambia password</string>
+    <string name="settings_label_username">Nome utente</string>
+    <string name="settings_label_old_password">Password attuale</string>
+    <string name="settings_label_new_password">Nuova password</string>
+    <string name="settings_btn_save_profile">Salva profilo</string>
+    <string name="settings_btn_change_password">Aggiorna password</string>
+    <string name="error_password_too_short">La password deve contenere almeno 6 caratteri.</string>
+    <string name="error_wrong_old_password">La password attuale inserita non è corretta.</string>
+    <string name="success_profile_updated">Profilo aggiornato con successo!</string>
+    <string name="success_password_changed">Password aggiornata con successo!</string>
 
 </resources>

@@ -95,6 +95,11 @@
     <string name="err_invalid_plate">Matrikularen formatua ez da baliozkoa (1234ABC)</string>
     <string name="err_user_exists">Erabiltzaile-izen hau dagoeneko hartuta dago</string>
     <string name="err_registration_failed">Errorea erregistratzean</string>
+    <string name="error_invalid_email_or_not_found">Posta elektroniko hau ez dago erregistratuta gure sisteman.</string>
+
+    <string name="rec_success_title">Mezua Bidali Da</string>
+    <string name="rec_success_body">Posta erregistratuta badago, esteka bat jasoko duzu laster. Mesedez, egiaztatu sarrera-ontzia eta spam karpeta.</string>
+    <string name="btn_understood">Ulertuta</string>
 
     <!-- TEXTO DE LAS NOTIFICACIONES EN EUSKERA -->
     <string name="notification_channel_name">Aparkaleku-abisuak</string>
@@ -153,5 +158,19 @@
     <string name="vehicle_type_motorcycle">Motorra</string>
     <string name="vehicle_type_electric">Elektrikoa</string>
     <string name="vehicle_type_adapted">Egokitua</string>
+
+    <string name="settings_title">Ezarpenak</string>
+    <string name="settings_language_section">Aplikazioaren hizkuntza</string>
+    <string name="settings_profile_section">Profilaren xehetasunak</string>
+    <string name="settings_password_section">Aldatu pasahitza</string>
+    <string name="settings_label_username">Erabiltzaile-izena</string>
+    <string name="settings_label_old_password">Uneko pasahitza</string>
+    <string name="settings_label_new_password">Pasahitz berria</string>
+    <string name="settings_btn_save_profile">Gorde profila</string>
+    <string name="settings_btn_change_password">Eguneratu pasahitza</string>
+    <string name="error_password_too_short">Pasahitzak gutxienez 6 karaktere izan behar ditu.</string>
+    <string name="error_wrong_old_password">Sartutako uneko pasahitza ez da zuzena.</string>
+    <string name="success_profile_updated">Profila ongi eguneratu da!</string>
+    <string name="success_password_changed">Pasahitza ongi eguneratu da!</string>
 
 </resources>

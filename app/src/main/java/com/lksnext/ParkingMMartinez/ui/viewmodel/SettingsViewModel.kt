@@ -17,7 +17,7 @@ class SettingsViewModel(
 ) : ViewModel() {
 
     private val auth = FirebaseAuth.getInstance()
-    private val currentUser = auth.currentUser
+    private val currentUser get() = auth.currentUser
 
     var username by mutableStateOf("")
     var email by mutableStateOf("")
@@ -28,16 +28,18 @@ class SettingsViewModel(
     var successCode by mutableStateOf<String?>(null)
     var errorCode by mutableStateOf<String?>(null)
 
-    init {
-        loadCurrentUserData()
-    }
+    fun loadCurrentUserData() {
+        clearMessages()
+        oldPassword = ""
+        newPassword = ""
+        confirmNewPassword = ""
 
-    private fun loadCurrentUserData() {
         val userId = sessionManager.getActiveUserId() ?: ""
         email = currentUser?.email ?: ""
+
         viewModelScope.launch {
             userRepository.getUserById(userId)?.let { user ->
-                username = user.name
+                username = user.username
             }
         }
     }
@@ -59,7 +61,7 @@ class SettingsViewModel(
             try {
                 val user = userRepository.getUserById(userId)
                 user?.let {
-                    val updatedUser = it.copy(name = username)
+                    val updatedUser = it.copy(username = username)
                     userRepository.registerUser(updatedUser)
                     successCode = "success_profile_updated"
                 }
@@ -72,6 +74,12 @@ class SettingsViewModel(
     }
 
     fun updatePassword() {
+        val user = currentUser
+        if (user == null) {
+            errorCode = "error_updating_password"
+            return
+        }
+
         if (oldPassword.isBlank() || newPassword.isBlank() || confirmNewPassword.isBlank()) {
             errorCode = "error_empty_field"
             return
@@ -88,12 +96,12 @@ class SettingsViewModel(
         isLoading = true
         clearMessages()
 
-        val credential = EmailAuthProvider.getCredential(currentUser?.email ?: "", oldPassword)
+        val credential = EmailAuthProvider.getCredential(user.email ?: "", oldPassword)
 
-        currentUser?.reauthenticate(credential)
-            ?.addOnCompleteListener { reauthTask ->
+        user.reauthenticate(credential)
+            .addOnCompleteListener { reauthTask ->
                 if (reauthTask.isSuccessful) {
-                    currentUser.updatePassword(newPassword)
+                    user.updatePassword(newPassword)
                         .addOnCompleteListener { updateTask ->
                             isLoading = false
                             if (updateTask.isSuccessful) {

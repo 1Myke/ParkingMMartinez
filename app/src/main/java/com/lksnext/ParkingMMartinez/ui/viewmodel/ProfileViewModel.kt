@@ -24,6 +24,8 @@ import kotlinx.coroutines.tasks.await
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Base64
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
 
@@ -31,7 +33,9 @@ class ProfileViewModel(
     private val vehicleRepository: VehicleRepository,
     private val userRepository: UserRepository,
     private val bookingRepository: BookingRepository,
-    private val sessionManager: SessionManager
+    private val sessionManager: SessionManager,
+    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
+    private val mainDispatcher: CoroutineDispatcher = Dispatchers.Main
 ) : ViewModel() {
 
     // Datos del usuario (luego vendrán de Firebase/Repository)
@@ -199,9 +203,8 @@ class ProfileViewModel(
 
         println("DEBUG_UPLOAD: Iniciando conversión a Base64 para evitar bloqueo de Storage...")
 
-        viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+        viewModelScope.launch(ioDispatcher) {
             try {
-                // 1. Leer la URI y transformarla en un Bitmap comprimido
                 val inputStream = context.contentResolver.openInputStream(imageUri)
                 val originalBitmap = BitmapFactory.decodeStream(inputStream)
                 inputStream?.close()
@@ -211,24 +214,19 @@ class ProfileViewModel(
                     return@launch
                 }
 
-                // Redimensionamos un poco la imagen para que no ocupe demasiado espacio en Firestore
                 val scaledBitmap = Bitmap.createScaledBitmap(originalBitmap, 300, 300, true)
 
-                // 2. Comprimir el bitmap a formato JPEG en un flujo de bytes
                 val outputStream = ByteArrayOutputStream()
                 scaledBitmap.compress(Bitmap.CompressFormat.JPEG, 80, outputStream)
                 val imageBytes = outputStream.toByteArray()
 
-                // 3. Convertir los bytes crudos a un String Base64 seguro
                 val base64String = Base64.encodeToString(imageBytes, Base64.NO_WRAP)
                 println("DEBUG_UPLOAD: Conversión exitosa. Tamaño del string: ${base64String.length} caracteres.")
 
-                // 4. Guardar directamente la cadena Base64 en el campo 'avatarURL' de Firestore
                 val success = userRepository.updateAvatar(userId, base64String)
 
                 if (success) {
-                    // Volvemos al hilo principal para actualizar la interfaz de Compose
-                    withContext(kotlinx.coroutines.Dispatchers.Main) {
+                    withContext(mainDispatcher) {
                         userAvatar = base64String
                         println("DEBUG_UPLOAD: ¡Firestore actualizado con éxito usando Base64!")
                     }

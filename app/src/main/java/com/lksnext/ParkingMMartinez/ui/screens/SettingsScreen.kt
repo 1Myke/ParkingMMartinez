@@ -5,9 +5,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -28,6 +28,10 @@ fun SettingsScreen(
     onNavigateBack: () -> Unit
 ) {
     val scrollState = rememberScrollState()
+
+    LaunchedEffect(Unit) {
+        viewModel.loadCurrentUserData()
+    }
 
     val feedbackMessage = when (viewModel.errorCode) {
         "error_empty_field" -> stringResource(R.string.error_empty_fields)
@@ -72,6 +76,8 @@ fun SettingsScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
+
+        // Seleccion de Idioma
         Text(text = stringResource(R.string.settings_language_section), fontWeight = FontWeight.SemiBold)
         Spacer(modifier = Modifier.height(8.dp))
         LanguageSelectorSection(modifier = Modifier.fillMaxWidth())
@@ -80,20 +86,22 @@ fun SettingsScreen(
         HorizontalDivider(color = Color.LightGray)
         Spacer(modifier = Modifier.height(16.dp))
 
+        // Perfil del Usuario
         Text(text = stringResource(R.string.settings_profile_section), fontWeight = FontWeight.SemiBold)
+        Spacer(modifier = Modifier.height(6.dp))
+
+        Text(
+            text = "${stringResource(R.string.login_email_label)}: ${viewModel.email}",
+            style = MaterialTheme.typography.bodyMedium,
+            color = Color.Gray
+        )
+
         Spacer(modifier = Modifier.height(12.dp))
         LksTextField(
             value = viewModel.username,
             onValueChange = { viewModel.username = it; viewModel.clearMessages() },
             label = stringResource(R.string.settings_label_username),
             placeholder = "Nombre"
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        LksTextField(
-            value = viewModel.email,
-            onValueChange = {},
-            label = stringResource(R.string.login_email_label),
-            placeholder = "",
         )
         Spacer(modifier = Modifier.height(12.dp))
         LksButton(
@@ -106,7 +114,7 @@ fun SettingsScreen(
         HorizontalDivider(color = Color.LightGray)
         Spacer(modifier = Modifier.height(16.dp))
 
-        // 🔑 SECCIÓN 3: Cambiar Contraseña
+        // Cambiar Contraseña
         Text(text = stringResource(R.string.settings_password_section), fontWeight = FontWeight.SemiBold)
         Spacer(modifier = Modifier.height(12.dp))
         LksPasswordField(

@@ -20,6 +20,7 @@ val archVersion = "2.2.0"
 val coroutinesVersion = "1.7.3"
 val appcompatVersion = "1.7.0"
 val coilVersion = "2.6.0"
+val mockitoKotlinVersion = "5.2.1"
 
 
 android {
@@ -27,6 +28,12 @@ android {
     compileSdk {
         version = release(36) {
             minorApiLevel = 1
+        }
+    }
+
+    testOptions {
+        unitTests {
+            isReturnDefaultValues = true
         }
     }
 
@@ -89,9 +96,9 @@ dependencies {
     implementation("com.google.firebase:firebase-storage")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:$coroutinesVersion")
     implementation("com.google.firebase:firebase-messaging")
-    //implementation("io.coil-kt.coil:coil-compose:$coilVersion")
     implementation("io.coil-kt:coil-compose:$coilVersion")
     testImplementation("org.mockito:mockito-core:$mockitoVersion")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:$mockitoKotlinVersion")
     testImplementation("androidx.arch.core:core-testing:$archVersion")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutinesVersion")
     testImplementation(libs.junit)

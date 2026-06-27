@@ -17,16 +17,44 @@ import com.lksnext.ParkingMMartinez.ui.theme.LksOrange
 import com.lksnext.ParkingMMartinez.ui.viewmodel.RecoveryViewModel
 import androidx.compose.ui.platform.testTag
 import com.lksnext.ParkingMMartinez.ui.constants.TestTags
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 
 @Composable
 fun RecoveryScreen(
     viewModel: RecoveryViewModel,
     onNavigateBack: () -> Unit
 ){
-    // Mapeo del código de error al recurso de string
+    var showSuccessDialog by remember { mutableStateOf(false) }
+
     val errorMessage = when (viewModel.errorCode) {
+        "error_empty_field" -> stringResource(R.string.error_empty_fields)
         "error_invalid_email_recovery" -> stringResource(R.string.err_invalid_email)
+        "error_email_not_found" -> stringResource(R.string.error_invalid_email_or_not_found)
         else -> null
+    }
+
+    // --- POPUP INFORMATIVO DE SPAM ---
+    if (showSuccessDialog) {
+        AlertDialog(
+            onDismissRequest = { /* No permitir cerrar tocando fuera */ },
+            title = { Text(text = stringResource(R.string.rec_success_title)) },
+            text = { Text(text = stringResource(R.string.rec_success_body)) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showSuccessDialog = false
+                        onNavigateBack()
+                    }
+                ) {
+                    Text(text = stringResource(R.string.btn_understood))
+                }
+            }
+        )
     }
 
     Column(
@@ -69,11 +97,13 @@ fun RecoveryScreen(
         Spacer(modifier = Modifier.height(12.dp))
 
         LksButton(
-            text = stringResource(R.string.rec_btn_continue),
-            enabled = viewModel.email.isNotEmpty(),
+            text = if (viewModel.isLoading) "..." else stringResource(R.string.rec_btn_continue),
+            enabled = viewModel.email.isNotEmpty() && !viewModel.isLoading,
             modifier = Modifier.testTag(TestTags.RECOVERY_SUBMIT_BTN),
             onClick = {
-                viewModel.validateAndSend(onSuccess = { onNavigateBack() })
+                viewModel.validateAndSend(onSuccess = {
+                    showSuccessDialog = true
+                })
             }
         )
     }

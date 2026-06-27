@@ -1,5 +1,6 @@
 package com.lksnext.ParkingMMartinez.ui.screens
 
+import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -60,13 +61,26 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.ui.platform.testTag
 import com.lksnext.ParkingMMartinez.ui.constants.TestTags
+import androidx.compose.material.icons.filled.Settings
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 
 @Composable
 fun ProfileScreen(
     viewModel: ProfileViewModel = viewModel(),
-    onLogoutClick: () -> Unit
+    onLogoutClick: () -> Unit,
+    onNavigateToSettings: () -> Unit
 ){
     val focusManager = LocalFocusManager.current
+
+    val context = androidx.compose.ui.platform.LocalContext.current
+
+    val galleryLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ){
+        uri: Uri? ->
+        uri?.let {viewModel.uploadProfileImage(context, it)}
+    }
 
     LaunchedEffect(Unit) {
         viewModel.loadUserData()
@@ -106,25 +120,47 @@ fun ProfileScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                LanguageSelectorSection()
+                //LanguageSelectorSection()
 
-                IconButton(
-                    onClick = onLogoutClick,
-                    modifier = Modifier.testTag(TestTags.PROFILE_LOGOUT_BTN)
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                        //.padding(horizontal = 8.dp, vertical = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(
-                        Icons.AutoMirrored.Default.Logout,
-                        null,
-                        tint = Color.Gray,
-                        modifier = Modifier.size(28.dp)
-                    )
+                    IconButton(
+                        onClick = onNavigateToSettings,
+                        modifier = Modifier.testTag("PROFILE_SETTINGS_BTN")
+                    ) {
+                        Icon(
+                            Icons.Default.Settings,
+                            contentDescription = "Settings",
+                            tint = Color.Gray,
+                            modifier = Modifier.size(26.dp)
+                        )
+                    }
+
+                    IconButton(
+                        onClick = onLogoutClick,
+                        modifier = Modifier.testTag(TestTags.PROFILE_LOGOUT_BTN)
+                    ) {
+                        Icon(
+                            Icons.AutoMirrored.Default.Logout,
+                            null,
+                            tint = Color.Gray,
+                            modifier = Modifier.size(28.dp)
+                        )
+                    }
                 }
             }
 
             ProfileHeaderSection(
                 viewModel.userName,
                 viewModel.userRole,
-                viewModel.userEmail
+                viewModel.userEmail,
+                photoUrl = viewModel.userAvatar,
+                onImageClick = { galleryLauncher.launch("image/*") }
             )
 
             HorizontalDivider(modifier = Modifier.padding(vertical = 24.dp), thickness = 1.dp, color = lightGray)
@@ -166,6 +202,7 @@ fun ProfileScreen(
                         modifier = Modifier.testTag("${TestTags.PROFILE_VEHICLE_CARD_PREFIX}${vehicle.plate}")
                     )
                 }
+                Spacer(modifier = Modifier.height(80.dp))
             }
         }
 

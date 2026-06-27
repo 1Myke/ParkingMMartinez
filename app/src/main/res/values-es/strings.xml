@@ -90,6 +90,11 @@
     <string name="err_invalid_plate">El formato de la matrícula no es válido (1234ABC)</string>
     <string name="err_user_exists">Este nombre de usuario ya está en uso</string>
     <string name="err_registration_failed">Error en el registro</string>
+    <string name="error_invalid_email_or_not_found">Este correo no corresponde a ningún usuario registrado.</string>
+
+    <string name="rec_success_title">Correo Enviado</string>
+    <string name="rec_success_body">Si el correo está registrado, recibirás un enlace en breve. Por favor, revisa tu bandeja de entrada y la carpeta de correo no deseado (spam).</string>
+    <string name="btn_understood">Entendido</string>
 
     <string name="notification_channel_name">Alertas de aparcamiento</string>
     <string name="notification_default_title">Actualización del aparcamiento</string>
@@ -145,5 +150,19 @@
     <string name="vehicle_type_motorcycle">Motocicleta</string>
     <string name="vehicle_type_electric">Eléctrico</string>
     <string name="vehicle_type_adapted">Adaptado</string>
+
+    <string name="settings_title">Ajustes</string>
+    <string name="settings_language_section">Idioma de la aplicación</string>
+    <string name="settings_profile_section">Detalles del perfil</string>
+    <string name="settings_password_section">Cambiar contraseña</string>
+    <string name="settings_label_username">Nombre de usuario</string>
+    <string name="settings_label_old_password">Contraseña actual</string>
+    <string name="settings_label_new_password">Nueva contraseña</string>
+    <string name="settings_btn_save_profile">Guardar perfil</string>
+    <string name="settings_btn_change_password">Actualizar contraseña</string>
+    <string name="error_password_too_short">La contraseña debe tener al menos 6 caracteres.</string>
+    <string name="error_wrong_old_password">La contraseña actual introducida es incorrecta.</string>
+    <string name="success_profile_updated">¡Perfil actualizado correctamente!</string>
+    <string name="success_password_changed">¡Contraseña actualizada correctamente!</string>
 
 </resources>

@@ -32,6 +32,7 @@ import com.google.firebase.Firebase
 import com.lksnext.ParkingMMartinez.data.repository.FirebaseNotificationRepository
 import com.lksnext.ParkingMMartinez.ui.screens.NotificationScreen
 import com.lksnext.ParkingMMartinez.ui.viewmodel.NotificationViewModel
+import com.lksnext.ParkingMMartinez.ui.viewmodel.SettingsViewModel
 
 @Composable
 fun LksNavigation() {
@@ -103,6 +104,15 @@ fun LksNavigation() {
         }
     )
 
+    val settingsViewModel: SettingsViewModel = viewModel(
+        factory = viewModelFactory {
+            addInitializer(SettingsViewModel::class) {
+                SettingsViewModel(userRepository, session)
+            }
+        }
+    )
+
+
     val startDestination = if (session.isLoggedIn()) Screen.Map.route else Screen.Login.route
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
@@ -110,7 +120,8 @@ fun LksNavigation() {
     val showFooter = currentRoute != null &&
             currentRoute != Screen.Login.route &&
             currentRoute != Screen.Register.route &&
-            currentRoute != Screen.Recovery.route
+            currentRoute != Screen.Recovery.route &&
+            currentRoute != Screen.Settings.route
 
     Scaffold(
         bottomBar = {
@@ -226,6 +237,9 @@ fun LksNavigation() {
                         navController.navigate(Screen.Login.route) {
                             popUpTo(0) { inclusive = true }
                         }
+                    },
+                    onNavigateToSettings = {
+                        navController.navigate(Screen.Settings.route)
                     }
                 )
             }
@@ -233,6 +247,14 @@ fun LksNavigation() {
             // --- ALERTS ---
             composable(Screen.Alerts.route) {
                 NotificationScreen(viewModel = notificationViewModel)
+            }
+
+            // --- AJUSTES ---
+            composable(Screen.Settings.route) {
+                SettingsScreen(
+                    viewModel = settingsViewModel,
+                    onNavigateBack = { navController.popBackStack() }
+                )
             }
         }
     }

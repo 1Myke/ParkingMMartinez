@@ -95,6 +95,11 @@
     <string name="err_invalid_plate">License plate format is invalid (1234ABC)</string>
     <string name="err_user_exists">This username is already taken</string>
     <string name="err_registration_failed">Registration failed</string>
+    <string name="error_invalid_email_or_not_found">This email is not registered in our system.</string>
+
+    <string name="rec_success_title">Email Sent</string>
+    <string name="rec_success_body">If the email is registered, you will receive a link shortly. Please check your inbox and your spam folder.</string>
+    <string name="btn_understood">Understood</string>
 
     <!-- TEXTO DE LAS NOTIFICACIONES -->
     <string name="notification_channel_name">Parking Alerts</string>
@@ -153,6 +158,21 @@
     <string name="vehicle_type_motorcycle">Motorcycle</string>
     <string name="vehicle_type_electric">Electric</string>
     <string name="vehicle_type_adapted">Adapted</string>
+
+    <!--- TEXTO DE SETTINGS -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_language_section">Application Language</string>
+    <string name="settings_profile_section">Profile Details</string>
+    <string name="settings_password_section">Change Password</string>
+    <string name="settings_label_username">Username</string>
+    <string name="settings_label_old_password">Current Password</string>
+    <string name="settings_label_new_password">New Password</string>
+    <string name="settings_btn_save_profile">Save Profile</string>
+    <string name="settings_btn_change_password">Update Password</string>
+    <string name="error_password_too_short">Password must be at least 6 characters.</string>
+    <string name="error_wrong_old_password">The current password you entered is incorrect.</string>
+    <string name="success_profile_updated">Profile updated successfully!</string>
+    <string name="success_password_changed">Password updated successfully!</string>
 
 
 

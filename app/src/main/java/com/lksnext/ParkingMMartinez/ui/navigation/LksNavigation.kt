@@ -121,7 +121,8 @@ fun LksNavigation() {
             currentRoute != Screen.Login.route &&
             currentRoute != Screen.Register.route &&
             currentRoute != Screen.Recovery.route &&
-            currentRoute != Screen.Settings.route
+            currentRoute != Screen.Settings.route &&
+            currentRoute != Screen.Booking.route
 
     Scaffold(
         bottomBar = {

@@ -430,7 +430,7 @@ fun BookingActionSection(viewModel: BookingViewModel, isButtonEnabled: Boolean, 
 
         LksButton(
             text = if (viewModel.editingReservationId != null) stringResource(R.string.booking_btn_update) else stringResource(R.string.booking_btn_confirm),
-            enabled = isButtonEnabled,
+            enabled = isButtonEnabled && !viewModel.isLoading,
             modifier = Modifier.testTag(TestTags.BOOKING_SUBMIT_BTN),
             onClick = {
                 val realZone = ParkingManager.zones.find { it.name == viewModel.parkingZone } ?: ParkingManager.zones.first()

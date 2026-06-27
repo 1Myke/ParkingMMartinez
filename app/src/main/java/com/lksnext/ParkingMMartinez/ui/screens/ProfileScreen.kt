@@ -202,6 +202,7 @@ fun ProfileScreen(
                         modifier = Modifier.testTag("${TestTags.PROFILE_VEHICLE_CARD_PREFIX}${vehicle.plate}")
                     )
                 }
+                Spacer(modifier = Modifier.height(80.dp))
             }
         }
 

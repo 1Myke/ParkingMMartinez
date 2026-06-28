@@ -4,9 +4,12 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Accessible
 import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.DirectionsCar
+import androidx.compose.material.icons.filled.ElectricCar
 import androidx.compose.material.icons.filled.Place
+import androidx.compose.material.icons.filled.TwoWheeler
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -20,6 +23,7 @@ import androidx.compose.ui.unit.sp
 import com.lksnext.ParkingMMartinez.model.Reservation
 import com.lksnext.ParkingMMartinez.ui.theme.LksOrange
 import com.lksnext.ParkingMMartinez.R
+import com.lksnext.ParkingMMartinez.model.VehicleType
 import com.lksnext.ParkingMMartinez.ui.theme.activeYelow
 import com.lksnext.ParkingMMartinez.ui.theme.LksGreen
 import com.lksnext.ParkingMMartinez.ui.theme.automaticRed
@@ -96,7 +100,11 @@ private fun ReservationHeader(reservation: Reservation, isPast: Boolean, isMisse
         Spacer(Modifier.width(12.dp))
 
         Column(modifier = Modifier.weight(1f)) {
-            Text(reservation.zone.name, fontWeight = FontWeight.Bold, fontSize = 18.sp)
+            Text(
+                text = stringResource(id = getZoneDisplayNameRes(reservation.zone.name)),
+                fontWeight = FontWeight.Bold,
+                fontSize = 18.sp
+            )
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(Icons.Default.Place, null, modifier = Modifier.size(14.dp), tint = Color.Gray)
                 Text(" ${stringResource(R.string.label_location)}", color = Color.Gray, fontSize = 12.sp)
@@ -160,7 +168,12 @@ private fun ReservationDetails(reservation: Reservation) {
                 color = Color.Gray
             )
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Default.DirectionsCar, null, modifier = Modifier.size(16.dp), tint = Color.Gray)
+                Icon(
+                    imageVector = getVehicleIcon(reservation.vehicle.type),
+                    contentDescription = null,
+                    modifier = Modifier.size(16.dp),
+                    tint = Color.Gray
+                )
                 Text(" ${reservation.vehicle.name} (${reservation.vehicle.plate})", fontSize = 14.sp, fontWeight = FontWeight.Medium)
             }
         }
@@ -256,4 +269,11 @@ fun DetailItem(label: String, value: String, modifier: Modifier, isTime: Boolean
             Text(value, fontWeight = FontWeight.Bold, fontSize = 14.sp, modifier = Modifier.padding(start = if(isTime) 4.dp else 0.dp))
         }
     }
+}
+
+private fun getVehicleIcon(type: VehicleType) = when (type) {
+    VehicleType.MOTORCYCLE -> Icons.Default.TwoWheeler
+    VehicleType.ELECTRIC -> Icons.Default.ElectricCar
+    VehicleType.ADAPTED -> Icons.AutoMirrored.Filled.Accessible
+    else -> Icons.Default.DirectionsCar
 }

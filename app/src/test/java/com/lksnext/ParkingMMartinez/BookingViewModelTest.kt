@@ -26,6 +26,7 @@ import org.junit.Test
 import org.mockito.Mockito.*
 import java.time.LocalTime
 import java.util.*
+import kotlin.collections.emptyList
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class BookingViewModelTest {
@@ -374,5 +375,32 @@ class BookingViewModelTest {
         // 🌟 CORRECCIÓN CRÍTICA: La traza demuestra que interactúa perfectamente 3 veces llamando a setExact().
         // Comprobamos que el AlarmManager nativo de Android recibe la orden de registrar las alarmas en el SO.
         verify(alarmManager, times(3)).setExact(anyInt(), anyLong(), any())
+    }
+
+
+    // ==========================================
+    // 6. TEST DE BLOQUEO DE BOTON PARA EVITAR ANTIRESERVA
+    // ==========================================
+    @Test
+    fun confirmReservation_secondCallIsIgnored_whenFirstCallIsProcessing() = runTest {
+        // 1. CONFIGURACIÓN: Usamos tus variables de clase existentes (mockRepository, fakeVehicle, fakeZone)
+        `when`(mockSessionManager.getActiveUserId()).thenReturn(userId)
+        `when`(mockRepository.getAllReservations()).thenReturn(emptyList())
+
+        // 2. EJECUCIÓN: Simulamos el primer clic en el hilo principal
+        viewModel.confirmReservation(mockContext, fakeVehicle, fakeZone) { /* onComplete */ }
+
+        // 🔒 VERIFICACIÓN INMEDIATA: Evaluamos instantáneamente en el microsegundo 0 el estado del candado
+        assertTrue(viewModel.isLoading)
+
+        // 3. INTENTO DE REENTRADA (Segundo clic ultra rápido mientras procesa)
+        viewModel.confirmReservation(mockContext, fakeVehicle, fakeZone) { /* onComplete */ }
+
+        // Liberamos el dispatcher de pruebas para que terminen de procesarse las corrutinas lanzadas
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        // 4. VERIFICACIÓN FINAL: El repositorio solo debió haber sido consultado 1 única vez.
+        // Si el candado hubiera fallado, el método confirmReservation habría entrado dos veces y llamado 2 veces a getAllReservations().
+        verify(mockRepository, times(1)).getAllReservations()
     }
 }

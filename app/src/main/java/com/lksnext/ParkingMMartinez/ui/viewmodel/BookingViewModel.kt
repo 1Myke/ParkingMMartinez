@@ -73,6 +73,9 @@ class BookingViewModel (
     var isButtonEnabled by mutableStateOf(false)
         private set
 
+    var isLoading by mutableStateOf(false)
+        private set
+
     val availableDates: List<Pair<Int, String>> by lazy {
         val calendar = Calendar.getInstance()
         (0..7).map { offset ->
@@ -133,6 +136,11 @@ class BookingViewModel (
         zone: ParkingZone,
         onComplete: () -> Unit
     ) {
+        if (isLoading) {
+            return
+        }
+        isLoading = true
+
         val userId = sessionManager.getActiveUserId() ?: ""
         val vehicleWithId = vehicle.copy(id = userId)
         val start = LocalTime.of(startHour, startMinute)
@@ -147,39 +155,48 @@ class BookingViewModel (
         }
 
         viewModelScope.launch {
-            val allBookings = repository.getAllReservations()
+            try {
+                val allBookings = repository.getAllReservations()
 
-            val calculatedSpotNumber = ParkingManager.findFirstAvailableSpotNumber(
-                allBookings = allBookings,
-                zoneName = parkingZone,
-                vehicleType = vehicle.type,
-                selectedDate = calendar.time,
-                slotStart = start,
-                slotEnd = end,
-                editingReservationId = editingReservationId
-            )
+                val calculatedSpotNumber = ParkingManager.findFirstAvailableSpotNumber(
+                    allBookings = allBookings,
+                    zoneName = parkingZone,
+                    vehicleType = vehicle.type,
+                    selectedDate = calendar.time,
+                    slotStart = start,
+                    slotEnd = end,
+                    editingReservationId = editingReservationId
+                )
 
-            val newReservation = Reservation(
-                id = editingReservationId ?: UUID.randomUUID().toString(),
-                vehicle = vehicleWithId,
-                zone = zone,
-                date = calendar.time,
-                startTime = start,
-                endTime = end,
-                isCheckedIn = isEditingCheckedIn,
-                spotNumber = calculatedSpotNumber
-            )
+                val newReservation = Reservation(
+                    id = editingReservationId ?: UUID.randomUUID().toString(),
+                    vehicle = vehicleWithId,
+                    zone = zone,
+                    date = calendar.time,
+                    startTime = start,
+                    endTime = end,
+                    isCheckedIn = isEditingCheckedIn,
+                    spotNumber = calculatedSpotNumber
+                )
 
-            editingReservationId?.let { repository.cancelReservation(it) }
-            repository.saveReservation(newReservation)
+                editingReservationId?.let { repository.cancelReservation(it) }
+                repository.saveReservation(newReservation)
 
-            programarAlertasDeReserva(context, newReservation)
+                programarAlertasDeReserva(context, newReservation)
 
-            editingReservationId = null
-            isEditingCheckedIn = false
-            hasActiveReservation = true
-            onComplete()
+                editingReservationId = null
+                isEditingCheckedIn = false
+                hasActiveReservation = true
+                onComplete()
+            } catch (e: Exception) {
+                android.util.Log.e("BOOKING_ERROR", "Error al guardar reserva: ${e.message}")
+                isLoading = false
+            }
         }
+    }
+    
+    fun resetLoadingState() {
+        isLoading = false
     }
 
     fun checkUserReservationStatus() {

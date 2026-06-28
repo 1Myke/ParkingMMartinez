@@ -57,7 +57,10 @@ fun BookingScreen(
     BookingInitializationEffect(viewModel, initialZone, initialHour, initialMinute)
 
     DisposableEffect(Unit) {
-        onDispose { viewModel.cancelEditing() }
+        onDispose {
+            viewModel.cancelEditing()
+            viewModel.resetLoadingState()
+        }
     }
 
     if (viewModel.showTimePicker) {
@@ -430,7 +433,7 @@ fun BookingActionSection(viewModel: BookingViewModel, isButtonEnabled: Boolean, 
 
         LksButton(
             text = if (viewModel.editingReservationId != null) stringResource(R.string.booking_btn_update) else stringResource(R.string.booking_btn_confirm),
-            enabled = isButtonEnabled,
+            enabled = isButtonEnabled && !viewModel.isLoading,
             modifier = Modifier.testTag(TestTags.BOOKING_SUBMIT_BTN),
             onClick = {
                 val realZone = ParkingManager.zones.find { it.name == viewModel.parkingZone } ?: ParkingManager.zones.first()
@@ -449,7 +452,7 @@ private fun BookingErrorMessages(viewModel: BookingViewModel) {
     when {
         viewModel.isOverlapConflict -> {
             Text(
-                text = stringResource(R.string.booking_error_overlap, viewModel.nextCollisionTime ?: "", viewModel.maxAllowedHours ?: 0f),
+                text = stringResource(R.string.booking_error_overlap, viewModel.nextCollisionTime ?: "", viewModel.maxAllowedHours),
                 color = Color.Red,
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier.padding(bottom = 8.dp).testTag(TestTags.BOOKING_ERROR_OVERLAP)

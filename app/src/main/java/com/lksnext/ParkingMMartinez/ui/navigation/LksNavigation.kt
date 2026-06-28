@@ -121,7 +121,8 @@ fun LksNavigation() {
             currentRoute != Screen.Login.route &&
             currentRoute != Screen.Register.route &&
             currentRoute != Screen.Recovery.route &&
-            currentRoute != Screen.Settings.route
+            currentRoute != Screen.Settings.route &&
+            currentRoute != Screen.Booking.route
 
     Scaffold(
         bottomBar = {
@@ -209,7 +210,12 @@ fun LksNavigation() {
                     //initialDay = day,
                     initialHour = hour,
                     initialMinute = minute,
-                    onConfirmBooking = { navController.popBackStack() },
+                    onConfirmBooking = {
+                        navController.popBackStack()
+                        navController.navigate(Screen.BookingsList.route) {
+                            launchSingleTop = true
+                        }
+                    },
                     onManageVehicles = {
                         navController.navigate(Screen.Profile.route) {
                             launchSingleTop = true

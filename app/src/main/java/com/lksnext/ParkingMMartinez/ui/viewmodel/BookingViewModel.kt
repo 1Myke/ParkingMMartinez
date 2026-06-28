@@ -264,7 +264,13 @@ class BookingViewModel (
                 val currentSelectionStillValid = filtered.any { it.plate == selectedVehicle?.plate }
 
                 if (!currentSelectionStillValid) {
-                    selectedVehicle = if (filtered.isNotEmpty()) filtered[0] else null
+                    selectedVehicle = if (filtered.size == 1) {
+                        // 1 solo vehiculo, se selecciona automaticamente
+                        filtered[0]
+                    } else {
+                    // El usuario elige el vehiculo que quiere
+                        null
+                    }
                 } else {
                     selectedVehicle = filtered.find { it.plate == selectedVehicle?.plate }
                 }

@@ -1,6 +1,7 @@
 package com.lksnext.ParkingMMartinez.ui.components
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -14,7 +15,8 @@ import com.lksnext.ParkingMMartinez.ui.theme.LksOrange
 fun LksHeader(title: String, subtitle: String, modifier: Modifier = Modifier){
     Surface(
         modifier = modifier.fillMaxWidth(),
-        color = LksOrange
+        color = LksOrange,
+        shape = RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp)
     ) {
         Column(
             modifier = Modifier.padding(24.dp)

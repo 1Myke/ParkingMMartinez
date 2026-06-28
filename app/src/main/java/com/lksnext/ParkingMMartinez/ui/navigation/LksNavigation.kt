@@ -33,6 +33,7 @@ import com.lksnext.ParkingMMartinez.data.repository.FirebaseNotificationReposito
 import com.lksnext.ParkingMMartinez.ui.screens.NotificationScreen
 import com.lksnext.ParkingMMartinez.ui.viewmodel.NotificationViewModel
 import com.lksnext.ParkingMMartinez.ui.viewmodel.SettingsViewModel
+import com.lksnext.ParkingMMartinez.ui.components.LksAppHeader
 
 @Composable
 fun LksNavigation() {
@@ -124,7 +125,19 @@ fun LksNavigation() {
             currentRoute != Screen.Settings.route &&
             currentRoute != Screen.Booking.route
 
+    val showHeader = currentRoute != null &&
+            currentRoute != Screen.Login.route &&
+            currentRoute != Screen.Register.route &&
+            currentRoute != Screen.Recovery.route &&
+            currentRoute != Screen.Map.route &&
+            currentRoute != Screen.Booking.route
+
     Scaffold(
+        topBar = {
+          if (showHeader) {
+              LksAppHeader()
+          }
+        },
         bottomBar = {
             if (showFooter) {
                 LksFooter(navController = navController)

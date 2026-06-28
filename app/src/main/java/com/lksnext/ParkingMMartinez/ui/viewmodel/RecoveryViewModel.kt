@@ -53,4 +53,10 @@ class RecoveryViewModel : ViewModel() {
                 }
             }
     }
+
+    fun clearForm() {
+        email = ""
+        errorCode = null
+        isLoading = false
+    }
 }

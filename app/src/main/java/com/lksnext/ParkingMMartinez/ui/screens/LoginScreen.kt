@@ -90,7 +90,7 @@ fun LoginScreen(
             LksTextField(
                 value = viewModel.email,
                 onValueChange = { viewModel.onEmailChange(it) },
-                label = stringResource(R.string.login_username),
+                label = stringResource(R.string.login_email_label),
                 isError = viewModel.errorCode != null,
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Email,

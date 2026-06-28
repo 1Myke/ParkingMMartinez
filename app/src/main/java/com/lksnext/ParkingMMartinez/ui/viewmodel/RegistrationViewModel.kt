@@ -91,4 +91,18 @@ class RegistrationViewModel(
             }
         }
     }
+
+    fun clearForm() {
+        name = ""
+        lastName = ""
+        username = ""
+        email = ""
+        password = ""
+        passwordRepeat = ""
+        plate = ""
+        vehicleName = ""
+        selectedVehicleType = VehicleType.STANDARD
+        errorCode = null
+        isLoading = false
+    }
 }

@@ -1,5 +1,6 @@
 package com.lksnext.ParkingMMartinez.ui.screens
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
@@ -21,6 +22,7 @@ import com.lksnext.ParkingMMartinez.ui.components.*
 import com.lksnext.ParkingMMartinez.ui.theme.LksOrange
 import com.lksnext.ParkingMMartinez.ui.viewmodel.RegistrationViewModel
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import com.lksnext.ParkingMMartinez.ui.constants.TestTags
 
 @Composable
@@ -49,12 +51,26 @@ fun RegistrationScreen(
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(
-            text = stringResource(R.string.reg_title),
-            style = MaterialTheme.typography.headlineLarge,
-            color = LksOrange,
-            modifier = Modifier.testTag(TestTags.REG_TITLE)
-        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ){
+            Image(
+                painter = painterResource(id = R.drawable.lks_logo),
+                contentDescription = "LKS Next Logo",
+                modifier = Modifier.size(60.dp)
+            )
+
+            Spacer(modifier = Modifier.width(24.dp))
+
+            Text(
+                text = stringResource(R.string.reg_title),
+                style = MaterialTheme.typography.headlineLarge,
+                color = LksOrange,
+                modifier = Modifier.testTag(TestTags.REG_TITLE)
+            )
+        }
 
         Spacer(modifier = Modifier.height(24.dp))
 

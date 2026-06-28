@@ -19,6 +19,7 @@ import androidx.compose.ui.platform.testTag
 import com.lksnext.ParkingMMartinez.ui.constants.TestTags
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.TextButton
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -30,6 +31,12 @@ fun RecoveryScreen(
     onNavigateBack: () -> Unit
 ){
     var showSuccessDialog by remember { mutableStateOf(false) }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            viewModel.clearForm()
+        }
+    }
 
     val errorMessage = when (viewModel.errorCode) {
         "error_empty_field" -> stringResource(R.string.error_empty_fields)

@@ -21,8 +21,9 @@
     <string name="booking_hours_unit">ordu</string>
     <string name="booking_today">GAUR</string>
     <string name="booking_change_vehicle_hint">Egin klik hemen ibilgailua aldatzeko!</string>
+    <string name="booking_select_vehicle_hint">Egin klik hemen zure ibilgailua hautatzeko!</string>
     <string name="booking_error_overlap">Hurrengo erreserba %1$s-(e)an da, beraz, gehienez %2$s ordu erreserba ditzakezu</string>
-
+    <string name="booking_error_vehicle_required">Mesedez, hautatu ibilgailu bat erreserba berresteko!</string>
 
     <!-- TEXTO BOOKING_REGISTER_SCREEN EN EUSKERA -->
     <string name="register_title">Nire erreserbak</string>

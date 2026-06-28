@@ -20,8 +20,9 @@
     <string name="booking_hours_unit">horas</string>
     <string name="booking_today">HOY</string>
     <string name="booking_change_vehicle_hint">¡Haz clic aquí para cambiar tu vehículo!</string>
+    <string name="booking_select_vehicle_hint">¡Haz clic aquí para seleccionar tu vehículo!</string>
     <string name="booking_error_overlap">Siguiente reserva a las %1$s, por lo que puedes reservar un máximo de %2$s horas</string>
-
+    <string name="booking_error_vehicle_required">¡Por favor, selecciona un vehículo para poder confirmar la reserva!</string>
 
     <string name="register_title">Mis reservas</string>
     <string name="register_empty">No hay reservas activas</string>

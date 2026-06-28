@@ -21,8 +21,9 @@
     <string name="booking_hours_unit">Stunden</string>
     <string name="booking_today">HEUTE</string>
     <string name="booking_change_vehicle_hint">Hier klicken, um Ihr Fahrzeug zu ändern!</string>
+    <string name="booking_select_vehicle_hint">Klicke hier, um dein Fahrzeug auszuwählen!</string>
     <string name="booking_error_overlap">Nächste Buchung um %1$s, daher können Sie maximal %2$s Stunden reservieren</string>
-
+    <string name="booking_error_vehicle_required">Bitte wähle ein Fahrzeug aus, um die Reservierung zu bestätigen!</string>
 
     <!-- TEXTO BOOKING_REGISTER_SCREEN EN ALEMÁN -->
     <string name="register_title">Meine Reservierungen</string>

@@ -96,7 +96,11 @@ private fun ReservationHeader(reservation: Reservation, isPast: Boolean, isMisse
         Spacer(Modifier.width(12.dp))
 
         Column(modifier = Modifier.weight(1f)) {
-            Text(reservation.zone.name, fontWeight = FontWeight.Bold, fontSize = 18.sp)
+            Text(
+                text = stringResource(id = getZoneDisplayNameRes(reservation.zone.name)),
+                fontWeight = FontWeight.Bold,
+                fontSize = 18.sp
+            )
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(Icons.Default.Place, null, modifier = Modifier.size(14.dp), tint = Color.Gray)
                 Text(" ${stringResource(R.string.label_location)}", color = Color.Gray, fontSize = 12.sp)

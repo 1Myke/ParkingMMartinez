@@ -194,6 +194,10 @@ class BookingViewModel (
             }
         }
     }
+    
+    fun resetLoadingState() {
+        isLoading = false
+    }
 
     fun checkUserReservationStatus() {
         val currentUserId = sessionManager.getActiveUserId() ?: return

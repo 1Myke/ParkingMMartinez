@@ -210,7 +210,12 @@ fun LksNavigation() {
                     //initialDay = day,
                     initialHour = hour,
                     initialMinute = minute,
-                    onConfirmBooking = { navController.popBackStack() },
+                    onConfirmBooking = {
+                        navController.popBackStack()
+                        navController.navigate(Screen.BookingsList.route) {
+                            launchSingleTop = true
+                        }
+                    },
                     onManageVehicles = {
                         navController.navigate(Screen.Profile.route) {
                             launchSingleTop = true

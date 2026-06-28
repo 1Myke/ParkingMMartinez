@@ -57,7 +57,10 @@ fun BookingScreen(
     BookingInitializationEffect(viewModel, initialZone, initialHour, initialMinute)
 
     DisposableEffect(Unit) {
-        onDispose { viewModel.cancelEditing() }
+        onDispose {
+            viewModel.cancelEditing()
+            viewModel.resetLoadingState()
+        }
     }
 
     if (viewModel.showTimePicker) {
@@ -449,7 +452,7 @@ private fun BookingErrorMessages(viewModel: BookingViewModel) {
     when {
         viewModel.isOverlapConflict -> {
             Text(
-                text = stringResource(R.string.booking_error_overlap, viewModel.nextCollisionTime ?: "", viewModel.maxAllowedHours ?: 0f),
+                text = stringResource(R.string.booking_error_overlap, viewModel.nextCollisionTime ?: "", viewModel.maxAllowedHours),
                 color = Color.Red,
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier.padding(bottom = 8.dp).testTag(TestTags.BOOKING_ERROR_OVERLAP)

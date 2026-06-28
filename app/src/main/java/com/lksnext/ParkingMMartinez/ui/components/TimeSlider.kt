@@ -14,8 +14,12 @@ fun TimeSlider(
 ) {
     Slider(
         value = currentHours,
-        onValueChange = onHoursChange,
-        valueRange = 1f..8f,
+        onValueChange = { newValue ->
+            if (newValue >= 1f) {
+                onHoursChange(newValue)
+            }
+        },
+        valueRange = 0f..8f,
         steps = 7,
         modifier = modifier,
         colors = SliderDefaults.colors(thumbColor = LksOrange, activeTrackColor = LksOrange)

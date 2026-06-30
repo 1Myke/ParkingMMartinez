@@ -22,6 +22,7 @@ val appcompatVersion = "1.7.0"
 val coilVersion = "2.6.0"
 val mockitoKotlinVersion = "5.2.1"
 
+val oneSignalVersion = "5.1.23"
 
 android {
     namespace = "com.lksnext.ParkingMMartinez"
@@ -45,6 +46,13 @@ android {
         versionName = appVersionName
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        val osId = System.getenv("ONESIGNAL_APP_ID")
+            ?: project.extensions.extraProperties.let {
+                if (it.has("onesignal.app.id")) it.get("onesignal.app.id").toString() else ""
+            }
+
+        resValue("string", "onesignal_app_id_secret", osId)
     }
 
     buildTypes {
@@ -65,6 +73,7 @@ android {
     }
     buildFeatures {
         compose = true
+        resValues = true
     }
 }
 
@@ -97,6 +106,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:$coroutinesVersion")
     implementation("com.google.firebase:firebase-messaging")
     implementation("io.coil-kt:coil-compose:$coilVersion")
+    implementation("com.onesignal:OneSignal:$oneSignalVersion")
     testImplementation("org.mockito:mockito-core:$mockitoVersion")
     testImplementation("org.mockito.kotlin:mockito-kotlin:$mockitoKotlinVersion")
     testImplementation("androidx.arch.core:core-testing:$archVersion")

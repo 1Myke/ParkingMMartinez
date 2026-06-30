@@ -6,6 +6,8 @@ interface NotificationRepository {
     fun saveNotification(notification: NotificationItem)
     fun getNotificationsFlow(userId: String, onUpdate: (List<NotificationItem>) -> Unit)
     fun markAllAsRead(userId: String)
-    fun deleteNotification(notificationId: String) // 🌟 NUEVO
-    fun deleteAllNotifications(userId: String)     // 🌟 NUEVO
+    fun deleteNotification(notificationId: String)
+    fun deleteAllNotifications(userId: String)
+    fun linkDeviceWithUser(userId: String)
+    fun sendPushNotification(context: android.content.Context, targetUserId: String, title: String, message: String)
 }

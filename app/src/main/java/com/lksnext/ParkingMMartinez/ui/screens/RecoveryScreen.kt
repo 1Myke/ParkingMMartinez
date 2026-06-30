@@ -1,5 +1,6 @@
 package com.lksnext.ParkingMMartinez.ui.screens
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -24,6 +25,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.res.painterResource
 
 @Composable
 fun RecoveryScreen(
@@ -71,6 +73,15 @@ fun RecoveryScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
+
+        Image(
+            painter = painterResource(id = R.drawable.lks_logo),
+            contentDescription = "LKS Next Logo",
+            modifier = Modifier.size(150.dp)
+        )
+
+        Spacer(modifier = Modifier.height(50.dp))
+
         Text(
             text = stringResource(R.string.rec_title),
             style = MaterialTheme.typography.headlineLarge,

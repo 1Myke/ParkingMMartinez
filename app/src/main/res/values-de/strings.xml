@@ -21,8 +21,9 @@
     <string name="booking_hours_unit">Stunden</string>
     <string name="booking_today">HEUTE</string>
     <string name="booking_change_vehicle_hint">Hier klicken, um Ihr Fahrzeug zu ändern!</string>
+    <string name="booking_select_vehicle_hint">Klicke hier, um dein Fahrzeug auszuwählen!</string>
     <string name="booking_error_overlap">Nächste Buchung um %1$s, daher können Sie maximal %2$s Stunden reservieren</string>
-
+    <string name="booking_error_vehicle_required">Bitte wähle ein Fahrzeug aus, um die Reservierung zu bestätigen!</string>
 
     <!-- TEXTO BOOKING_REGISTER_SCREEN EN ALEMÁN -->
     <string name="register_title">Meine Reservierungen</string>
@@ -112,7 +113,7 @@
 
     <string name="notification_channel_id">parking_alerts_channel</string>
     <string name="notification_title_start">Ihre Buchung beginnt bald!</string>
-    <string name="notification_body_start">Es verbleiben noch 15 Minuten, bis Ihre Buchung in %1$s (%2$s) beginnt.</string>
+    <string name="notification_body_start">Es verbleiben noch 30 Minuten, bis Ihre Buchung in %1$s (%2$s) beginnt.</string>
 
     <string name="notification_title_end">Ihre Zeit läuft ab!</string>
     <string name="notification_body_end">Es verbleiben noch 15 Minuten, bis Ihre Buchung endet. Denken Sie daran, Ihr Fahrzeug zu entfernen.</string>
@@ -143,6 +144,8 @@
     <string name="label_time">UHRZEIT</string>
     <string name="label_vehicle">FAHRZEUG</string>
     <string name="label_available">VERFÜGBAR</string>
+    <string name="label_almost_full">FAST VOLL</string>
+    <string name="label_free">frei</string>
     <string name="label_full">VOLL</string>
     <string name="status_active">AKTIV</string>
     <string name="btn_edit">Bearbeiten</string>

@@ -20,8 +20,9 @@
     <string name="booking_hours_unit">ore</string>
     <string name="booking_today">OGGI</string>
     <string name="booking_change_vehicle_hint">Clicca qui per cambiare il tuo veicolo!</string>
+    <string name="booking_select_vehicle_hint">Clicca qui per selezionare il tuo veicolo!</string>
     <string name="booking_error_overlap">Prossima prenotazione alle %1$s, quindi puoi prenotare al massimo %2$s ore</string>
-
+    <string name="booking_error_vehicle_required">Seleziona un veicolo per confermare la prenotazione!</string>
 
     <string name="register_title">Le mie prenotazioni</string>
     <string name="register_empty">Nessuna prenotazione attiva</string>
@@ -106,7 +107,7 @@
 
     <string name="notification_channel_id">parking_alerts_channel</string>
     <string name="notification_title_start">La tua prenotazione inizia presto!</string>
-    <string name="notification_body_start">Mancano 15 minuti all\'inizio della tua prenotazione in %1$s (%2$s).</string>
+    <string name="notification_body_start">Mancano 30 minuti all\'inizio della tua prenotazione in %1$s (%2$s).</string>
 
     <string name="notification_title_end">Il tempo a disposizione sta per scadere!</string>
     <string name="notification_body_end">Mancano 15 minuti alla fine della tua prenotazione. Ricordati di spostare il veicolo.</string>
@@ -136,6 +137,8 @@
     <string name="label_time">ORA</string>
     <string name="label_vehicle">VEICOLO</string>
     <string name="label_available">DISPONIBILE</string>
+    <string name="label_almost_full">QUASI PIENO</string>
+    <string name="label_free">liberi</string>
     <string name="label_full">PIENO</string>
     <string name="status_active">ATTIVA</string>
     <string name="btn_edit">Modifica</string>

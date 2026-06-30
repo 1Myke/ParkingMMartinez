@@ -95,7 +95,7 @@ private fun handleNavigationClick(navController: NavController, targetRoute: Str
 
 private fun navigateToNormalTab(navController: NavController, route: String) {
     navController.navigate(route) {
-        popUpTo(navController.graph.findStartDestination().id) {
+        popUpTo(Screen.Map.route) {
             saveState = true
         }
         launchSingleTop = true

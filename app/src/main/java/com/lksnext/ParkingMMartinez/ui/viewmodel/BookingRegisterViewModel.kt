@@ -40,8 +40,18 @@ class BookingRegisterViewModel(
                 getReservationEndMillis(res) <= nowMillis
             }
 
+            val thirtyDaysMillis = 30L * 24 * 60 * 60 * 1000
+            val validPast = past.filter { res ->
+                if (nowMillis - getReservationEndMillis(res) > thirtyDaysMillis) {
+                    repository.cancelReservation(res.id)
+                    false
+                } else {
+                    true
+                }
+            }
+
             activeReservations = active.sortedBy { getReservationStartMillis(it) }
-            pastReservations = past.sortedByDescending { getReservationStartMillis(it) }
+            pastReservations = validPast.sortedByDescending { getReservationStartMillis(it) }
         }
     }
 

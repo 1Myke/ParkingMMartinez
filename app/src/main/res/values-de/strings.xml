@@ -113,7 +113,7 @@
 
     <string name="notification_channel_id">parking_alerts_channel</string>
     <string name="notification_title_start">Ihre Buchung beginnt bald!</string>
-    <string name="notification_body_start">Es verbleiben noch 15 Minuten, bis Ihre Buchung in %1$s (%2$s) beginnt.</string>
+    <string name="notification_body_start">Es verbleiben noch 30 Minuten, bis Ihre Buchung in %1$s (%2$s) beginnt.</string>
 
     <string name="notification_title_end">Ihre Zeit läuft ab!</string>
     <string name="notification_body_end">Es verbleiben noch 15 Minuten, bis Ihre Buchung endet. Denken Sie daran, Ihr Fahrzeug zu entfernen.</string>

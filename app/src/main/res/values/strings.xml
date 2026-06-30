@@ -114,7 +114,7 @@
 
     <string name="notification_channel_id">parking_alerts_channel</string>
     <string name="notification_title_start">Your booking starts soon!</string>
-    <string name="notification_body_start">There are 15 minutes left until your booking begins in %1$s (%2$s).</string>
+    <string name="notification_body_start">There are 30 minutes left until your booking begins in %1$s (%2$s).</string>
 
     <string name="notification_title_end">Your time is running out!</string>
     <string name="notification_body_end">There are 15 minutes left until your booking ends. Remember to remove your vehicle.</string>

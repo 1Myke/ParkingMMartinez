@@ -107,7 +107,7 @@
 
     <string name="notification_channel_id">parking_alerts_channel</string>
     <string name="notification_title_start">La tua prenotazione inizia presto!</string>
-    <string name="notification_body_start">Mancano 15 minuti all\'inizio della tua prenotazione in %1$s (%2$s).</string>
+    <string name="notification_body_start">Mancano 30 minuti all\'inizio della tua prenotazione in %1$s (%2$s).</string>
 
     <string name="notification_title_end">Il tempo a disposizione sta per scadere!</string>
     <string name="notification_body_end">Mancano 15 minuti alla fine della tua prenotazione. Ricordati di spostare il veicolo.</string>

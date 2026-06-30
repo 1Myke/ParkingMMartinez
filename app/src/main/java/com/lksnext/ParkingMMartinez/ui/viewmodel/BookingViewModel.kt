@@ -390,14 +390,14 @@ class BookingViewModel (
 
         val nowMillis = System.currentTimeMillis()
 
-        // --- 1. CONFIGURAR NUEVA ALERTA DE INICIO (15 minutos antes) ---
+        // --- 1. CONFIGURAR NUEVA ALERTA DE INICIO (30 minutos antes) ---
         val calInicio = Calendar.getInstance().apply {
             time = reservation.date
             set(Calendar.HOUR_OF_DAY, reservation.startTime.hour)
             set(Calendar.MINUTE, reservation.startTime.minute)
             set(Calendar.SECOND, 0)
             set(Calendar.MILLISECOND, 0)
-            add(Calendar.MINUTE, -15) //- 15
+            add(Calendar.MINUTE, -30) //- 30
         }
 
         if (calInicio.timeInMillis > nowMillis) {

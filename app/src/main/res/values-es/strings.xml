@@ -107,7 +107,7 @@
 
     <string name="notification_channel_id">parking_alerts_channel</string>
     <string name="notification_title_start">¡Tu reserva empieza pronto!</string>
-    <string name="notification_body_start">Faltan 15 minutos para que comience tu reserva en %1$s (%2$s).</string>
+    <string name="notification_body_start">Faltan 30 minutos para que comience tu reserva en %1$s (%2$s).</string>
 
     <string name="notification_title_end">¡Tu tiempo se está agotando!</string>
     <string name="notification_body_end">Faltan 15 minutos para que termine tu reserva. Recuerda retirar tu vehículo.</string>

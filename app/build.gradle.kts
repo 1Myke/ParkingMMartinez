@@ -90,6 +90,12 @@ sonar {
     }
 }
 
+tasks.matching { it.name == "sonarResolver" }.configureEach {
+    dependsOn(tasks.matching {
+        it.name.startsWith("generate") && it.name.endsWith("AndroidTestResValues")
+    })
+}
+
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

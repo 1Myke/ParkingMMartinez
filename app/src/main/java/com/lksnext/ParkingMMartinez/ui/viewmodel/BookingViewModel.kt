@@ -240,21 +240,6 @@ class BookingViewModel (
         return endCal.timeInMillis <= nowMillis
     }
 
-//    private fun isReservationPast(res: Reservation, nowMillis: Long): Boolean {
-//        val endCal = Calendar.getInstance().apply {
-//            time = res.date
-//            set(Calendar.HOUR_OF_DAY, res.endTime.hour)
-//            set(Calendar.MINUTE, res.endTime.minute)
-//            set(Calendar.SECOND, 0)
-//            set(Calendar.MILLISECOND, 0)
-//
-//            if (res.endTime.hour < res.startTime.hour) {
-//                add(Calendar.DAY_OF_YEAR, 1)
-//            }
-//        }
-//        return endCal.timeInMillis <= nowMillis
-//    }
-
     fun loadAndFilterVehicles() {
         val userId = sessionManager.getActiveUserId() ?: ""
 

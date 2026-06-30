@@ -213,7 +213,11 @@ fun LksNavigation() {
                     onConfirmBooking = {
                         navController.popBackStack()
                         navController.navigate(Screen.BookingsList.route) {
+                            popUpTo(Screen.Map.route) {
+                                saveState = true
+                            }
                             launchSingleTop = true
+                            restoreState = true
                         }
                     },
                     onManageVehicles = {

@@ -51,6 +51,11 @@ class BookingRegisterViewModelTest {
 
         `when`(mockContext.getSystemService(Context.ALARM_SERVICE)).thenReturn(mockAlarmManager)
 
+        // Sin este mock, context.applicationContext devuelve null y PendingIntent.getBroadcast
+        // no es interceptado por el mock estático, causando NPE en piCancel.cancel() dentro
+        // de cancelarAlarmaExistente, lo que interrumpe la corrutina antes de llamar a loadReservations()
+        `when`(mockContext.applicationContext).thenReturn(mockContext)
+
         // Mockeamos estáticamente PendingIntent para evitar el error "Method getBroadcast not mocked"
         mockedPendingIntent = mockStatic(PendingIntent::class.java)
         val mockPendingIntent = mock(PendingIntent::class.java)

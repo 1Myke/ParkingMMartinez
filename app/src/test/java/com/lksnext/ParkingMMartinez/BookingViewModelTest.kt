@@ -72,6 +72,10 @@ class BookingViewModelTest {
         val mockAlarmManager = mock(android.app.AlarmManager::class.java)
         `when`(mockContext.getSystemService(Context.ALARM_SERVICE)).thenReturn(mockAlarmManager)
 
+        // Sin este mock, context.applicationContext devuelve null y PendingIntent.getBroadcast
+        // no es interceptado por el mock estático (any() no captura null), causando NPE en piCancel.cancel()
+        `when`(mockContext.applicationContext).thenReturn(mockContext)
+
         // Interceptamos la creación de cualquier 'new Intent(...)' para que putExtra no rompa el entorno de la JVM
         mockedIntent = mockConstruction(android.content.Intent::class.java) { mock, _ ->
             `when`(mock.putExtra(anyString(), anyString())).thenReturn(mock)

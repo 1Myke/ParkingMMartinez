@@ -32,6 +32,7 @@ import androidx.lifecycle.compose.LifecycleResumeEffect
 import com.lksnext.ParkingMMartinez.ui.viewmodel.BookingViewModel
 import com.lksnext.ParkingMMartinez.ui.constants.TestTags
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
 import java.util.Calendar
 
 @Composable
@@ -40,20 +41,22 @@ fun MapScreen(
     bookingViewModel: BookingViewModel,
     onZoneClick: (String) -> Unit
 ) {
-    val todayStr = stringResource(R.string.booking_today)
-
     val scope = rememberCoroutineScope()
 
     LifecycleResumeEffect(Unit) {
         bookingViewModel.cancelEditing()
         bookingViewModel.checkUserReservationStatus()
 
-        scope.launch {
-            viewModel.refreshParking()
+        //Metodo manual, ya que no disponemos de los servicios cloud de firebase
+        val job = scope.launch {
+            while (true) {
+                viewModel.refreshParking()
+                delay(30_000L)
+            }
         }
 
         onPauseOrDispose {
-            // Limpieza si fuera necesario
+            job.cancel()
         }
     }
 
@@ -91,93 +94,114 @@ fun MapScreen(
             Spacer(Modifier.height(4.dp))
 
             // --- SELECTOR DE FECHAS HORIZONTAL ---
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .horizontalScroll(rememberScrollState()),
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                viewModel.availableDates.forEach { (fullDate, label) ->
-                    val displayLabel = if (label == "TODAY") todayStr else {
-                        val sdf = java.text.SimpleDateFormat("EEE", java.util.Locale.getDefault())
-
-                        sdf.format(fullDate).replaceFirstChar { it.uppercase() }
-                    }
-
-                    val cal = Calendar.getInstance().apply { time = fullDate }
-                    val dayNumStr = cal.get(Calendar.DAY_OF_MONTH).toString()
-
-                    DateItem(
-                        day = dayNumStr,
-                        label = displayLabel,
-                        isSelected = viewModel.selectedDate == fullDate,
-                        modifier = Modifier.testTag("${TestTags.MAP_DATE_ITEM_PREFIX}$dayNumStr"),
-                        onClick = { viewModel.onDateSelected(fullDate) }
-                    )
-                }
-            }
+            DateSelectorSection(viewModel)
 
             // --- SELECTOR DE HORA DE INICIO ---
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
-                border = BorderStroke(1.dp, Color.LightGray),
-                shape = RoundedCornerShape(16.dp)
-            ) {
-                Column(modifier = Modifier.padding(14.dp)) {
-                    Text(
-                        text = stringResource(R.string.booking_start_time),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = Color.Gray
-                    )
-
-                    OutlinedCard(
-                        onClick = { viewModel.showTimePicker = true },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 8.dp)
-                            .testTag(TestTags.MAP_TIME_PICKER_TRIGGER),
-                        shape = RoundedCornerShape(12.dp),
-                        colors = CardDefaults.outlinedCardColors(containerColor = bookingCardColor),
-                        border = BorderStroke(1.dp, lightGray)
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(12.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Text(
-                                text = String.format("%02d:%02d", viewModel.selectedStartTime.hour, viewModel.selectedStartTime.minute),
-                                style = MaterialTheme.typography.titleMedium
-                            )
-                            Icon(Icons.Default.AccessTime, null, tint = Color.Gray)
-                        }
-                    }
-                }
-            }
+            TimeSelectorSection(viewModel)
 
             // --- ZONAS DE APARCAMIENTO ---
-            Column(
+            ParkingZonesSection(viewModel, bookingViewModel, onZoneClick)
+        }
+    }
+}
+
+@Composable
+private fun DateSelectorSection(viewModel: MapViewModel) {
+    val todayStr = stringResource(R.string.booking_today)
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .horizontalScroll(rememberScrollState()),
+        horizontalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        viewModel.availableDates.forEach { (fullDate, label) ->
+            val displayLabel = if (label == "TODAY") todayStr else {
+                val sdf = java.text.SimpleDateFormat("EEE", java.util.Locale.getDefault())
+
+                sdf.format(fullDate).replaceFirstChar { it.uppercase() }
+            }
+
+            val cal = Calendar.getInstance().apply { time = fullDate }
+            val dayNumStr = cal.get(Calendar.DAY_OF_MONTH).toString()
+
+            DateItem(
+                day = dayNumStr,
+                label = displayLabel,
+                isSelected = viewModel.selectedDate == fullDate,
+                modifier = Modifier.testTag("${TestTags.MAP_DATE_ITEM_PREFIX}$dayNumStr"),
+                onClick = { viewModel.onDateSelected(fullDate) }
+            )
+        }
+    }
+}
+
+@Composable
+private fun TimeSelectorSection(viewModel: MapViewModel) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        border = BorderStroke(1.dp, Color.LightGray),
+        shape = RoundedCornerShape(16.dp)
+    ) {
+        Column(modifier = Modifier.padding(14.dp)) {
+            Text(
+                text = stringResource(R.string.booking_start_time),
+                style = MaterialTheme.typography.labelSmall,
+                color = Color.Gray
+            )
+
+            OutlinedCard(
+                onClick = { viewModel.showTimePicker = true },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                    .padding(top = 8.dp)
+                    .testTag(TestTags.MAP_TIME_PICKER_TRIGGER),
+                shape = RoundedCornerShape(12.dp),
+                colors = CardDefaults.outlinedCardColors(containerColor = bookingCardColor),
+                border = BorderStroke(1.dp, lightGray)
             ) {
-                viewModel.zones.forEach { zone ->
-                    val isZoneFull = zone.availableSpots <= 0
-
-                    ZoneCard(
-                        zone = zone,
-                        modifier = Modifier.testTag("${TestTags.MAP_ZONE_CARD_PREFIX}${zone.name}"),
-                        onClick = {
-                            if (!isZoneFull) {
-                                bookingViewModel.onDateSelected(viewModel.selectedDate)
-                                onZoneClick(zone.name)
-                            }
-                        }
+                Row(
+                    modifier = Modifier.padding(12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = java.lang.String.format("%02d:%02d", viewModel.selectedStartTime.hour, viewModel.selectedStartTime.minute),
+                        style = MaterialTheme.typography.titleMedium
                     )
+                    Icon(Icons.Default.AccessTime, null, tint = Color.Gray)
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun ParkingZonesSection(
+    viewModel: MapViewModel,
+    bookingViewModel: BookingViewModel,
+    onZoneClick: (String) -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        viewModel.zones.forEach { zone ->
+            val isZoneFull = zone.availableSpots <= 0
+
+            ZoneCard(
+                zone = zone,
+                modifier = Modifier.testTag("${TestTags.MAP_ZONE_CARD_PREFIX}${zone.name}"),
+                onClick = {
+                    if (!isZoneFull) {
+                        bookingViewModel.onDateSelected(viewModel.selectedDate)
+                        onZoneClick(zone.name)
+                    }
+                }
+            )
         }
     }
 }

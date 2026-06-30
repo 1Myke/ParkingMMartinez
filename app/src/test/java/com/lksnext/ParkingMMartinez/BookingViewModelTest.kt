@@ -217,9 +217,12 @@ class BookingViewModelTest {
             spotNumber = 5,
             vehicle = matchingVehicle,
             zone = fakeZone,
-            date = Date(),
-            startTime = LocalTime.now(),
-            endTime = LocalTime.now().plusHours(2),
+            // Fecha futura y horas fijas: la reserva está garantizada como "no terminada"
+            // independientemente de la hora a la que se ejecute el test (evita flakiness
+            // por cruce de medianoche en CI/UTC).
+            date = GregorianCalendar(2099, Calendar.JANUARY, 1).time,
+            startTime = LocalTime.of(10, 0),
+            endTime = LocalTime.of(12, 0),
             isCheckedIn = false
         )
 

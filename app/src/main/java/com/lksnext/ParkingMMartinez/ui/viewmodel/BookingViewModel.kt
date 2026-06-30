@@ -330,6 +330,13 @@ class BookingViewModel (
             set(Calendar.MINUTE, res.endTime.minute)
             set(Calendar.SECOND, 0)
             set(Calendar.MILLISECOND, 0)
+
+            // Si la reserva cruza la medianoche (la hora de fin es menor que la de inicio),
+            // el fin pertenece al día siguiente. Sin esto, una reserva nocturna se
+            // consideraría erróneamente "ya terminada".
+            if (res.endTime.hour < res.startTime.hour) {
+                add(Calendar.DAY_OF_YEAR, 1)
+            }
         }
         return endCal.timeInMillis <= nowMillis
     }

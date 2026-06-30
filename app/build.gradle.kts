@@ -1,3 +1,6 @@
+import java.util.Properties
+import java.io.FileInputStream
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -21,7 +24,6 @@ val coroutinesVersion = "1.7.3"
 val appcompatVersion = "1.7.0"
 val coilVersion = "2.6.0"
 val mockitoKotlinVersion = "5.2.1"
-
 val oneSignalVersion = "5.1.23"
 
 android {
@@ -47,19 +49,15 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
+        // Busca en variables de entorno, si no, en gradle.properties (local o global)
         val osId = System.getenv("ONESIGNAL_APP_ID")
-            ?: project.extensions.extraProperties.let {
-                if (it.has("onesignal.app.id")) it.get("onesignal.app.id").toString() else ""
-            }
+            ?: (project.findProperty("onesignal.app.id") as? String ?: "")
 
         resValue("string", "onesignal_app_id_secret", osId)
 
         // OneSignal REST API Key — needed to authorize server-to-device push calls.
-        // Add  onesignal.rest.api.key=YOUR_KEY  to gradle.properties (never commit it).
         val osRestApiKey = System.getenv("ONESIGNAL_REST_API_KEY")
-            ?: project.extensions.extraProperties.let {
-                if (it.has("onesignal.rest.api.key")) it.get("onesignal.rest.api.key").toString() else ""
-            }
+            ?: (project.findProperty("onesignal.rest.api.key") as? String ?: "")
 
         resValue("string", "onesignal_rest_api_key_secret", osRestApiKey)
     }

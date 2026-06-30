@@ -179,8 +179,24 @@ class ProfileViewModel(
             try {
                 // Ahora esto es suspend, así que debe ir dentro de la corrutina
                 val allBookings = bookingRepository.getAllReservations()
+                val nowMillis = System.currentTimeMillis()
                 val hasActiveBookings = allBookings.any { booking ->
-                    booking.vehicle.plate == vehicle.plate
+                    if (booking.vehicle.plate == vehicle.plate) {
+                        val endCal = java.util.Calendar.getInstance().apply {
+                            time = booking.date
+                            set(java.util.Calendar.HOUR_OF_DAY, booking.endTime.hour)
+                            set(java.util.Calendar.MINUTE, booking.endTime.minute)
+                            set(java.util.Calendar.SECOND, 0)
+                            set(java.util.Calendar.MILLISECOND, 0)
+
+                            if (booking.endTime.hour < booking.startTime.hour) {
+                                add(java.util.Calendar.DAY_OF_YEAR, 1)
+                            }
+                        }
+                        endCal.timeInMillis > nowMillis
+                    } else {
+                        false
+                    }
                 }
 
                 if (hasActiveBookings) {

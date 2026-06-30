@@ -137,6 +137,7 @@
     <string name="label_time">ORA</string>
     <string name="label_vehicle">VEICOLO</string>
     <string name="label_available">DISPONIBILE</string>
+    <string name="label_free">liberi</string>
     <string name="label_full">PIENO</string>
     <string name="status_active">ATTIVA</string>
     <string name="btn_edit">Modifica</string>

@@ -144,6 +144,7 @@
     <string name="label_time">HEURE</string>
     <string name="label_vehicle">VÉHICULE</string>
     <string name="label_available">DISPONIBLE</string>
+    <string name="label_free">libres</string>
     <string name="label_full">COMPLET</string>
     <string name="status_active">ACTIVE</string>
     <string name="btn_edit">Modifier</string>

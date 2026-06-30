@@ -89,7 +89,7 @@ private fun ZoneInfoSection(zone: ParkingZone, isZoneFull: Boolean, modifier: Mo
                 fontWeight = FontWeight.ExtraBold,
                 color = if (isZoneFull) Color.Red else verdePino
             )
-            Text(" / ${zone.totalSpots} free", color = Color.Gray)
+            Text(" / ${zone.totalSpots} ${stringResource(R.string.label_free)}", color = Color.Gray)
         }
     }
 }

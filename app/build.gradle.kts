@@ -53,6 +53,15 @@ android {
             }
 
         resValue("string", "onesignal_app_id_secret", osId)
+
+        // OneSignal REST API Key — needed to authorize server-to-device push calls.
+        // Add  onesignal.rest.api.key=YOUR_KEY  to gradle.properties (never commit it).
+        val osRestApiKey = System.getenv("ONESIGNAL_REST_API_KEY")
+            ?: project.extensions.extraProperties.let {
+                if (it.has("onesignal.rest.api.key")) it.get("onesignal.rest.api.key").toString() else ""
+            }
+
+        resValue("string", "onesignal_rest_api_key_secret", osRestApiKey)
     }
 
     buildTypes {

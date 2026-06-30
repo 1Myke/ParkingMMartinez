@@ -119,6 +119,10 @@
     <string name="notification_body_checkin_reminder">Hai una prenotazione attiva in %1$s. Effettua il check-in ora o cancella la prenotazione se non intendi utilizzarla.</string>
     <string name="notification_unrestricted_battery">Per ricevere gli avvisi con l\'app chiusa, tocca qui, abilita \"Batteria senza restrizioni\" e riavvia l\'app.</string>
 
+    <!-- NOTIFICHE DI CAPACITÀ ZONA -->
+    <string name="notification_half_capacity_title">⚠️ Zona parcheggio quasi piena</string>
+    <string name="notification_half_capacity_body">La %1$s ha raggiunto il 50%% della sua capacità. I posti stanno esaurendosi — prenota il tuo adesso!</string>
+
     <string name="notification_system_alerts">Avvisi di sistema</string>
     <string name="notification_missed_title">Prenotazione cancellata automaticamente</string>
     <string name="notification_missed_body">La tua prenotazione per il veicolo %1$s (%2$s) nella Zona %3$s il %4$s (dalle %5$s alle %6$s) è stata cancellata per mancato check-in entro l\'orario stabilito.</string>

@@ -10,4 +10,6 @@ interface NotificationRepository {
     fun deleteAllNotifications(userId: String)
     fun linkDeviceWithUser(userId: String)
     fun sendPushNotification(context: android.content.Context, targetUserId: String, title: String, message: String)
+
+    fun sendBroadcastNotification(context: android.content.Context, title: String, message: String)
 }

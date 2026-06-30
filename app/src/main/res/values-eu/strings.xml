@@ -125,6 +125,10 @@
     <string name="notification_body_checkin_reminder">Erreserba aktibo bat duzu %1$s-(e)an. Mesedez, egin check-ina orain edo bertan behera utzi erreserba erabiltzen ez baduzu.</string>
     <string name="notification_unrestricted_battery">Aplikazioa itxita egonda abisuak jasotzeko, sakatu hemen, aktibatu \"Bateria mugarik gabe\" eta berriarazi aplikazioa.</string>
 
+    <!-- EREMU-EDUKIERAREN JAKINARAZPENAK -->
+    <string name="notification_half_capacity_title">⚠️ Aparkaleku eremua ia beteta</string>
+    <string name="notification_half_capacity_body">%1$s eremua bere edukieraren &#37;50era iritsi da. Tokiak agortzen ari dira — erreserbatu zurea orain!</string>
+
     <string name="notification_system_alerts">Sistemaren abisuak</string>
     <string name="notification_missed_title">Erreserba automatikoki bertan behera utzita</string>
     <string name="notification_missed_body">%1$s (%2$s) ibilgailuaren erreserba %3$s eremuan, %4$s-(e)an (%5$s-(e)tik %6$s-(e)ra), bertan behera utzi da check-in ordua igaro delako.</string>

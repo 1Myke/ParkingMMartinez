@@ -130,6 +130,10 @@
     <string name="notification_missed_title">Reservation Automatically Cancelled</string>
     <string name="notification_missed_body">Your reservation for vehicle %1$s (%2$s) in Zone %3$s on %4$s (%5$s to %6$s) was cancelled due to missing the check-in time.</string>
 
+    <!-- NOTIFICACIONES DE CAPACIDAD DE ZONA -->
+    <string name="notification_half_capacity_title">⚠️ Parking Zone Running Low</string>
+    <string name="notification_half_capacity_body">The %1$s has reached 50%% capacity. Spaces are running out — book yours now!</string>
+
     <!-- TEXTO DE LOS COMPONENTES EN INGLES -->
     <string name="footer_map">Map</string>
     <string name="footer_bookings">Bookings</string>

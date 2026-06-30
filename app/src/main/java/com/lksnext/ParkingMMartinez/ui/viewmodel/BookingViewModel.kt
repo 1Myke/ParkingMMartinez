@@ -15,6 +15,7 @@ import com.lksnext.ParkingMMartinez.data.ParkingManager
 import com.lksnext.ParkingMMartinez.data.SessionManager
 import com.lksnext.ParkingMMartinez.data.receiver.BookingAlarmReceiver
 import com.lksnext.ParkingMMartinez.data.repository.BookingRepository
+import com.lksnext.ParkingMMartinez.data.repository.NotificationRepository
 import com.lksnext.ParkingMMartinez.data.repository.VehicleRepository
 import com.lksnext.ParkingMMartinez.model.ParkingZone
 import com.lksnext.ParkingMMartinez.model.Reservation
@@ -33,8 +34,16 @@ private const val TIME_FORMAT = "%02d:%02d"
 class BookingViewModel (
     private val repository: BookingRepository,
     private val vehicleRepository: VehicleRepository,
-    private val sessionManager: SessionManager
+    private val sessionManager: SessionManager,
+    private val notificationRepository: NotificationRepository
 ): ViewModel() {
+
+    /**
+     * In-session guard: tracks which zone names have already triggered the 50 %
+     * broadcast so we don't spam users if multiple bookings are confirmed quickly.
+     * Scoped to the ViewModel lifetime — resets when the user kills the app.
+     */
+    private val halfCapacityNotifiedZones = mutableSetOf<String>()
     var startHour by mutableStateOf(8)
         private set
     var startMinute by mutableStateOf(0)
@@ -182,6 +191,10 @@ class BookingViewModel (
                 editingReservationId?.let { repository.cancelReservation(it) }
                 repository.saveReservation(newReservation)
 
+                // TASK 3 — Check 50 % threshold RIGHT HERE, at the moment the state
+                // changes, using the exact date/time slot of the new booking.
+                checkAndBroadcastIfHalfCapacity(context, allBookings, newReservation)
+
                 programarAlertasDeReserva(context, newReservation)
 
                 editingReservationId = null
@@ -197,6 +210,59 @@ class BookingViewModel (
     
     fun resetLoadingState() {
         isLoading = false
+    }
+
+    /**
+     * Called immediately after a reservation is saved to Firestore.
+     *
+     * Uses the EXACT date/time slot of [newReservation] (not the map's currently
+     * selected slot) to count how many spots in that zone are occupied, including
+     * the reservation just confirmed. Sends a broadcast push to all users the first
+     * time a zone crosses the ≥ 50 % occupancy mark in this ViewModel session.
+     *
+     * @param context           Activity/application context for string resources.
+     * @param existingBookings  All bookings fetched BEFORE saving [newReservation].
+     * @param newReservation    The reservation that was just persisted.
+     */
+    private fun checkAndBroadcastIfHalfCapacity(
+        context: Context,
+        existingBookings: List<Reservation>,
+        newReservation: Reservation
+    ) {
+        val vehicleType = newReservation.vehicle.type
+        val zoneName    = newReservation.zone.name
+
+        // Skip if we already sent the alert for this zone in this session
+        if (zoneName in halfCapacityNotifiedZones) return
+
+        // Compute occupancy for the EXACT time slot of the new booking
+        val allIncludingNew = existingBookings + newReservation
+        ParkingManager.syncWithReservationsForTimeSlot(
+            allBookings  = allIncludingNew,
+            selectedDate = newReservation.date,
+            slotStart    = newReservation.startTime,
+            slotEnd      = newReservation.endTime
+        )
+
+        val totalSpots    = ParkingManager.getTotalSpotsCount(vehicleType)
+        val availableSpots = ParkingManager.getAvailableSpotsCount(vehicleType)
+        val occupiedCount  = totalSpots - availableSpots
+
+        android.util.Log.d(
+            "BOOKING_HALF_CAPACITY",
+            "Zona '$zoneName': $occupiedCount/$totalSpots ocupadas tras guardar reserva."
+        )
+
+        if (totalSpots > 0 && occupiedCount * 2 >= totalSpots) {
+            halfCapacityNotifiedZones.add(zoneName)
+            val title   = context.getString(R.string.notification_half_capacity_title)
+            val message = context.getString(R.string.notification_half_capacity_body, zoneName)
+            notificationRepository.sendBroadcastNotification(context, title, message)
+            android.util.Log.d(
+                "BOOKING_HALF_CAPACITY",
+                "🔔 Broadcast disparado para '$zoneName' ($occupiedCount/$totalSpots)."
+            )
+        }
     }
 
     fun checkUserReservationStatus() {

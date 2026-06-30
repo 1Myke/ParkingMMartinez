@@ -32,7 +32,6 @@ class FirebaseNotificationRepository(
     private val SUPPORTED_LOCALES = listOf("en", "es", "de", "fr", "it", "pt", "eu")
     private val ISO_DATE_PATTERN  = Regex("^\\d{4}-\\d{2}-\\d{2}$")
 
-    /** Lightweight projection of a Firestore user document. */
     private data class UserEntry(
         val userId: String,
         val onesignalId: String,
@@ -41,8 +40,9 @@ class FirebaseNotificationRepository(
 
     private val firestore  = FirebaseFirestore.getInstance()
     private val collection = firestore.collection("notifications")
+    private val subscriptionsCollection = firestore.collection("zone_subscriptions")
 
-    // ── Standard notification CRUD ────────────────────────────────────────────
+    // --- Standard notification CRUD ---
 
     override fun saveNotification(notification: NotificationItem) {
         val docRef = collection.document()
@@ -81,7 +81,7 @@ class FirebaseNotificationRepository(
             }
     }
 
-    // ── Device ↔ user wiring ─────────────────────────────────────────────────
+    // --- Device ↔ user wiring ---
 
     override fun linkDeviceWithUser(userId: String) {
         val immediateId = OneSignal.User.pushSubscription.id
@@ -106,11 +106,11 @@ class FirebaseNotificationRepository(
         Log.d(TAG_FIRESTORE, "Guardando onesignal_id='$onesignalId' para user='$userId'…")
         firestore.collection("users").document(userId)
             .set(mapOf("onesignal_id" to onesignalId), SetOptions.merge())
-            .addOnSuccessListener { Log.d(TAG_FIRESTORE, "✅ onesignal_id guardado para user='$userId'") }
-            .addOnFailureListener { e -> Log.e(TAG_FIRESTORE, "❌ Error guardando onesignal_id", e) }
+            .addOnSuccessListener { Log.d(TAG_FIRESTORE, "onesignal_id guardado para user='$userId'") }
+            .addOnFailureListener { e -> Log.e(TAG_FIRESTORE, "Error guardando onesignal_id", e) }
     }
 
-    // ── Single-user push ──────────────────────────────────────────────────────
+    // --- Single-user push ---
 
     override fun sendPushNotification(context: Context, targetUserId: String, title: String, message: String) {
         firestore.collection("users").document(targetUserId).get()
@@ -139,14 +139,7 @@ class FirebaseNotificationRepository(
             }
     }
 
-    // ── Broadcast push (Issues 1 + 3) ────────────────────────────────────────
-    //
-    // Refactored into small private methods (< 15 cognitive complexity each) and
-    // extended with:
-    //   • Multi-language OneSignal payload — each device receives the text in its
-    //     language (set via OneSignal.User.setLanguage when the user changes locale).
-    //   • Per-user Firestore NotificationItem saved in the user's stored language.
-    //   • ISO-8601 date args ("yyyy-MM-dd") are formatted per locale automatically.
+    // --- Broadcast push ---
 
     override fun sendBroadcastNotification(
         context: Context,
@@ -170,7 +163,7 @@ class FirebaseNotificationRepository(
         val users = collectUsersWithSubscription(snapshot)
         Log.d(TAG_BROADCAST, "Firestore: ${snapshot.size()} docs, ${users.size} con onesignal_id válido.")
         if (users.isEmpty()) {
-            Log.e(TAG_BROADCAST, "❌ Ningún usuario tiene onesignal_id. Verifica linkDeviceWithUser().")
+            Log.e(TAG_BROADCAST, "Ningún usuario tiene onesignal_id. Verifica linkDeviceWithUser().")
             return
         }
         CoroutineScope(ioDispatcher).launch {
@@ -206,12 +199,11 @@ class FirebaseNotificationRepository(
     }
 
     private fun validateBroadcastCredentials(appId: String, restKey: String): Boolean {
-        if (appId.isEmpty()) { Log.e(TAG_BROADCAST, "❌ App ID vacío — broadcast cancelado."); return false }
-        if (restKey.isEmpty()) Log.e(TAG_BROADCAST, "❌ REST API Key vacía — el servidor rechazará la petición.")
+        if (appId.isEmpty()) { Log.e(TAG_BROADCAST, "App ID vacío — broadcast cancelado."); return false }
+        if (restKey.isEmpty()) Log.e(TAG_BROADCAST, "REST API Key vacía — el servidor rechazará la petición.")
         return true
     }
 
-    /** Builds OneSignal headings/contents JSONObjects with all supported translations. */
     private fun buildMultiLanguagePayload(
         context: Context,
         titleResId: Int,
@@ -227,10 +219,6 @@ class FirebaseNotificationRepository(
         return headings to contents
     }
 
-    /**
-     * Resolves [resId] in the given [localeCode], optionally substituting [args].
-     * ISO-8601 date strings in [args] are reformatted in [localeCode]'s locale.
-     */
     private fun resolveLocalizedString(
         context: Context,
         localeCode: String,
@@ -245,7 +233,6 @@ class FirebaseNotificationRepository(
         return if (resolvedArgs.isEmpty()) ctx.getString(resId) else ctx.getString(resId, *resolvedArgs)
     }
 
-    /** If [arg] is an ISO-8601 date ("yyyy-MM-dd"), returns it formatted for [locale]. */
     private fun formatArgForLocale(arg: String, locale: Locale): String {
         if (!ISO_DATE_PATTERN.matches(arg)) return arg
         return try {
@@ -266,8 +253,8 @@ class FirebaseNotificationRepository(
             try {
                 val code = postToOneSignal(buildPushPayload(appId, chunk, headings, contents), restKey)
                 Log.d(TAG_BROADCAST, "Chunk $index → HTTP $code")
-                if (code in 200..299) { atLeastOneSucceeded = true; Log.d(TAG_BROADCAST, "✅ Chunk $index OK.") }
-                else Log.e(TAG_BROADCAST, "❌ Chunk $index rechazado (HTTP $code).")
+                if (code in 200..299) { atLeastOneSucceeded = true; Log.d(TAG_BROADCAST, "Chunk $index OK.") }
+                else Log.e(TAG_BROADCAST, "Chunk $index rechazado (HTTP $code).")
             } catch (e: Exception) { Log.e(TAG_BROADCAST, "Error en chunk $index", e) }
         }
         return atLeastOneSucceeded
@@ -283,7 +270,6 @@ class FirebaseNotificationRepository(
             put("priority", 10)
         }
 
-    /** Saves a [NotificationItem] per user, translated into the user's stored language. */
     private fun persistNotificationsToFirestore(
         context: Context,
         users: List<UserEntry>,
@@ -296,10 +282,10 @@ class FirebaseNotificationRepository(
             val localBody  = resolveLocalizedString(context, user.languageCode, bodyResId, bodyFormatArgs)
             saveNotification(NotificationItem(userId = user.userId, title = localTitle, body = localBody, isRead = false))
         }
-        Log.d(TAG_BROADCAST, "✅ NotificationItem guardado para ${users.size} usuarios.")
+        Log.d(TAG_BROADCAST, "NotificationItem guardado para ${users.size} usuarios.")
     }
 
-    // ── HTTP helper ───────────────────────────────────────────────────────────
+    // --- HTTP helper ---
 
     private fun resolveResString(context: Context, resName: String): String {
         val id = context.resources.getIdentifier(resName, "string", context.packageName)
@@ -328,6 +314,97 @@ class FirebaseNotificationRepository(
         private const val TAG_PUSH      = "OneSignal_Push"
         private const val TAG_FIRESTORE = "OneSignal_Firestore"
         private const val TAG_HTTP      = "OneSignal_HTTP"
+        private const val TAG_ZONE_BELL = "ZoneBell"
+    }
+
+    // --- Zone-availability subscription helpers ---
+
+    private fun buildSubscriptionDocId(userId: String, zoneName: String, dateKey: String): String =
+        "${userId}_${zoneName}_${dateKey}".replace(" ", "_")
+
+    override fun subscribeToZoneAvailability(
+        userId: String,
+        onesignalId: String,
+        languageCode: String,
+        zoneName: String,
+        dateKey: String
+    ) {
+        val docId = buildSubscriptionDocId(userId, zoneName, dateKey)
+        subscriptionsCollection.document(docId).set(
+            mapOf(
+                "userId"       to userId,
+                "onesignalId"  to onesignalId,
+                "languageCode" to languageCode,
+                "zoneName"     to zoneName,
+                "dateKey"      to dateKey
+            )
+        )
+        Log.d(TAG_ZONE_BELL, "Suscripción guardada: user=$userId zona=$zoneName día=$dateKey")
+    }
+
+    override fun unsubscribeFromZoneAvailability(userId: String, zoneName: String, dateKey: String) {
+        subscriptionsCollection.document(buildSubscriptionDocId(userId, zoneName, dateKey)).delete()
+        Log.d(TAG_ZONE_BELL, "Suscripción eliminada: user=$userId zona=$zoneName día=$dateKey")
+    }
+
+    override fun getUserZoneSubscriptions(userId: String, dateKey: String, onResult: (Set<String>) -> Unit) {
+        subscriptionsCollection
+            .whereEqualTo("userId", userId)
+            .whereEqualTo("dateKey", dateKey)
+            .get()
+            .addOnSuccessListener { snapshot ->
+                onResult(snapshot.documents.mapNotNull { it.getString("zoneName") }.toSet())
+            }
+            .addOnFailureListener { onResult(emptySet()) }
+    }
+
+    override fun notifyAndClearZoneSubscribers(
+        context: Context,
+        zoneName: String,
+        dateKey: String,
+        titleResId: Int,
+        bodyResId: Int,
+        bodyFormatArgs: List<String>
+    ) {
+        subscriptionsCollection
+            .whereEqualTo("zoneName", zoneName)
+            .whereEqualTo("dateKey", dateKey)
+            .get()
+            .addOnSuccessListener { snapshot ->
+                if (snapshot.isEmpty) return@addOnSuccessListener
+
+                val subscribers = snapshot.documents.mapNotNull { doc ->
+                    val uid  = doc.getString("userId")      ?: return@mapNotNull null
+                    val oid  = doc.getString("onesignalId") ?: return@mapNotNull null
+                    val lang = doc.getString("languageCode") ?: "en"
+                    UserEntry(userId = uid, onesignalId = oid, languageCode = lang)
+                }
+                if (subscribers.isEmpty()) return@addOnSuccessListener
+
+                Log.d(TAG_ZONE_BELL, " Notificando a ${subscribers.size} suscriptores de $zoneName el $dateKey")
+
+                // Delete subscriptions first (one-time alert)
+                val batch = firestore.batch()
+                snapshot.documents.forEach { batch.delete(it.reference) }
+                batch.commit()
+
+                CoroutineScope(ioDispatcher).launch {
+                    try {
+                        val appId   = resolveResString(context, "onesignal_app_id_secret")
+                        val restKey = resolveResString(context, "onesignal_rest_api_key_secret")
+                        if (!validateBroadcastCredentials(appId, restKey)) return@launch
+
+                        val (headings, contents) = buildMultiLanguagePayload(context, titleResId, bodyResId, bodyFormatArgs)
+                        val succeeded = sendAllChunks(subscribers.map { it.onesignalId }, appId, headings, contents, restKey)
+                        if (succeeded) persistNotificationsToFirestore(context, subscribers, titleResId, bodyResId, bodyFormatArgs)
+                    } catch (e: Exception) {
+                        Log.e(TAG_ZONE_BELL, "Error notificando suscriptores de disponibilidad", e)
+                    }
+                }
+            }
+            .addOnFailureListener { e ->
+                Log.e(TAG_ZONE_BELL, "Error consultando suscripciones de zona", e)
+            }
     }
 }
 

@@ -84,7 +84,7 @@ fun LksNavigation() {
     val mapViewModel: MapViewModel = viewModel(
         factory = viewModelFactory {
             addInitializer(MapViewModel::class) {
-                MapViewModel(bookingRepository)
+                MapViewModel(bookingRepository, notificationRepository, session)
             }
         }
     )

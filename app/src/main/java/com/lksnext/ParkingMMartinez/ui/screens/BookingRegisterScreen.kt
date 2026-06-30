@@ -114,11 +114,9 @@ fun BookingRegisterScreen(
                         isCheckInWindowActive = viewModel.isCheckInWindowActive(reservation),
                         actions = ReservationActions(
                             onCancelClick = {
-                                // Cancel in the register VM first (removes from Firestore + alarms)
-                                viewModel.cancelReservation(context, reservation.id)
-                                // Then let the shared booking VM reset the 50 % guard if the
-                                // zone+day drops back below the threshold after this cancellation.
-                                bookingViewModel.onReservationCancelled(context, reservation)
+                                viewModel.cancelReservation(context, reservation.id) {
+                                    bookingViewModel.onReservationCancelled(context, reservation)
+                                }
                             },
                             onCheckInClick = {
                                 if (isCheckInEnabled) {

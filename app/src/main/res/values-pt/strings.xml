@@ -122,6 +122,10 @@
     <!-- NOTIFICAÇÕES DE CAPACIDADE DE ZONA -->
     <string name="notification_half_capacity_title">⚠️ Zona de estacionamento quase lotada</string>
     <string name="notification_half_capacity_body">A %1$s está a ficar sem vagas no dia %2$s. Reserve a sua agora!</string>
+    <string name="notification_zone_available_title">🅿️ Vaga disponível!</string>
+    <string name="notification_zone_available_body">Acabou de ficar livre uma vaga na %1$s no dia %2$s. Reserve agora antes que acabe!</string>
+    <string name="map_bell_subscribe">Avisar-me quando houver vaga</string>
+    <string name="map_bell_unsubscribe">Cancelar alerta de disponibilidade</string>
 
     <string name="notification_system_alerts">Alertas do sistema</string>
     <string name="notification_missed_title">Reserva cancelada automaticamente</string>

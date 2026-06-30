@@ -22,6 +22,7 @@ val bookingCardColor = Color(0xFFF9F9F9)
 val lightGray = Color(0xFFE0E0E0)
 val navyBlue = Color(0xFF1A2C42)
 val automaticRed = Color(0xFFFFEBEE)
+val zoneFull = Color(0xFFE53935)
 
 val standardVehicleColor = Color(0xFFFFF4E6) to Color(0xFFD9480F) // Naranja suave
 val motorcycleVehicleColor = Color(0xFFE7F5FF) to Color(0xFF1971C2) // Azul suave

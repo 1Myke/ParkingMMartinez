@@ -85,13 +85,13 @@ class BookingRegisterViewModel(
         }.timeInMillis
     }
 
-    fun cancelReservation(context: Context, reservationId: String) {
+    fun cancelReservation(context: Context, reservationId: String, onCancelled: () -> Unit = {}) {
         viewModelScope.launch {
             repository.cancelReservation(reservationId)
 
             val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-            val idAlertaInicio = reservationId.hashCode() + 1
-            val idAlertaFin = reservationId.hashCode() + 2
+            val idAlertaInicio  = reservationId.hashCode() + 1
+            val idAlertaFin     = reservationId.hashCode() + 2
             val idAlertaCheckIn = reservationId.hashCode() + 3
 
             cancelarAlarmaExistente(context, alarmManager, idAlertaInicio)
@@ -99,6 +99,7 @@ class BookingRegisterViewModel(
             cancelarAlarmaExistente(context, alarmManager, idAlertaCheckIn)
 
             loadReservations()
+            onCancelled()
         }
     }
 

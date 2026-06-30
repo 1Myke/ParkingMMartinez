@@ -12,6 +12,7 @@ import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -41,8 +42,8 @@ fun MapScreen(
     onZoneClick: (String) -> Unit
 ) {
     val todayStr = stringResource(R.string.booking_today)
-
-    val scope = rememberCoroutineScope()
+    val context  = LocalContext.current
+    val scope    = rememberCoroutineScope()
 
     LifecycleResumeEffect(Unit) {
         bookingViewModel.cancelEditing()
@@ -167,8 +168,10 @@ fun MapScreen(
                     val isZoneFull = zone.availableSpots <= 0
 
                     ZoneCard(
-                        zone = zone,
-                        modifier = Modifier.testTag("${TestTags.MAP_ZONE_CARD_PREFIX}${zone.name}"),
+                        zone         = zone,
+                        modifier     = Modifier.testTag("${TestTags.MAP_ZONE_CARD_PREFIX}${zone.name}"),
+                        isSubscribed = zone.name in viewModel.subscribedZoneNames,
+                        onBellClick  = { viewModel.toggleZoneSubscription(context, zone.name) },
                         onClick = {
                             if (!isZoneFull) {
                                 bookingViewModel.onDateSelected(viewModel.selectedDate)

@@ -49,9 +49,9 @@ class BookingViewModel (
      */
     private val halfCapacityNotifiedZones = mutableSetOf<String>()
 
-    /** Returns a stable yyyy-MM-dd key for the given [date]. */
+    /** Returns a stable yyyy-MM-dd key for the given [date]. Uses Locale.US for consistency across devices. */
     private fun dateKey(date: Date): String =
-        SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(date)
+        SimpleDateFormat("yyyy-MM-dd", Locale.US).format(date)
 
     /** Returns a human-readable date string for notification messages, e.g. "Monday, Jun 30". */
     private fun displayDate(date: Date): String =
@@ -288,23 +288,21 @@ class BookingViewModel (
     }
 
     /**
-     * Called after a reservation is cancelled. Recalculates occupancy for the
-     * cancelled zone+day and, if it drops below 50 %, clears the guard key so the
-     * alert can fire again if the zone fills back up.
+     * Called AFTER [BookingRegisterViewModel.cancelReservation] has finished (Firestore delete
+     * is guaranteed to be complete when this runs thanks to the onCancelled callback).
      *
-     * Must be called AFTER [BookingRegisterViewModel.cancelReservation] has finished
-     * so that Firestore no longer contains the cancelled reservation when we re-query.
+     * 1. Resets the 50 % half-capacity guard if occupancy dropped below the threshold.
+     * 2. Fires zone-availability push notifications to any subscribed users if the zone
+     *    now has at least one free spot (full → available transition).
      */
     fun onReservationCancelled(context: Context, cancelledReservation: Reservation) {
-        val key = guardKey(cancelledReservation.zone.name, cancelledReservation.date)
-
-        // Nothing to reset if we never sent an alert for this zone+day
-        if (key !in halfCapacityNotifiedZones) return
-
         viewModelScope.launch {
             try {
                 val remainingBookings = repository.getAllReservations()
                 val vehicleType       = cancelledReservation.vehicle.type
+                val zoneName          = cancelledReservation.zone.name
+                val key               = guardKey(zoneName, cancelledReservation.date)
+                val iso               = dateKey(cancelledReservation.date)
 
                 ParkingManager.syncWithReservationsForTimeSlot(
                     allBookings  = remainingBookings,
@@ -317,17 +315,29 @@ class BookingViewModel (
                 val availableSpots = ParkingManager.getAvailableSpotsCount(vehicleType)
                 val occupiedCount  = totalSpots - availableSpots
 
-                if (totalSpots > 0 && occupiedCount * 2 < totalSpots) {
+                // ── 1. Reset 50 % broadcast guard ───────────────────────────
+                if (key in halfCapacityNotifiedZones && totalSpots > 0 && occupiedCount * 2 < totalSpots) {
                     halfCapacityNotifiedZones.remove(key)
                     android.util.Log.d(
                         "BOOKING_HALF_CAPACITY",
-                        "Guard reseteado para '${cancelledReservation.zone.name}' " +
-                        "el ${displayDate(cancelledReservation.date)} " +
-                        "($occupiedCount/$totalSpots tras cancelación)."
+                        "Guard reseteado para '$zoneName' el ${displayDate(cancelledReservation.date)} ($occupiedCount/$totalSpots)."
                     )
                 }
+
+                // ── 2. Notify bell subscribers if zone now has availability ──
+                if (availableSpots > 0) {
+                    notificationRepository.notifyAndClearZoneSubscribers(
+                        context       = context,
+                        zoneName      = zoneName,
+                        dateKey       = iso,
+                        titleResId    = R.string.notification_zone_available_title,
+                        bodyResId     = R.string.notification_zone_available_body,
+                        bodyFormatArgs = listOf(zoneName, iso)
+                    )
+                }
+
             } catch (e: Exception) {
-                android.util.Log.e("BOOKING_HALF_CAPACITY", "Error al resetear guard tras cancelación", e)
+                android.util.Log.e("BOOKING_HALF_CAPACITY", "Error en onReservationCancelled", e)
             }
         }
     }

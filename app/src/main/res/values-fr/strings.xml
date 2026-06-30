@@ -128,6 +128,10 @@
     <!-- NOTIFICATIONS DE CAPACITÉ DE ZONE -->
     <string name="notification_half_capacity_title">⚠️ Zone de parking presque pleine</string>
     <string name="notification_half_capacity_body">La %1$s manque de places le %2$s. Réservez la vôtre maintenant !</string>
+    <string name="notification_zone_available_title">🅿️ Place disponible !</string>
+    <string name="notification_zone_available_body">Une place vient de se libérer dans la %1$s le %2$s. Réservez vite avant qu\'elle ne soit prise !</string>
+    <string name="map_bell_subscribe">Me prévenir quand une place se libère</string>
+    <string name="map_bell_unsubscribe">Annuler l\'alerte de disponibilité</string>
 
     <string name="notification_system_alerts">Alertes systme</string>
     <string name="notification_missed_title">Réservation annulée automatiquement</string>

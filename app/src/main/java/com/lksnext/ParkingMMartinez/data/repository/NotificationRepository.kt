@@ -24,4 +24,35 @@ interface NotificationRepository {
         bodyResId: Int,
         bodyFormatArgs: List<String>
     )
+
+    // ── Zone-availability bell feature ──────────────────────────────────────
+
+    /** Subscribes [userId] to receive a one-time push when [zoneName] has availability on [dateKey]. */
+    fun subscribeToZoneAvailability(
+        userId: String,
+        onesignalId: String,
+        languageCode: String,
+        zoneName: String,
+        dateKey: String
+    )
+
+    /** Removes the subscription for [userId] + [zoneName] + [dateKey]. */
+    fun unsubscribeFromZoneAvailability(userId: String, zoneName: String, dateKey: String)
+
+    /** Returns the set of zone names the user has subscribed to for [dateKey]. */
+    fun getUserZoneSubscriptions(userId: String, dateKey: String, onResult: (Set<String>) -> Unit)
+
+    /**
+     * Sends a push notification to every subscriber for [zoneName] + [dateKey],
+     * saves a [NotificationItem] per user, then deletes the subscription documents
+     * (one-time fire-and-forget alert).
+     */
+    fun notifyAndClearZoneSubscribers(
+        context: android.content.Context,
+        zoneName: String,
+        dateKey: String,
+        titleResId: Int,
+        bodyResId: Int,
+        bodyFormatArgs: List<String>
+    )
 }

@@ -134,6 +134,12 @@
     <string name="notification_half_capacity_title">⚠️ Parking Zone Running Low</string>
     <string name="notification_half_capacity_body">The %1$s is running out of spaces on %2$s. Book your spot now!</string>
 
+    <!-- NOTIFICACIONES DE DISPONIBILIDAD DE ZONA (bell) -->
+    <string name="notification_zone_available_title">🅿️ Spot Just Opened!</string>
+    <string name="notification_zone_available_body">A space has just become available in the %1$s on %2$s. Book it now before it\'s gone!</string>
+    <string name="map_bell_subscribe">Notify me when a spot opens</string>
+    <string name="map_bell_unsubscribe">Cancel availability alert</string>
+
     <!-- TEXTO DE LOS COMPONENTES EN INGLES -->
     <string name="footer_map">Map</string>
     <string name="footer_bookings">Bookings</string>

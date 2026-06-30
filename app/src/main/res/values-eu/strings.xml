@@ -128,6 +128,10 @@
     <!-- EREMU-EDUKIERAREN JAKINARAZPENAK -->
     <string name="notification_half_capacity_title">⚠️ Aparkaleku eremua ia beteta</string>
     <string name="notification_half_capacity_body">%1$s eremuak %2$s-rako tokiak agortu egiten ari dira. Erreserbatu zurea orain!</string>
+    <string name="notification_zone_available_title">🅿️ Tokia libre!</string>
+    <string name="notification_zone_available_body">%1$s eremuan toki bat libre geratu da %2$s-rako. Erreserbatu azkar hartzen aurretik!</string>
+    <string name="map_bell_subscribe">Jakinarazi toki bat libre dagoenean</string>
+    <string name="map_bell_unsubscribe">Erabilgarritasun alerta bertan behera utzi</string>
 
     <string name="notification_system_alerts">Sistemaren abisuak</string>
     <string name="notification_missed_title">Erreserba automatikoki bertan behera utzita</string>

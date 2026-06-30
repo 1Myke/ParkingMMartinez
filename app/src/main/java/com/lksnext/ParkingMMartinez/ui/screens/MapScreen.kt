@@ -42,10 +42,8 @@ fun MapScreen(
     bookingViewModel: BookingViewModel,
     onZoneClick: (String) -> Unit
 ) {
-    val todayStr = stringResource(R.string.booking_today)
     val context  = LocalContext.current
     val scope    = rememberCoroutineScope()
-    val scope = rememberCoroutineScope()
 
     LifecycleResumeEffect(Unit) {
         bookingViewModel.cancelEditing()
@@ -104,7 +102,7 @@ fun MapScreen(
             TimeSelectorSection(viewModel)
 
             // --- ZONAS DE APARCAMIENTO ---
-            ParkingZonesSection(viewModel, bookingViewModel, onZoneClick)
+            ParkingZonesSection(viewModel, bookingViewModel, context, onZoneClick)
         }
     }
 }
@@ -185,6 +183,7 @@ private fun TimeSelectorSection(viewModel: MapViewModel) {
 private fun ParkingZonesSection(
     viewModel: MapViewModel,
     bookingViewModel: BookingViewModel,
+    context: android.content.Context,
     onZoneClick: (String) -> Unit
 ) {
     Column(
@@ -196,20 +195,18 @@ private fun ParkingZonesSection(
         viewModel.zones.forEach { zone ->
             val isZoneFull = zone.availableSpots <= 0
 
-                    ZoneCard(
-                        zone         = zone,
-                        modifier     = Modifier.testTag("${TestTags.MAP_ZONE_CARD_PREFIX}${zone.name}"),
-                        isSubscribed = zone.name in viewModel.subscribedZoneNames,
-                        onBellClick  = { viewModel.toggleZoneSubscription(context, zone.name) },
-                        onClick = {
-                            if (!isZoneFull) {
-                                bookingViewModel.onDateSelected(viewModel.selectedDate)
-                                onZoneClick(zone.name)
-                            }
-                        }
-                    )
+            ZoneCard(
+                zone         = zone,
+                modifier     = Modifier.testTag("${TestTags.MAP_ZONE_CARD_PREFIX}${zone.name}"),
+                isSubscribed = zone.name in viewModel.subscribedZoneNames,
+                onBellClick  = { viewModel.toggleZoneSubscription(context, zone.name) },
+                onClick = {
+                    if (!isZoneFull) {
+                        bookingViewModel.onDateSelected(viewModel.selectedDate)
+                        onZoneClick(zone.name)
+                    }
                 }
-            }
+            )
         }
     }
 }

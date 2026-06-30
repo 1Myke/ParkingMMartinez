@@ -20,12 +20,9 @@ import com.lksnext.ParkingMMartinez.R
 import com.lksnext.ParkingMMartinez.model.ZoneNames
 import com.lksnext.ParkingMMartinez.ui.theme.LksGreen
 import com.lksnext.ParkingMMartinez.ui.theme.LksOrange
-import com.lksnext.ParkingMMartinez.ui.theme.automaticRed
-import com.lksnext.ParkingMMartinez.ui.theme.alertOrange
 import com.lksnext.ParkingMMartinez.ui.theme.automaticOrange
 import com.lksnext.ParkingMMartinez.ui.theme.automaticRed
 import com.lksnext.ParkingMMartinez.ui.theme.verdePino
-import com.lksnext.ParkingMMartinez.ui.theme.zoneFull
 
 @Composable
 fun ZoneCard(

@@ -145,6 +145,7 @@
     <string name="label_time">TIME</string>
     <string name="label_vehicle">VEHICLE</string>
     <string name="label_available">AVAILABLE</string>
+    <string name="label_almost_full">ALMOST FULL</string>
     <string name="label_free">free</string>
     <string name="label_full">FULL</string>
     <string name="status_active">ACTIVE</string>

@@ -144,6 +144,7 @@
     <string name="label_time">ORDUA</string>
     <string name="label_vehicle">IBILGAILUA</string>
     <string name="label_available">LIBRE</string>
+    <string name="label_almost_full">IA BETETA</string>
     <string name="label_free">libre</string>
     <string name="label_full">BETETA</string>
     <string name="status_active">AKTIBOA</string>

@@ -137,6 +137,7 @@
     <string name="label_time">HORA</string>
     <string name="label_vehicle">VEHÍCULO</string>
     <string name="label_available">DISPONIBLE</string>
+    <string name="label_almost_full">CASI LLENO</string>
     <string name="label_free">libres</string>
     <string name="label_full">LLENO</string>
     <string name="status_active">ACTIVA</string>

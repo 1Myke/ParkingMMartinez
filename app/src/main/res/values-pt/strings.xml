@@ -137,6 +137,7 @@
     <string name="label_time">HORA</string>
     <string name="label_vehicle">VEÍCULO</string>
     <string name="label_available">DISPONÍVEL</string>
+    <string name="label_almost_full">QUASE CHEIO</string>
     <string name="label_free">livres</string>
     <string name="label_full">CHEIO</string>
     <string name="status_active">ATIVA</string>

@@ -55,7 +55,13 @@ fun BookingScreen(
     val isButtonEnabled = viewModel.isButtonEnabled
     val isCheckedIn = viewModel.isEditingCheckedIn
 
-    BookingInitializationEffect(viewModel, initialZone, initialHour, initialMinute)
+    // 🛡️ 1. LLAMADA ÚNICA Y ARRIBA: Reemplaza por completo el desorden anterior
+    BookingInitializationEffect(
+        viewModel = viewModel,
+        initialZone = initialZone,
+        initialHour = initialHour,
+        initialMinute = initialMinute
+    )
 
     DisposableEffect(Unit) {
         onDispose {
@@ -104,6 +110,7 @@ fun BookingScreen(
     }
 }
 
+// 🛡️ 2. COMPOSABLE DE INICIALIZACIÓN CORREGIDO (Fuera de la función principal)
 @Composable
 private fun BookingInitializationEffect(
     viewModel: BookingViewModel,
@@ -112,15 +119,7 @@ private fun BookingInitializationEffect(
     initialMinute: Int
 ) {
     LaunchedEffect(initialZone, initialHour, initialMinute) {
-        viewModel.setZone(initialZone)
-
-        if (viewModel.editingReservationId == null) {
-            viewModel.cancelEditing()
-            viewModel.onTimeChange(initialHour, initialMinute)
-        }
-        viewModel.checkUserReservationStatus()
-        viewModel.loadAndFilterVehicles()
-        viewModel.validateBooking()
+        viewModel.inicializarPantalla(initialZone, initialHour, initialMinute)
     }
 }
 
@@ -219,7 +218,6 @@ fun VehicleSection(
 
     Box(modifier = Modifier.fillMaxWidth()) {
         when {
-            // Solo un vehiculo, se selecciona autoamaticamente
             currentVehicle != null -> {
                 SelectedVehicleCard(
                     vehicle = currentVehicle,
@@ -229,7 +227,6 @@ fun VehicleSection(
                 )
             }
 
-            // Hay varios vehiculos del mismo tipo, obligatorio seleccionar cual
             currentVehicle == null && vehiclesList.isNotEmpty() -> {
                 OutlinedCard(
                     modifier = Modifier
@@ -262,7 +259,6 @@ fun VehicleSection(
                 }
             }
 
-            // Lista de vehiculos vacia, error
             else -> {
                 NoVehiclesErrorCard(parkingZone = viewModel.parkingZone)
             }
@@ -469,13 +465,14 @@ fun BookingActionSection(viewModel: BookingViewModel, isButtonEnabled: Boolean, 
     val context = LocalContext.current
 
     Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-        if (!isButtonEnabled) {
+        if (!isButtonEnabled || viewModel.hasActiveReservation) {
             BookingErrorMessages(viewModel)
         }
 
         LksButton(
             text = if (viewModel.editingReservationId != null) stringResource(R.string.booking_btn_update) else stringResource(R.string.booking_btn_confirm),
-            enabled = isButtonEnabled && !viewModel.isLoading,
+            // Bloqueado si la validacion da false, si esta cargando, O si se detecta reserva activa de antemano
+            enabled = isButtonEnabled && !viewModel.isLoading && !viewModel.hasActiveReservation,
             modifier = Modifier.testTag(TestTags.BOOKING_SUBMIT_BTN),
             onClick = {
                 val realZone = ParkingManager.zones.find { it.name == viewModel.parkingZone } ?: ParkingManager.zones.first()
@@ -512,7 +509,8 @@ private fun BookingErrorMessages(viewModel: BookingViewModel) {
                 textAlign = TextAlign.Center
             )
         }
-        viewModel.isDateTimeValid() && viewModel.selectedVehicle != null -> {
+        // 🛡️ Si el backend reporta reserva activa, muestra error de inmediato
+        viewModel.hasActiveReservation -> {
             Text(
                 text = stringResource(R.string.booking_error_active),
                 color = Color.Red,

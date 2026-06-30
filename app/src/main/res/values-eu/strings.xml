@@ -127,7 +127,7 @@
 
     <!-- EREMU-EDUKIERAREN JAKINARAZPENAK -->
     <string name="notification_half_capacity_title">⚠️ Aparkaleku eremua ia beteta</string>
-    <string name="notification_half_capacity_body">%1$s eremua bere edukieraren &#37;50era iritsi da. Tokiak agortzen ari dira — erreserbatu zurea orain!</string>
+    <string name="notification_half_capacity_body">%1$s eremuak %2$s-rako tokiak agortu egiten ari dira. Erreserbatu zurea orain!</string>
 
     <string name="notification_system_alerts">Sistemaren abisuak</string>
     <string name="notification_missed_title">Erreserba automatikoki bertan behera utzita</string>

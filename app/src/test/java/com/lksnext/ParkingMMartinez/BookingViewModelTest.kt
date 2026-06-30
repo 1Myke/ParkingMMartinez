@@ -5,6 +5,7 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.compose.ui.graphics.Color
 import com.lksnext.ParkingMMartinez.data.SessionManager
 import com.lksnext.ParkingMMartinez.data.repository.BookingRepository
+import com.lksnext.ParkingMMartinez.data.repository.NotificationRepository
 import com.lksnext.ParkingMMartinez.data.repository.VehicleRepository
 import com.lksnext.ParkingMMartinez.model.ParkingZone
 import com.lksnext.ParkingMMartinez.model.Reservation
@@ -38,6 +39,7 @@ class BookingViewModelTest {
     private lateinit var mockVehicleRepository: VehicleRepository
     private lateinit var mockSessionManager: SessionManager
     private lateinit var mockContext: Context
+    private lateinit var mockNotificationRepository: NotificationRepository
     private lateinit var viewModel: BookingViewModel
 
     private val testDispatcher = StandardTestDispatcher()
@@ -64,6 +66,7 @@ class BookingViewModelTest {
         mockVehicleRepository = mock(VehicleRepository::class.java)
         mockSessionManager = mock(SessionManager::class.java)
         mockContext = mock(Context::class.java)
+        mockNotificationRepository = mock(NotificationRepository::class.java)
 
         // Mock del servicio de alarmas nativo
         val mockAlarmManager = mock(android.app.AlarmManager::class.java)
@@ -96,7 +99,7 @@ class BookingViewModelTest {
         // Evitamos que las corrutinas del repositorio queden en un limbo asíncrono
         `when`(mockRepository.getAllReservations()).thenReturn(emptyList())
 
-        viewModel = BookingViewModel(mockRepository, mockVehicleRepository, mockSessionManager)
+        viewModel = BookingViewModel(mockRepository, mockVehicleRepository, mockSessionManager, mockNotificationRepository)
     }
 
     @After

@@ -121,7 +121,7 @@
 
     <!-- NOTIFICACIONES DE CAPACIDAD DE ZONA -->
     <string name="notification_half_capacity_title">⚠️ Zona de aparcamiento al límite</string>
-    <string name="notification_half_capacity_body">La %1$s ha alcanzado el 50%% de su capacidad. Las plazas se agotan, ¡reserva la tuya ahora!</string>
+    <string name="notification_half_capacity_body">La %1$s se está quedando sin plazas el %2$s. ¡Reserva la tuya ahora!</string>
 
     <string name="notification_system_alerts">Alertas del sistema</string>
     <string name="notification_missed_title">Reserva cancelada automáticamente</string>

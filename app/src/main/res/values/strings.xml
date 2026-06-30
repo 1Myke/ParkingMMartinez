@@ -132,7 +132,7 @@
 
     <!-- NOTIFICACIONES DE CAPACIDAD DE ZONA -->
     <string name="notification_half_capacity_title">⚠️ Parking Zone Running Low</string>
-    <string name="notification_half_capacity_body">The %1$s has reached 50%% capacity. Spaces are running out — book yours now!</string>
+    <string name="notification_half_capacity_body">The %1$s is running out of spaces on %2$s. Book your spot now!</string>
 
     <!-- TEXTO DE LOS COMPONENTES EN INGLES -->
     <string name="footer_map">Map</string>

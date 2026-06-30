@@ -3,6 +3,7 @@ package com.lksnext.ParkingMMartinez
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.firestore.FirebaseFirestore
 import com.lksnext.ParkingMMartinez.data.SessionManager
 import com.lksnext.ParkingMMartinez.data.repository.UserRepository
 import com.lksnext.ParkingMMartinez.model.User
@@ -34,6 +35,7 @@ class SettingsViewModelTest {
     private lateinit var viewModel: SettingsViewModel
 
     private lateinit var mockedAuthStatic: MockedStatic<FirebaseAuth>
+    private lateinit var mockedFirestoreStatic: MockedStatic<FirebaseFirestore>
 
     private val userId = "user_123"
 
@@ -48,6 +50,13 @@ class SettingsViewModelTest {
         mockedAuthStatic = mockStatic(FirebaseAuth::class.java)
         mockedAuthStatic.`when`<FirebaseAuth> { FirebaseAuth.getInstance() }.thenReturn(mockAuth)
 
+        // SettingsViewModel now holds a FirebaseFirestore instance to persist language
+        // preferences. We mock it statically so the constructor doesn't throw
+        // IllegalStateException("Default FirebaseApp is not initialized").
+        val mockFirestore = mock(FirebaseFirestore::class.java)
+        mockedFirestoreStatic = mockStatic(FirebaseFirestore::class.java)
+        mockedFirestoreStatic.`when`<FirebaseFirestore> { FirebaseFirestore.getInstance() }.thenReturn(mockFirestore)
+
         `when`(mockSessionManager.getActiveUserId()).thenReturn(userId)
         `when`(mockAuth.currentUser).thenReturn(mockFirebaseUser)
         `when`(mockFirebaseUser.email).thenReturn("mikel2@lks.com")
@@ -59,6 +68,7 @@ class SettingsViewModelTest {
     fun tearDown() {
         Dispatchers.resetMain()
         mockedAuthStatic.close()
+        mockedFirestoreStatic.close()
     }
 
     @Test

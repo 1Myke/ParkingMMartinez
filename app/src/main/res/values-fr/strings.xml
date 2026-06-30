@@ -127,7 +127,7 @@
 
     <!-- NOTIFICATIONS DE CAPACITÉ DE ZONE -->
     <string name="notification_half_capacity_title">⚠️ Zone de parking presque pleine</string>
-    <string name="notification_half_capacity_body">La %1$s a atteint 50%% de sa capacité. Les places s\'épuisent — réservez la vôtre maintenant !</string>
+    <string name="notification_half_capacity_body">La %1$s manque de places le %2$s. Réservez la vôtre maintenant !</string>
 
     <string name="notification_system_alerts">Alertes systme</string>
     <string name="notification_missed_title">Réservation annulée automatiquement</string>

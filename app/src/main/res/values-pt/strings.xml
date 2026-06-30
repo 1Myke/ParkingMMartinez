@@ -121,7 +121,7 @@
 
     <!-- NOTIFICAÇÕES DE CAPACIDADE DE ZONA -->
     <string name="notification_half_capacity_title">⚠️ Zona de estacionamento quase lotada</string>
-    <string name="notification_half_capacity_body">A %1$s atingiu 50%% da sua capacidade. As vagas estão a esgotar-se — reserve a sua agora!</string>
+    <string name="notification_half_capacity_body">A %1$s está a ficar sem vagas no dia %2$s. Reserve a sua agora!</string>
 
     <string name="notification_system_alerts">Alertas do sistema</string>
     <string name="notification_missed_title">Reserva cancelada automaticamente</string>

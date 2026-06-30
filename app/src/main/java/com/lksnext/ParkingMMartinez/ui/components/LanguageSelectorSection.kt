@@ -34,10 +34,15 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.lksnext.ParkingMMartinez.ui.theme.LksOrange
+import com.onesignal.OneSignal
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LanguageSelectorSection(modifier: Modifier = Modifier) {
+fun LanguageSelectorSection(
+    modifier: Modifier = Modifier,
+    /** Called with the BCP-47 language code after the user picks a new language. */
+    onLanguageChanged: (String) -> Unit = {}
+) {
     val context = LocalContext.current
     val configuration = LocalConfiguration.current
 
@@ -112,6 +117,12 @@ fun LanguageSelectorSection(modifier: Modifier = Modifier) {
                                 java.util.Locale.setDefault(locale)
                                 configuration.setLocale(locale)
                             }
+                            // Sync language to OneSignal so push notifications arrive in the
+                            // user's chosen language regardless of the device OS language.
+                            OneSignal.User.setLanguage(code)
+                            // Notify the caller (SettingsViewModel) to persist the preference
+                            // in Firestore so the in-app notification centre also uses it.
+                            onLanguageChanged(code)
                             expanded = false
                         }
                     )

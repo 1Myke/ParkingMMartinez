@@ -127,7 +127,7 @@
 
     <!-- BENACHRICHTIGUNGEN ZUR ZONENKAPAZITÄT -->
     <string name="notification_half_capacity_title">⚠️ Parkzone fast voll</string>
-    <string name="notification_half_capacity_body">Die %1$s hat 50%% ihrer Kapazität erreicht. Die Plätze werden knapp — reservieren Sie jetzt Ihren!</string>
+    <string name="notification_half_capacity_body">Die %1$s hat für den %2$s fast keine Plätze mehr. Reservieren Sie jetzt Ihren!</string>
 
     <string name="notification_system_alerts">Systembenachrichtigungen</string>
     <string name="notification_missed_title">Reservierung automatisch storniert</string>

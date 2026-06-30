@@ -104,13 +104,12 @@ class BookingRegisterViewModel(
     }
 
     private fun cancelarAlarmaExistente(context: Context, alarmManager: AlarmManager, idAlerta: Int) {
-        val intentCancel = Intent(context, BookingAlarmReceiver::class.java)
+        val appContext = context.applicationContext
+        val intentCancel = Intent(appContext, BookingAlarmReceiver::class.java)
         val piCancel = PendingIntent.getBroadcast(
-            context, idAlerta, intentCancel, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_NO_CREATE
+            appContext, idAlerta, intentCancel, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
-        if (piCancel != null) {
-            alarmManager.cancel(piCancel)
-            piCancel.cancel()
-        }
+        alarmManager.cancel(piCancel)
+        piCancel.cancel()
     }
 }

@@ -8,6 +8,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import androidx.core.app.NotificationCompat
+import com.google.firebase.firestore.FirebaseFirestore
 import com.lksnext.ParkingMMartinez.MainActivity
 import com.lksnext.ParkingMMartinez.R
 import com.lksnext.ParkingMMartinez.data.SessionManager
@@ -15,6 +16,10 @@ import com.lksnext.ParkingMMartinez.data.repository.FirebaseNotificationReposito
 import com.lksnext.ParkingMMartinez.data.repository.NotificationRepository
 import com.lksnext.ParkingMMartinez.model.NotificationItem
 import com.lksnext.ParkingMMartinez.model.ZoneNames
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import java.util.Date
 
 class BookingAlarmReceiver : BroadcastReceiver() {
@@ -26,9 +31,42 @@ class BookingAlarmReceiver : BroadcastReceiver() {
         val titleRes = intent.getIntExtra("NOTIFICATION_TITLE_RES", 0)
         val bodyRes = intent.getIntExtra("NOTIFICATION_BODY_RES", 0)
         val args = intent.getStringArrayExtra("NOTIFICATION_ARGS") ?: emptyArray()
+        val reservationId = intent.getStringExtra("RESERVATION_ID")
 
         if (titleRes == 0 || bodyRes == 0) return
 
+        if (reservationId != null) {
+            val pendingResult = goAsync()
+            CoroutineScope(Dispatchers.IO).launch {
+                try {
+                    val doc = FirebaseFirestore.getInstance()
+                        .collection("bookings")
+                        .document(reservationId)
+                        .get()
+                        .await()
+
+                    if (doc.exists()) {
+                        showNotification(context, titleRes, bodyRes, args, userId)
+                    }
+                } catch (e: Exception) {
+                    android.util.Log.e("BookingAlarmReceiver", "Error checking reservation before check-in notification", e)
+                    showNotification(context, titleRes, bodyRes, args, userId)
+                } finally {
+                    pendingResult.finish()
+                }
+            }
+        } else {
+            showNotification(context, titleRes, bodyRes, args, userId)
+        }
+    }
+
+    private fun showNotification(
+        context: Context,
+        titleRes: Int,
+        bodyRes: Int,
+        args: Array<String>,
+        userId: String
+    ) {
         val processedArgs = args.map { arg ->
             when (arg) {
                 ZoneNames.DISABILITY -> context.getString(R.string.zone_disability)

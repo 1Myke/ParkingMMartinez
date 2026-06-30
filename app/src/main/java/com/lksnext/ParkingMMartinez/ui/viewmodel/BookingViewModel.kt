@@ -38,26 +38,14 @@ class BookingViewModel (
     private val notificationRepository: NotificationRepository
 ): ViewModel() {
 
-    /**
-     * In-session guard: tracks which zone+day combinations have already triggered
-     * the 50 % broadcast. Key format: "zoneName|yyyy-MM-dd".
-     *
-     * - A new booking that pushes zone X on day D to ≥ 50 % adds "X|D" to the set.
-     * - A cancellation that drops zone X on day D below 50 % removes "X|D" so the
-     *   alert can fire again if the zone fills back up that same day.
-     * - The whole set is scoped to the ViewModel lifetime (resets on app kill).
-     */
     private val halfCapacityNotifiedZones = mutableSetOf<String>()
 
-    /** Returns a stable yyyy-MM-dd key for the given [date]. Uses Locale.US for consistency across devices. */
     private fun dateKey(date: Date): String =
         SimpleDateFormat("yyyy-MM-dd", Locale.US).format(date)
 
-    /** Returns a human-readable date string for notification messages, e.g. "Monday, Jun 30". */
     private fun displayDate(date: Date): String =
         SimpleDateFormat("EEEE, MMM d", Locale.getDefault()).format(date)
 
-    /** Guard key combining zone name and day so notifications are per-zone-per-day. */
     private fun guardKey(zoneName: String, date: Date) = "$zoneName|${dateKey(date)}"
     var startHour by mutableStateOf(8)
         private set
@@ -206,8 +194,6 @@ class BookingViewModel (
                 editingReservationId?.let { repository.cancelReservation(it) }
                 repository.saveReservation(newReservation)
 
-                // TASK 3 — Check 50 % threshold RIGHT HERE, at the moment the state
-                // changes, using the exact date/time slot of the new booking.
                 checkAndBroadcastIfHalfCapacity(context, allBookings, newReservation)
 
                 programarAlertasDeReserva(context, newReservation)
@@ -227,18 +213,6 @@ class BookingViewModel (
         isLoading = false
     }
 
-    /**
-     * Called immediately after a reservation is saved to Firestore.
-     *
-     * Uses the EXACT date/time slot of [newReservation] (not the map's currently
-     * selected slot) to count how many spots in that zone are occupied, including
-     * the reservation just confirmed. Sends a broadcast push to all users the first
-     * time a zone crosses the ≥ 50 % occupancy mark in this ViewModel session.
-     *
-     * @param context           Activity/application context for string resources.
-     * @param existingBookings  All bookings fetched BEFORE saving [newReservation].
-     * @param newReservation    The reservation that was just persisted.
-     */
     private fun checkAndBroadcastIfHalfCapacity(
         context: Context,
         existingBookings: List<Reservation>,
@@ -248,10 +222,8 @@ class BookingViewModel (
         val zoneName    = newReservation.zone.name
         val key         = guardKey(zoneName, newReservation.date)
 
-        // Skip if we already sent the alert for this zone+day in this session
         if (key in halfCapacityNotifiedZones) return
 
-        // Compute occupancy for the EXACT date/time slot of the new booking
         val allIncludingNew = existingBookings + newReservation
         ParkingManager.syncWithReservationsForTimeSlot(
             allBookings  = allIncludingNew,
@@ -271,8 +243,6 @@ class BookingViewModel (
 
         if (totalSpots > 0 && occupiedCount * 2 >= totalSpots) {
             halfCapacityNotifiedZones.add(key)
-            // Pass resource IDs + ISO date as args — the repository resolves them in
-            // every supported locale so each recipient gets the text in their language.
             val dateIso = SimpleDateFormat("yyyy-MM-dd", Locale.US).format(newReservation.date)
             notificationRepository.sendBroadcastNotification(
                 context,
@@ -282,19 +252,12 @@ class BookingViewModel (
             )
             android.util.Log.d(
                 "BOOKING_HALF_CAPACITY",
-                "🔔 Broadcast para '$zoneName' el ${displayDate(newReservation.date)} ($occupiedCount/$totalSpots)."
+                "Broadcast para '$zoneName' el ${displayDate(newReservation.date)} ($occupiedCount/$totalSpots)."
             )
         }
     }
 
-    /**
-     * Called AFTER [BookingRegisterViewModel.cancelReservation] has finished (Firestore delete
-     * is guaranteed to be complete when this runs thanks to the onCancelled callback).
-     *
-     * 1. Resets the 50 % half-capacity guard if occupancy dropped below the threshold.
-     * 2. Fires zone-availability push notifications to any subscribed users if the zone
-     *    now has at least one free spot (full → available transition).
-     */
+
     fun onReservationCancelled(context: Context, cancelledReservation: Reservation) {
         viewModelScope.launch {
             try {
@@ -553,7 +516,6 @@ class BookingViewModel (
         if (calInicio.timeInMillis > nowMillis) {
             val horaFormateada = String.format(Locale.getDefault(), TIME_FORMAT, reservation.startTime.hour, reservation.startTime.minute)
 
-            // 🔒 Pasamos solo IDs lógicos y argumentos, nada de Strings fijos
             configurarAlertaNativa(
                 context = context,
                 alarmManager = alarmManager,
@@ -561,7 +523,6 @@ class BookingViewModel (
                 notificationId = idAlertaInicio,
                 titleResId = R.string.notification_title_start,
                 bodyResId = R.string.notification_body_start,
-                // Pasamos los argumentos que necesita el string (la zona y la hora)
                 args = arrayOf(reservation.zone.name, horaFormateada)
             )
         }
@@ -585,7 +546,8 @@ class BookingViewModel (
                     notificationId = idAlertaCheckIn,
                     titleResId = R.string.notification_title_checkin_reminder,
                     bodyResId = R.string.notification_body_checkin_reminder,
-                    args = arrayOf(reservation.zone.name)
+                    args = arrayOf(reservation.zone.name),
+                    reservationId = reservation.id
                 )
             }
         }
@@ -624,7 +586,8 @@ class BookingViewModel (
         notificationId: Int,
         titleResId: Int,
         bodyResId: Int,
-        args: Array<String> = emptyArray()
+        args: Array<String> = emptyArray(),
+        reservationId: String? = null
     ) {
         val appContext = context.applicationContext
 
@@ -633,6 +596,9 @@ class BookingViewModel (
             putExtra("NOTIFICATION_TITLE_RES", titleResId)
             putExtra("NOTIFICATION_BODY_RES", bodyResId)
             putExtra("NOTIFICATION_ARGS", args)
+            if (reservationId != null) {
+                putExtra("RESERVATION_ID", reservationId)
+            }
             addFlags(Intent.FLAG_RECEIVER_FOREGROUND)
         }
 
@@ -662,11 +628,9 @@ class BookingViewModel (
         val appContext = context.applicationContext
         val intentCancel = Intent(appContext, BookingAlarmReceiver::class.java)
         val piCancel = PendingIntent.getBroadcast(
-            appContext, idAlerta, intentCancel, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_NO_CREATE
+            appContext, idAlerta, intentCancel, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
-        if (piCancel != null) {
-            alarmManager.cancel(piCancel)
-            piCancel.cancel()
-        }
+        alarmManager.cancel(piCancel)
+        piCancel.cancel()
     }
 }

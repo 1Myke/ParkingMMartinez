@@ -113,7 +113,7 @@
 
     <string name="notification_channel_id">parking_alerts_channel</string>
     <string name="notification_title_start">Zure erreserba laster hasiko da!</string>
-    <string name="notification_body_start">15 minutu falta dira zure erreserba %1$s-(e)an (%2$s) hasteko.</string>
+    <string name="notification_body_start">30 minutu falta dira zure erreserba %1$s-(e)an (%2$s) hasteko.</string>
 
     <string name="notification_title_end">Zure denbora amaitzen ari da!</string>
     <string name="notification_body_end">15 minutu falta dira zure erreserba amaitzeko. Gogoratu ibilgailua kentzeaz.</string>
@@ -144,6 +144,8 @@
     <string name="label_time">ORDUA</string>
     <string name="label_vehicle">IBILGAILUA</string>
     <string name="label_available">LIBRE</string>
+    <string name="label_almost_full">IA BETETA</string>
+    <string name="label_free">libre</string>
     <string name="label_full">BETETA</string>
     <string name="status_active">AKTIBOA</string>
     <string name="btn_edit">Editatu</string>

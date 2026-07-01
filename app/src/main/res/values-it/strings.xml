@@ -168,4 +168,8 @@
     <string name="success_profile_updated">Profilo aggiornato con successo!</string>
     <string name="success_password_changed">Password aggiornata con successo!</string>
 
+    <string name="reservation_cancel_title">Annulla prenotazione</string>
+    <string name="reservation_cancel_msg">Sei sicuro di voler annulle questa prenotazione?</string>
+    <string name="reservation_cancel_confirm">Sì, annulla</string>
+
 </resources>

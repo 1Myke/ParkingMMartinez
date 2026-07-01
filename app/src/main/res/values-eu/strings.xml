@@ -176,4 +176,8 @@
     <string name="success_profile_updated">Profila ongi eguneratu da!</string>
     <string name="success_password_changed">Pasahitza ongi eguneratu da!</string>
 
+    <string name="reservation_cancel_title">Erreserba bertan behera utzi</string>
+    <string name="reservation_cancel_msg">Ziur zaude erreserba hau bertan behera utzi nahi duzula?</string>
+    <string name="reservation_cancel_confirm">Bai, bertan behera utzi</string>
+
 </resources>

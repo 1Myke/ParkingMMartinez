@@ -178,7 +178,7 @@
     <string name="success_profile_updated">Profile updated successfully!</string>
     <string name="success_password_changed">Password updated successfully!</string>
 
-
-
-
+    <string name="reservation_cancel_title">Cancel Reservation</string>
+    <string name="reservation_cancel_msg">Are you sure you want to cancel this reservation?</string>
+    <string name="reservation_cancel_confirm">Yes, cancel</string>
 </resources>

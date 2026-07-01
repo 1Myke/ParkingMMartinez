@@ -29,6 +29,41 @@ class BookingRegisterViewModel(
 
     var selectedTab by mutableStateOf(0)
 
+    var showCancelConfirmation by mutableStateOf(false)
+        private set
+
+    var reservationToCancel by mutableStateOf<String?>(null)
+        private set
+
+    fun askCancelReservation(reservationId: String) {
+        reservationToCancel = reservationId
+        showCancelConfirmation = true
+    }
+
+    fun dismissCancelDialog() {
+        showCancelConfirmation = false
+        reservationToCancel = null
+    }
+
+    fun confirmCancelReservation(context: Context) {
+        val reservationId = reservationToCancel ?: return
+        viewModelScope.launch {
+            repository.cancelReservation(reservationId)
+
+            val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+            val idAlertaInicio = reservationId.hashCode() + 1
+            val idAlertaFin = reservationId.hashCode() + 2
+            val idAlertaCheckIn = reservationId.hashCode() + 3
+
+            cancelarAlarmaExistente(context, alarmManager, idAlertaInicio)
+            cancelarAlarmaExistente(context, alarmManager, idAlertaFin)
+            cancelarAlarmaExistente(context, alarmManager, idAlertaCheckIn)
+
+            loadReservations()
+            dismissCancelDialog()
+        }
+    }
+
     fun loadReservations() {
         val currentUserId = sessionManager.getActiveUserId() ?: return
 

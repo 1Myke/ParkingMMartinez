@@ -76,7 +76,7 @@ fun MapScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(mistGray)
+            .background(MaterialTheme.colorScheme.background)
     ) {
         LksHeader(
             title = stringResource(R.string.map_header_title),

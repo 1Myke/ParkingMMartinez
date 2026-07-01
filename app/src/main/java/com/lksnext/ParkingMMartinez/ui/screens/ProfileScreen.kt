@@ -87,7 +87,7 @@ fun ProfileScreen(
     }
 
     Scaffold(
-        containerColor = Color.White,
+        containerColor = MaterialTheme.colorScheme.background,
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { viewModel.onOpenDialog() },
@@ -104,7 +104,7 @@ fun ProfileScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .background(Color.White)
+                .background(MaterialTheme.colorScheme.background)
                 .pointerInput(Unit) {
                     detectTapGestures(onTap = {
                         focusManager.clearFocus()

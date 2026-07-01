@@ -19,9 +19,11 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.lksnext.ParkingMMartinez.ui.components.LksButton
 import com.lksnext.ParkingMMartinez.ui.components.LksTimePicker
@@ -30,6 +32,7 @@ import com.lksnext.ParkingMMartinez.ui.viewmodel.BookingViewModel
 import com.lksnext.ParkingMMartinez.data.ParkingManager
 import com.lksnext.ParkingMMartinez.model.VehicleType
 import com.lksnext.ParkingMMartinez.R
+import com.lksnext.ParkingMMartinez.model.Vehicle
 import com.lksnext.ParkingMMartinez.ui.components.DateItem
 import com.lksnext.ParkingMMartinez.ui.components.TimeSlider
 import com.lksnext.ParkingMMartinez.ui.theme.lightGray
@@ -49,36 +52,26 @@ fun BookingScreen(
     onConfirmBooking: () -> Unit = {},
     onManageVehicles: () -> Unit = {}
 ) {
-    val todayStr = stringResource(R.string.booking_today)
     val isButtonEnabled = viewModel.isButtonEnabled
+    val isCheckedIn = viewModel.isEditingCheckedIn
 
-    LaunchedEffect(initialZone, initialHour, initialMinute) {
-        viewModel.setZone(initialZone)
-
-        if (viewModel.editingReservationId == null) {
-            viewModel.cancelEditing()
-            viewModel.onTimeChange(initialHour, initialMinute)
-        }
-        viewModel.checkUserReservationStatus()
-        viewModel.loadAndFilterVehicles()
-        viewModel.validateBooking()
-    }
+    // 🛡️ 1. LLAMADA ÚNICA Y ARRIBA: Reemplaza por completo el desorden anterior
+    BookingInitializationEffect(
+        viewModel = viewModel,
+        initialZone = initialZone,
+        initialHour = initialHour,
+        initialMinute = initialMinute
+    )
 
     DisposableEffect(Unit) {
-        onDispose { viewModel.cancelEditing() }
+        onDispose {
+            viewModel.cancelEditing()
+            viewModel.resetLoadingState()
+        }
     }
 
     if (viewModel.showTimePicker) {
-        LksTimePicker(
-            onConfirm = { h, m ->
-                viewModel.onTimeChange(h, m)
-                viewModel.onShowTimePickerChange(false)
-            },
-            onDismiss = { viewModel.onShowTimePickerChange(false) },
-            modifier = Modifier.testTag(TestTags.TIME_PICKER_DIALOG),
-            confirmButtonModifier = Modifier.testTag(TestTags.TIME_PICKER_CONFIRM),
-            dismissButtonModifier = Modifier.testTag(TestTags.TIME_PICKER_CANCEL)
-        )
+        BookingTimePickerWrapper(viewModel)
     }
 
     Column(
@@ -89,50 +82,23 @@ fun BookingScreen(
         BookingTopHeader(zone = viewModel.parkingZone)
 
         Column(modifier = Modifier.padding(20.dp)) {
-
-            // --- VEHÍCULO ---
-            VehicleSection(viewModel = viewModel, onManageVehicles = onManageVehicles)
+            VehicleSection(
+                viewModel = viewModel,
+                onManageVehicles = onManageVehicles,
+                isEnabled = !isCheckedIn
+            )
 
             Spacer(Modifier.height(16.dp))
 
-            // --- FECHAS (EDICIÓN) ---
-            if (viewModel.editingReservationId != null) {
-                SectionHeader(title = stringResource(R.string.booking_select_date))
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 8.dp)
-                        .horizontalScroll(rememberScrollState()),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-                    viewModel.availableDates.forEach { (dayInt, label) ->
-                        val displayLabel = if (label == "TODAY") todayStr else label
-                        val isSelected = isDateMatchingDay(viewModel.selectedDate, dayInt)
+            DateSelectionSection(viewModel = viewModel, isCheckedIn = isCheckedIn)
 
-                        DateItem(
-                            day = dayInt.toString(),
-                            label = displayLabel,
-                            isSelected = isSelected,
-                            modifier = Modifier.testTag("${TestTags.BOOKING_DATE_ITEM_PREFIX}$dayInt"),
-                            onClick = {
-                                val targetDate = calculateTargetDate(dayInt)
-                                viewModel.onDateSelected(targetDate)
-                            }
-                        )
-                    }
-                }
-                Spacer(Modifier.height(24.dp))
-            }
-
-            // --- TIEMPO Y DURACIÓN ---
             TimeAndDurationSection(
                 viewModel = viewModel,
-                isReadOnly = viewModel.editingReservationId == null
+                isReadOnly = viewModel.editingReservationId == null || isCheckedIn
             )
 
             Spacer(Modifier.height(32.dp))
 
-            // --- CONFIRMACIÓN ---
             BookingActionSection(
                 viewModel = viewModel,
                 isButtonEnabled = isButtonEnabled,
@@ -142,6 +108,67 @@ fun BookingScreen(
             Spacer(Modifier.height(24.dp))
         }
     }
+}
+
+// 🛡️ 2. COMPOSABLE DE INICIALIZACIÓN CORREGIDO (Fuera de la función principal)
+@Composable
+private fun BookingInitializationEffect(
+    viewModel: BookingViewModel,
+    initialZone: String,
+    initialHour: Int,
+    initialMinute: Int
+) {
+    LaunchedEffect(initialZone, initialHour, initialMinute) {
+        viewModel.inicializarPantalla(initialZone, initialHour, initialMinute)
+    }
+}
+
+@Composable
+private fun BookingTimePickerWrapper(viewModel: BookingViewModel) {
+    LksTimePicker(
+        onConfirm = { h, m ->
+            viewModel.onTimeChange(h, m)
+            viewModel.onShowTimePickerChange(false)
+        },
+        onDismiss = { viewModel.onShowTimePickerChange(false) },
+        modifier = Modifier.testTag(TestTags.TIME_PICKER_DIALOG),
+        confirmButtonModifier = Modifier.testTag(TestTags.TIME_PICKER_CONFIRM),
+        dismissButtonModifier = Modifier.testTag(TestTags.TIME_PICKER_CANCEL)
+    )
+}
+
+@Composable
+fun DateSelectionSection(viewModel: BookingViewModel, isCheckedIn: Boolean) {
+    if (viewModel.editingReservationId == null) return
+
+    val todayStr = stringResource(R.string.booking_today)
+
+    SectionHeader(title = stringResource(R.string.booking_select_date))
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp)
+            .horizontalScroll(rememberScrollState()),
+        horizontalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        viewModel.availableDates.forEach { (dayInt, label) ->
+            val displayLabel = if (label == "TODAY") todayStr else label
+            val isSelected = isDateMatchingDay(viewModel.selectedDate, dayInt)
+
+            DateItem(
+                day = dayInt.toString(),
+                label = displayLabel,
+                isSelected = isSelected,
+                modifier = Modifier.testTag("${TestTags.BOOKING_DATE_ITEM_PREFIX}$dayInt"),
+                onClick = {
+                    if (!isCheckedIn) {
+                        viewModel.onDateSelected(calculateTargetDate(dayInt))
+                    }
+                }
+            )
+        }
+    }
+    Spacer(Modifier.height(24.dp))
 }
 
 @Composable
@@ -160,7 +187,7 @@ fun BookingTopHeader(zone: String) {
             Column {
                 Text(stringResource(R.string.booking_header_label), style = MaterialTheme.typography.labelSmall, color = Color.White.copy(alpha = 0.8f))
                 Text(
-                    text = zone,
+                    text = stringResource(id = getZoneDisplayNameRes(zone)),
                     style = MaterialTheme.typography.titleLarge,
                     color = Color.White,
                     fontWeight = FontWeight.Bold,
@@ -172,52 +199,188 @@ fun BookingTopHeader(zone: String) {
 }
 
 @Composable
-fun VehicleSection(viewModel: BookingViewModel, onManageVehicles: () -> Unit) {
+fun VehicleSection(
+    viewModel: BookingViewModel,
+    onManageVehicles: () -> Unit,
+    isEnabled: Boolean = true
+) {
+    var expanded by remember { mutableStateOf(false) }
+
     SectionHeader(
         title = stringResource(R.string.booking_select_vehicle),
-        actionText = stringResource(R.string.booking_manage),
+        actionText = if (isEnabled) stringResource(R.string.booking_manage) else null,
         onActionClick = onManageVehicles,
         actionModifier = Modifier.testTag(TestTags.BOOKING_MANAGE_VEHICLES_BTN)
     )
 
-    viewModel.selectedVehicle?.let { vehicle ->
-        val vehicleIcon = when (vehicle.type) {
-            VehicleType.MOTORCYCLE -> Icons.Default.TwoWheeler
-            VehicleType.ELECTRIC -> Icons.Default.ElectricCar
-            VehicleType.ADAPTED -> Icons.AutoMirrored.Filled.Accessible
-            else -> Icons.Default.DirectionsCar
-        }
-        OutlinedCard(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp)
-                .testTag(TestTags.BOOKING_SELECTED_VEHICLE_CARD),
-            border = BorderStroke(2.dp, LksOrange),
-            shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.outlinedCardColors(containerColor = Color.White)
-        ) {
-            Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                Icon(vehicleIcon, null, tint = LksOrange)
-                Spacer(Modifier.width(16.dp))
-                Column {
-                    Text(vehicle.name, fontWeight = FontWeight.Bold)
-                    Text(vehicle.plate, color = Color.Gray)
+    val currentVehicle = viewModel.selectedVehicle
+    val vehiclesList = viewModel.userVehicles
+
+    Box(modifier = Modifier.fillMaxWidth()) {
+        when {
+            currentVehicle != null -> {
+                SelectedVehicleCard(
+                    vehicle = currentVehicle,
+                    hasMultipleOptions = isEnabled && vehiclesList.size > 1,
+                    isEnabled = isEnabled,
+                    onClick = { expanded = true }
+                )
+            }
+
+            currentVehicle == null && vehiclesList.isNotEmpty() -> {
+                OutlinedCard(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp)
+                        .clickable(enabled = isEnabled) { expanded = true }
+                        .testTag("BOOKING_SELECT_REQUIRED_CARD"),
+                    border = BorderStroke(2.dp, Color.Red),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.outlinedCardColors(containerColor = Color(0xFFFFF2F2))
+                ) {
+                    Row(
+                        modifier = Modifier.padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.DirectionsCar,
+                            contentDescription = null,
+                            tint = Color.Red
+                        )
+                        Spacer(Modifier.width(16.dp))
+
+                        Text(
+                            text = stringResource(R.string.booking_select_vehicle_hint),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = Color.Red,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                 }
             }
-        }
-    } ?: run {
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp)
-                .testTag(TestTags.BOOKING_NO_VEHICLES_ERROR),
-            colors = CardDefaults.cardColors(containerColor = palePink),
-            border = BorderStroke(1.dp, Color.Red.copy(alpha = 0.5f))
-        ) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Text(text = stringResource(R.string.booking_no_vehicles, viewModel.parkingZone), color = Color.Red, fontWeight = FontWeight.Bold)
-                Text(text = stringResource(R.string.booking_add_vehicle_hint), style = MaterialTheme.typography.bodySmall)
+
+            else -> {
+                NoVehiclesErrorCard(parkingZone = viewModel.parkingZone)
             }
+        }
+
+        VehicleDropdownMenu(
+            expanded = expanded,
+            vehicles = vehiclesList,
+            onDismiss = { expanded = false },
+            onVehicleSelected = { vehicle ->
+                viewModel.onVehicleSelected(vehicle)
+                expanded = false
+            }
+        )
+    }
+}
+
+@Composable
+private fun SelectedVehicleCard(
+    vehicle: Vehicle,
+    hasMultipleOptions: Boolean,
+    isEnabled: Boolean,
+    onClick: () -> Unit
+) {
+    OutlinedCard(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp)
+            .clickable(enabled = hasMultipleOptions, onClick = onClick)
+            .testTag(TestTags.BOOKING_SELECTED_VEHICLE_CARD),
+        border = BorderStroke(2.dp, if (isEnabled) LksOrange else Color.LightGray),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.outlinedCardColors(containerColor = Color.White)
+    ) {
+        Row(
+            modifier = Modifier.padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = getVehicleIcon(vehicle.type),
+                contentDescription = null,
+                tint = if (isEnabled) LksOrange else Color.Gray
+            )
+            Spacer(Modifier.width(16.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = vehicle.name,
+                    fontWeight = FontWeight.Bold,
+                    color = if (isEnabled) Color.Unspecified else Color.Gray
+                )
+                Text(text = vehicle.plate, color = Color.Gray)
+            }
+            if (hasMultipleOptions) {
+                Text(
+                    text = stringResource(R.string.booking_change_vehicle_hint),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = LksOrange
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun VehicleDropdownMenu(
+    expanded: Boolean,
+    vehicles: List<Vehicle>,
+    onDismiss: () -> Unit,
+    onVehicleSelected: (Vehicle) -> Unit
+) {
+    DropdownMenu(
+        expanded = expanded,
+        onDismissRequest = onDismiss,
+        modifier = Modifier
+            .fillMaxWidth(0.9f)
+            .background(Color.White)
+    ) {
+        vehicles.forEach { option ->
+            DropdownMenuItem(
+                text = {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = getVehicleIcon(option.type),
+                            contentDescription = null,
+                            tint = LksOrange,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Column {
+                            Text(text = option.name, fontWeight = FontWeight.SemiBold)
+                            Text(text = option.plate, style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                        }
+                    }
+                },
+                onClick = { onVehicleSelected(option) }
+            )
+        }
+    }
+}
+
+@Composable
+private fun NoVehiclesErrorCard(parkingZone: String) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp)
+            .testTag(TestTags.BOOKING_NO_VEHICLES_ERROR),
+        colors = CardDefaults.cardColors(containerColor = palePink),
+        border = BorderStroke(1.dp, Color.Red.copy(alpha = 0.5f))
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            val translatedZone = stringResource(id = getZoneDisplayNameRes(parkingZone))
+
+            Text(
+                text = stringResource(R.string.booking_no_vehicles, translatedZone),
+                color = Color.Red,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                text = stringResource(R.string.booking_add_vehicle_hint),
+                style = MaterialTheme.typography.bodySmall
+            )
         }
     }
 }
@@ -233,7 +396,7 @@ fun TimeAndDurationSection(viewModel: BookingViewModel, isReadOnly: Boolean) {
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
-                text = if (isReadOnly) "Selected Start Time" else stringResource(R.string.booking_start_time),
+                text = if (isReadOnly) stringResource(R.string.booking_selected_start_time) else stringResource(R.string.booking_start_time),
                 style = MaterialTheme.typography.labelSmall,
                 color = Color.Gray
             )
@@ -246,8 +409,8 @@ fun TimeAndDurationSection(viewModel: BookingViewModel, isReadOnly: Boolean) {
                     border = BorderStroke(1.dp, lightGray)
                 ) {
                     Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
-                        Text(String.format("%02d:%02d", viewModel.startHour, viewModel.startMinute), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                        Icon(Icons.Default.AccessTime, null, tint = LksOrange)
+                        Text(String.format("%02d:%02d", viewModel.startHour, viewModel.startMinute), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = Color.DarkGray)
+                        Icon(Icons.Default.AccessTime, null, tint = Color.Gray)
                     }
                 }
             } else {
@@ -260,7 +423,7 @@ fun TimeAndDurationSection(viewModel: BookingViewModel, isReadOnly: Boolean) {
                 ) {
                     Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
                         Text(String.format("%02d:%02d", viewModel.startHour, viewModel.startMinute), style = MaterialTheme.typography.titleLarge)
-                        Icon(Icons.Default.AccessTime, null, tint = Color.Gray)
+                        Icon(Icons.Default.AccessTime, null, tint = LksOrange)
                     }
                 }
             }
@@ -286,7 +449,7 @@ fun DurationBlock(viewModel: BookingViewModel) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Row(verticalAlignment = Alignment.Bottom) {
                 Text(text = viewModel.duration.toInt().toString(), style = MaterialTheme.typography.displayMedium, color = LksOrange, fontWeight = FontWeight.Bold)
-                Text(stringResource(R.string.booking_hours_unit), modifier = Modifier.padding(bottom = 12.dp), color = LksOrange, fontWeight = FontWeight.Medium)
+                Text(" " + stringResource(R.string.booking_hours_unit), modifier = Modifier.padding(bottom = 12.dp), color = LksOrange, fontWeight = FontWeight.Medium)
             }
             TimeSlider(
                 currentHours = viewModel.duration,
@@ -299,52 +462,72 @@ fun DurationBlock(viewModel: BookingViewModel) {
 
 @Composable
 fun BookingActionSection(viewModel: BookingViewModel, isButtonEnabled: Boolean, onConfirmBooking: () -> Unit) {
+    val context = LocalContext.current
+
     Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-
-        if (!isButtonEnabled) {
-            when {
-                viewModel.isOverlapConflict -> {
-                    Text(
-                        text = stringResource(R.string.booking_error_overlap, viewModel.nextCollisionTime ?: "", viewModel.maxAllowedHours ?: 0f),
-                        color = Color.Red,
-                        style = MaterialTheme.typography.bodySmall,
-                        modifier = Modifier.padding(bottom = 8.dp).testTag(TestTags.BOOKING_ERROR_OVERLAP)
-                    )
-                }
-
-                viewModel.isDateTimeValid() && viewModel.selectedVehicle != null -> {
-                    Text(
-                        text = stringResource(R.string.booking_error_active),
-                        color = Color.Red,
-                        style = MaterialTheme.typography.bodySmall,
-                        modifier = Modifier.padding(bottom = 8.dp).testTag(TestTags.BOOKING_ERROR_ACTIVE)
-                    )
-                }
-
-                !viewModel.isDateTimeValid() -> {
-                    Text(
-                        text = stringResource(R.string.booking_error_past),
-                        color = Color.Red,
-                        style = MaterialTheme.typography.bodySmall,
-                        modifier = Modifier.padding(bottom = 8.dp).testTag(TestTags.BOOKING_ERROR_PAST)
-                    )
-                }
-            }
+        if (!isButtonEnabled || viewModel.hasActiveReservation) {
+            BookingErrorMessages(viewModel)
         }
 
         LksButton(
             text = if (viewModel.editingReservationId != null) stringResource(R.string.booking_btn_update) else stringResource(R.string.booking_btn_confirm),
-            enabled = isButtonEnabled,
+            // Bloqueado si la validacion da false, si esta cargando, O si se detecta reserva activa de antemano
+            enabled = isButtonEnabled && !viewModel.isLoading && !viewModel.hasActiveReservation,
             modifier = Modifier.testTag(TestTags.BOOKING_SUBMIT_BTN),
             onClick = {
                 val realZone = ParkingManager.zones.find { it.name == viewModel.parkingZone } ?: ParkingManager.zones.first()
                 viewModel.selectedVehicle?.let { vehicle ->
-                    viewModel.confirmReservation(vehicle, realZone) {
+                    viewModel.confirmReservation(context, vehicle, realZone) {
                         onConfirmBooking()
                     }
                 }
             }
         )
+    }
+}
+
+@Composable
+private fun BookingErrorMessages(viewModel: BookingViewModel) {
+    when {
+        viewModel.selectedVehicle == null && viewModel.userVehicles.isNotEmpty() -> {
+            Text(
+                text = stringResource(R.string.booking_error_vehicle_required),
+                color = Color.Red,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier
+                    .padding(bottom = 8.dp)
+                    .testTag("BOOKING_ERROR_VEHICLE_REQUIRED"),
+                textAlign = TextAlign.Center
+            )
+        }
+        viewModel.isOverlapConflict -> {
+            Text(
+                text = stringResource(R.string.booking_error_overlap, viewModel.nextCollisionTime ?: "", viewModel.maxAllowedHours),
+                color = Color.Red,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(bottom = 8.dp).testTag(TestTags.BOOKING_ERROR_OVERLAP),
+                textAlign = TextAlign.Center
+            )
+        }
+        // 🛡️ Si el backend reporta reserva activa, muestra error de inmediato
+        viewModel.hasActiveReservation -> {
+            Text(
+                text = stringResource(R.string.booking_error_active),
+                color = Color.Red,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(bottom = 8.dp).testTag(TestTags.BOOKING_ERROR_ACTIVE),
+                textAlign = TextAlign.Center
+            )
+        }
+        !viewModel.isDateTimeValid() -> {
+            Text(
+                text = stringResource(R.string.booking_error_past),
+                color = Color.Red,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(bottom = 8.dp).testTag(TestTags.BOOKING_ERROR_PAST),
+                textAlign = TextAlign.Center
+            )
+        }
     }
 }
 
@@ -394,4 +577,20 @@ private fun calculateTargetDate(dayInt: Int): Date {
     targetCal.set(Calendar.MILLISECOND, 0)
 
     return targetCal.time
+}
+
+private fun getVehicleIcon(type: VehicleType) = when (type) {
+    VehicleType.MOTORCYCLE -> Icons.Default.TwoWheeler
+    VehicleType.ELECTRIC -> Icons.Default.ElectricCar
+    VehicleType.ADAPTED -> Icons.AutoMirrored.Filled.Accessible
+    else -> Icons.Default.DirectionsCar
+}
+
+fun getZoneDisplayNameRes(zoneName: String): Int {
+    return when (zoneName) {
+        com.lksnext.ParkingMMartinez.model.ZoneNames.DISABILITY -> R.string.zone_disability
+        com.lksnext.ParkingMMartinez.model.ZoneNames.EV -> R.string.zone_ev
+        com.lksnext.ParkingMMartinez.model.ZoneNames.MOTORCYCLE -> R.string.zone_motorcycle
+        else -> R.string.zone_standard
+    }
 }

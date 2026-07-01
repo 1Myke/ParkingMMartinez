@@ -7,8 +7,8 @@ plugins {
     jacoco
 }
 
-val appVersionCode = 3
-val appVersionName = "v1.1.0"
+val appVersionCode = 4
+val appVersionName = "v1.2.0"
 val targetSdkVersion = 36
 
 // Versiones de paquetes
@@ -18,12 +18,22 @@ val gsonVersion = "2.11.0"
 val mockitoVersion = "5.11.0"
 val archVersion = "2.2.0"
 val coroutinesVersion = "1.7.3"
+val appcompatVersion = "1.7.0"
+val coilVersion = "2.6.0"
+val mockitoKotlinVersion = "5.2.1"
+
 
 android {
     namespace = "com.lksnext.ParkingMMartinez"
     compileSdk {
         version = release(36) {
             minorApiLevel = 1
+        }
+    }
+
+    testOptions {
+        unitTests {
+            isReturnDefaultValues = true
         }
     }
 
@@ -77,13 +87,18 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycleVersion")
     implementation("androidx.navigation:navigation-compose:$navigationVersion")
     implementation("com.google.code.gson:gson:$gsonVersion")
+    implementation("androidx.appcompat:appcompat:$appcompatVersion")
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.analytics)
     implementation(libs.firebase.crashlytics)
     implementation(libs.firebase.auth)
     implementation("com.google.firebase:firebase-firestore")
+    implementation("com.google.firebase:firebase-storage")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:$coroutinesVersion")
+    implementation("com.google.firebase:firebase-messaging")
+    implementation("io.coil-kt:coil-compose:$coilVersion")
     testImplementation("org.mockito:mockito-core:$mockitoVersion")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:$mockitoKotlinVersion")
     testImplementation("androidx.arch.core:core-testing:$archVersion")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutinesVersion")
     testImplementation(libs.junit)

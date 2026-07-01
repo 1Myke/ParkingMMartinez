@@ -9,8 +9,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Accessible
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.DirectionsCar
+import androidx.compose.material.icons.filled.ElectricCar
 import androidx.compose.material.icons.filled.TwoWheeler
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -23,9 +25,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.lksnext.ParkingMMartinez.R // 🌐 Importamos R para resolver los strings traducidos
 import com.lksnext.ParkingMMartinez.model.VehicleType
+import com.lksnext.ParkingMMartinez.ui.screens.getVehicleTypeDisplayNameRes // 🌐 Importamos el helper del ProfileScreen
 import com.lksnext.ParkingMMartinez.ui.theme.*
 
 @Composable
@@ -49,7 +54,7 @@ fun VehicleCard(
         modifier = modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(4.dp),
-        shape = RoundedCornerShape(20.dp) // Esquinas un poco más redondeadas
+        shape = RoundedCornerShape(20.dp)
     ) {
         Row(
             modifier = Modifier.padding(16.dp),
@@ -62,8 +67,13 @@ fun VehicleCard(
                 shape = RoundedCornerShape(12.dp)
             ) {
                 Icon(
-                    // Cambiar el icono según el tipo también
-                    imageVector = if (type == VehicleType.MOTORCYCLE) Icons.Default.TwoWheeler else Icons.Default.DirectionsCar,
+                    // 🚗 MEJORA: Cambiamos el icono dinámicamente según TODOS los tipos reales
+                    imageVector = when (type) {
+                        VehicleType.MOTORCYCLE -> Icons.Default.TwoWheeler
+                        VehicleType.ELECTRIC -> Icons.Default.ElectricCar
+                        VehicleType.ADAPTED -> Icons.AutoMirrored.Filled.Accessible
+                        else -> Icons.Default.DirectionsCar
+                    },
                     contentDescription = null,
                     modifier = Modifier.padding(12.dp),
                     tint = grisPizarra
@@ -92,13 +102,14 @@ fun VehicleCard(
 
                     Spacer(modifier = Modifier.width(8.dp))
 
-                    // MEJORAS: El Badge con colores bonitos
+                    // El Badge con colores bonitos e idioma corregido
                     Surface(
                         color = containerColor,
                         shape = RoundedCornerShape(4.dp)
                     ) {
                         Text(
-                            text = type.toString().lowercase().replaceFirstChar { it.uppercase() },
+                            // 🌐 SOLUCIÓN: Usamos stringResource pasándole el mapeador dinámico del Enum
+                            text = stringResource(id = getVehicleTypeDisplayNameRes(type)),
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
                             style = MaterialTheme.typography.labelSmall,
                             color = contentColor,

@@ -7,4 +7,5 @@ interface UserRepository {
     suspend fun registerUser(user: User): Boolean
     suspend fun authenticate(email: String, pass: String): User?
     suspend fun getUserById(userId: String): User?
+    suspend fun updateAvatar(userId: String, url: String): Boolean
 }

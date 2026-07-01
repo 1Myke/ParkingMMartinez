@@ -1,0 +1,183 @@
+<resources>
+    <string name="app_name">lksParking</string>
+
+    <!-- TEXTO BOOKING_SCREEN EN EUSKERA -->
+    <string name="booking_header_label">HEMEN ERRESERBATZEN ARI ZARA PLAZA BAT:</string>
+    <string name="booking_select_vehicle">Hautatu ibilgailua</string>
+    <string name="booking_selected_start_time">Hautatutako hasiera-ordua</string>
+    <string name="booking_manage">Kudeatu</string>
+    <string name="booking_error_active">Dagoeneko baduzu erreserba aktibo bat.</string>
+    <string name="booking_error_past">Ezin da iraganean erreserbatu. Hautatu etorkizuneko ordu bat.</string>
+    <string name="booking_btn_confirm">Berretsi erreserba</string>
+    <string name="booking_btn_update">Eguneratu erreserba</string>
+    <string name="booking_no_vehicles">Ez da ibilgailu bateragarririk aurkitu honentzat: %1$s.</string>
+    <string name="booking_add_vehicle_hint">Mesedez, gehitu mota honetako ibilgailu bat \'Kudeatu\' atalean jarraitzeko.</string>
+    <string name="booking_select_date">Hautatu data</string>
+    <string name="booking_time_duration">Ordua eta iraupena</string>
+    <string name="booking_start_time">HASIERA-ORDUA</string>
+    <string name="booking_duration_label">IRAUPENA</string>
+    <string name="booking_ending_at">%1$s-(e)tan amaitzen da</string>
+    <string name="booking_next_day_warning">(+egun 1)</string>
+    <string name="booking_hours_unit">ordu</string>
+    <string name="booking_today">GAUR</string>
+    <string name="booking_change_vehicle_hint">Egin klik hemen ibilgailua aldatzeko!</string>
+    <string name="booking_select_vehicle_hint">Egin klik hemen zure ibilgailua hautatzeko!</string>
+    <string name="booking_error_overlap">Hurrengo erreserba %1$s-(e)an da, beraz, gehienez %2$s ordu erreserba ditzakezu</string>
+    <string name="booking_error_vehicle_required">Mesedez, hautatu ibilgailu bat erreserba berresteko!</string>
+
+    <!-- TEXTO BOOKING_REGISTER_SCREEN EN EUSKERA -->
+    <string name="register_title">Nire erreserbak</string>
+    <string name="register_empty">Ez dago erreserba aktiborik</string>
+
+    <string name="reservation_missed">EZ AURKEZTUA</string>
+    <string name="reservation_past">IRAGANA</string>
+    <string name="reservation_checked_in">CHECK-IN EGINDA</string>
+    <string name="reservation_done">AMAITUTA</string>
+
+    <string name="notification_tab_active">Aktiboak (%1$d)</string>
+    <string name="notification_tab_past">Historiala (%1$d)</string>
+    <string name="notification_past_empty">Ez da erregistrorik aurkitu historialean</string>
+
+    <!-- TEXTO MAP SCREEN EN EUSKERA -->
+    <string name="map_header_title">LKS Next Parking</string>
+    <string name="map_header_subtitle">Hautatu eremu bat berehala erreserbatzeko</string>
+
+    <!-- TEXTO PROFILE SCREEN EN EUSKERA -->
+    <string name="profile_vehicles">Nire ibilgailuak</string>
+    <string name="profile_add_vehicle_title">+ Gehitu ibilgailu berria</string>
+    <string name="profile_label_nickname">EZIZENA</string>
+    <string name="profile_hint_nickname">Ezizena</string>
+    <string name="profile_placeholder_nickname">adib. Laneko autoa</string>
+    <string name="profile_label_plate">MATRIKULA</string>
+    <string name="profile_hint_plate">Matrikula</string>
+    <string name="profile_placeholder_plate">1234 ABC</string>
+    <string name="profile_label_type">IBILGAILU MOTA</string>
+    <string name="profile_btn_save">Gorde ibilgailua</string>
+    <string name="profile_delete_title">Berretsi ezabatzea</string>
+    <string name="profile_delete_msg">Ziur zaude %1$s ezabatu nahi duzula? Ekintza hau ezin da desegin.</string>
+    <string name="btn_cancel">Utzi</string>
+    <string name="btn_delete">Ezabatu</string>
+    <string name="error_empty_fields">Eremuak ezin dira hutsik egon.</string>
+    <string name="error_duplicate_plate">Dagoeneko badago matrikula hau duen ibilgailu bat.</string>
+    <string name="error_active_booking">Ezin da ezabatu: ibilgailu honek aparkaleku-erreserba aktibo bat du.</string>
+    <string name="error_generic">Ustekabeko errore bat gertatu da. Mesedez, saiatu berriro.</string>
+
+    <!-- TEXTO LOGIN/REGISTER/RECOVERY EN EUSKERA -->
+    <string name="login_welcome">Ongi etorri berriro</string>
+    <string name="login_username">Erabiltzaile-izena</string>
+    <string name="login_password">Pasahitza</string>
+    <string name="login_remember">Gogoratu nirekin</string>
+    <string name="login_forgot">Pasahitza ahaztu duzu?</string>
+    <string name="login_btn">SAIOA HASI</string>
+    <string name="login_no_account">Ez duzu konturik?</string>
+    <string name="login_register_link">Erregistratu hemen!</string>
+    <string name="login_email_label">Posta elektronikoa</string>
+
+    <string name="reg_title">Erregistratu</string>
+    <string name="reg_label_name">Izena</string>
+    <string name="reg_label_plate">Matrikula</string>
+    <string name="reg_vehicle_type">Ibilgailu mota</string>
+    <string name="reg_vehicle_name">Ibilgailuaren izena</string>
+    <string name="reg_btn">ERREGISTRATU</string>
+    <string name="reg_label_lastname">Abizena</string>
+    <string name="reg_label_email">Posta elektronikoa</string>
+    <string name="reg_label_confirm_password">Berretsi pasahitza</string>
+    <string name="reg_already_have_account">Dagoeneko baduzu kontu bat? </string>
+    <string name="reg_login_link">Saioa hasi</string>
+
+    <string name="rec_title">Berreskuratu pasahitza</string>
+    <string name="rec_placeholder">Erabili erregistroko posta elektronikoa</string>
+    <string name="rec_btn_continue">Jarraitu</string>
+
+    <string name="err_login_failed">Posta elektroniko edo pasahitz baliogabea</string>
+    <string name="err_invalid_email">Mesedez, sartu baliozko posta elektroniko bat</string>
+    <string name="err_password_short">Pasahitzak gutxienez 6 karaktere izan behar ditu</string>
+    <string name="err_password_mismatch">Pasahitzak ez datoz bat</string>
+    <string name="err_invalid_plate">Matrikularen formatua ez da baliozkoa (1234ABC)</string>
+    <string name="err_user_exists">Erabiltzaile-izen hau dagoeneko hartuta dago</string>
+    <string name="err_registration_failed">Errorea erregistratzean</string>
+    <string name="error_invalid_email_or_not_found">Posta elektroniko hau ez dago erregistratuta gure sisteman.</string>
+
+    <string name="rec_success_title">Mezua Bidali Da</string>
+    <string name="rec_success_body">Posta erregistratuta badago, esteka bat jasoko duzu laster. Mesedez, egiaztatu sarrera-ontzia eta spam karpeta.</string>
+    <string name="btn_understood">Ulertuta</string>
+
+    <!-- TEXTO DE LAS NOTIFICACIONES EN EUSKERA -->
+    <string name="notification_channel_name">Aparkaleku-abisuak</string>
+    <string name="notification_default_title">Aparkalekuaren eguneratzea</string>
+    <string name="notification_default_body">Eguneratze berri bat jaso duzu.</string>
+
+    <string name="notification_screen_title">Abisu-zentroa aktibo</string>
+    <string name="notification_screen_body">Denbora errealeko abisuak jasoko dituzu zure gailuan erreserbak hastear daudenean, iraungitzear daudenean edo check-ina egitea ahaztu zaizunean.</string>
+    <string name="notification_screen_icon_desc">Abisu aktiboen ikonoa</string>
+
+    <string name="notification_channel_id">parking_alerts_channel</string>
+    <string name="notification_title_start">Zure erreserba laster hasiko da!</string>
+    <string name="notification_body_start">30 minutu falta dira zure erreserba %1$s-(e)an (%2$s) hasteko.</string>
+
+    <string name="notification_title_end">Zure denbora amaitzen ari da!</string>
+    <string name="notification_body_end">15 minutu falta dira zure erreserba amaitzeko. Gogoratu ibilgailua kentzeaz.</string>
+    <string name="notification_title_default">Aparkaleku-abisua</string>
+
+    <string name="zone_default_standard">Eremu estandarra</string>
+
+    <string name="notification_title_checkin_reminder">Check-ina falta da</string>
+    <string name="notification_body_checkin_reminder">Erreserba aktibo bat duzu %1$s-(e)an. Mesedez, egin check-ina orain edo bertan behera utzi erreserba erabiltzen ez baduzu.</string>
+    <string name="notification_unrestricted_battery">Aplikazioa itxita egonda abisuak jasotzeko, sakatu hemen, aktibatu \"Bateria mugarik gabe\" eta berriarazi aplikazioa.</string>
+
+    <string name="notification_system_alerts">Sistemaren abisuak</string>
+    <string name="notification_missed_title">Erreserba automatikoki bertan behera utzita</string>
+    <string name="notification_missed_body">%1$s (%2$s) ibilgailuaren erreserba %3$s eremuan, %4$s-(e)an (%5$s-(e)tik %6$s-(e)ra), bertan behera utzi da check-in ordua igaro delako.</string>
+
+    <!-- TEXTO DE LOS COMPONENTES EN EUSKERA -->
+    <string name="footer_map">Mapa</string>
+    <string name="footer_bookings">Erreserbak</string>
+    <string name="footer_alerts">Abisuak</string>
+    <string name="footer_profile">Profila</string>
+
+    <string name="timepick_confirm">Berretsi</string>
+    <string name="timepick_cancel">Utzi</string>
+    <string name="timepick_selecttime">Hautatu ordua</string>
+
+    <string name="label_location">1. solairua</string>
+    <string name="label_date">DATA</string>
+    <string name="label_time">ORDUA</string>
+    <string name="label_vehicle">IBILGAILUA</string>
+    <string name="label_available">LIBRE</string>
+    <string name="label_almost_full">IA BETETA</string>
+    <string name="label_free">libre</string>
+    <string name="label_full">BETETA</string>
+    <string name="status_active">AKTIBOA</string>
+    <string name="btn_edit">Editatu</string>
+    <string name="btn_check_in">Egin check-ina orain</string>
+
+    <!-- TEXTO DE LAS ZONAS DEL MAPA EN EUSKERA -->
+    <string name="zone_standard">Eremu estandarra</string>
+    <string name="zone_disability">Mugikortasun urrikoen eremua</string>
+    <string name="zone_ev">Ibilgailu elektrikoen karga-eremua</string>
+    <string name="zone_motorcycle">Motoen eremua</string>
+
+    <string name="vehicle_type_standard">Estandarra</string>
+    <string name="vehicle_type_motorcycle">Motorra</string>
+    <string name="vehicle_type_electric">Elektrikoa</string>
+    <string name="vehicle_type_adapted">Egokitua</string>
+
+    <string name="settings_title">Ezarpenak</string>
+    <string name="settings_language_section">Aplikazioaren hizkuntza</string>
+    <string name="settings_profile_section">Profilaren xehetasunak</string>
+    <string name="settings_password_section">Aldatu pasahitza</string>
+    <string name="settings_label_username">Erabiltzaile-izena</string>
+    <string name="settings_label_old_password">Uneko pasahitza</string>
+    <string name="settings_label_new_password">Pasahitz berria</string>
+    <string name="settings_btn_save_profile">Gorde profila</string>
+    <string name="settings_btn_change_password">Eguneratu pasahitza</string>
+    <string name="error_password_too_short">Pasahitzak gutxienez 6 karaktere izan behar ditu.</string>
+    <string name="error_wrong_old_password">Sartutako uneko pasahitza ez da zuzena.</string>
+    <string name="success_profile_updated">Profila ongi eguneratu da!</string>
+    <string name="success_password_changed">Pasahitza ongi eguneratu da!</string>
+
+    <string name="reservation_cancel_title">Erreserba bertan behera utzi</string>
+    <string name="reservation_cancel_msg">Ziur zaude erreserba hau bertan behera utzi nahi duzula?</string>
+    <string name="reservation_cancel_confirm">Bai, bertan behera utzi</string>
+
+</resources>

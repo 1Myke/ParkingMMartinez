@@ -28,6 +28,12 @@ import com.lksnext.ParkingMMartinez.ui.viewmodel.RecoveryViewModel
 import com.lksnext.ParkingMMartinez.ui.viewmodel.RegistrationViewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.google.firebase.Firebase
+import com.lksnext.ParkingMMartinez.data.repository.FirebaseNotificationRepository
+import com.lksnext.ParkingMMartinez.ui.screens.NotificationScreen
+import com.lksnext.ParkingMMartinez.ui.viewmodel.NotificationViewModel
+import com.lksnext.ParkingMMartinez.ui.viewmodel.SettingsViewModel
+import com.lksnext.ParkingMMartinez.ui.components.LksAppHeader
 
 @Composable
 fun LksNavigation() {
@@ -36,6 +42,7 @@ fun LksNavigation() {
     val bookingRepository = FirebaseBookingRepository()
     val userRepository = FirebaseUserRepository()
     val vehicleRepository = FirebaseVehicleRepository()
+    val notificationRepository = FirebaseNotificationRepository()
     val session = SessionManager(context)
 
     val navController = rememberNavController()
@@ -90,6 +97,23 @@ fun LksNavigation() {
         }
     )
 
+    val notificationViewModel: NotificationViewModel = viewModel(
+        factory = viewModelFactory {
+            addInitializer(NotificationViewModel::class) {
+                NotificationViewModel(notificationRepository, session)
+            }
+        }
+    )
+
+    val settingsViewModel: SettingsViewModel = viewModel(
+        factory = viewModelFactory {
+            addInitializer(SettingsViewModel::class) {
+                SettingsViewModel(userRepository, session)
+            }
+        }
+    )
+
+
     val startDestination = if (session.isLoggedIn()) Screen.Map.route else Screen.Login.route
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
@@ -97,9 +121,23 @@ fun LksNavigation() {
     val showFooter = currentRoute != null &&
             currentRoute != Screen.Login.route &&
             currentRoute != Screen.Register.route &&
-            currentRoute != Screen.Recovery.route
+            currentRoute != Screen.Recovery.route &&
+            currentRoute != Screen.Settings.route &&
+            currentRoute != Screen.Booking.route
+
+    val showHeader = currentRoute != null &&
+            currentRoute != Screen.Login.route &&
+            currentRoute != Screen.Register.route &&
+            currentRoute != Screen.Recovery.route &&
+            currentRoute != Screen.Map.route &&
+            currentRoute != Screen.Booking.route
 
     Scaffold(
+        topBar = {
+          if (showHeader) {
+              LksAppHeader()
+          }
+        },
         bottomBar = {
             if (showFooter) {
                 LksFooter(navController = navController)
@@ -176,7 +214,6 @@ fun LksNavigation() {
                 )
             ) { backStackEntry ->
                 val zoneName = backStackEntry.arguments?.getString("zoneName") ?: "Standard Zone"
-                val day = backStackEntry.arguments?.getInt("day") ?: 0
                 val hour = backStackEntry.arguments?.getInt("hour") ?: 8
                 val minute = backStackEntry.arguments?.getInt("minute") ?: 0
 
@@ -186,7 +223,16 @@ fun LksNavigation() {
                     //initialDay = day,
                     initialHour = hour,
                     initialMinute = minute,
-                    onConfirmBooking = { navController.popBackStack() },
+                    onConfirmBooking = {
+                        navController.popBackStack()
+                        navController.navigate(Screen.BookingsList.route) {
+                            popUpTo(Screen.Map.route) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    },
                     onManageVehicles = {
                         navController.navigate(Screen.Profile.route) {
                             launchSingleTop = true
@@ -214,11 +260,25 @@ fun LksNavigation() {
                         navController.navigate(Screen.Login.route) {
                             popUpTo(0) { inclusive = true }
                         }
+                    },
+                    onNavigateToSettings = {
+                        navController.navigate(Screen.Settings.route)
                     }
                 )
             }
 
-            composable(Screen.Alerts.route) { NotificationScreen() }
+            // --- ALERTS ---
+            composable(Screen.Alerts.route) {
+                NotificationScreen(viewModel = notificationViewModel)
+            }
+
+            // --- AJUSTES ---
+            composable(Screen.Settings.route) {
+                SettingsScreen(
+                    viewModel = settingsViewModel,
+                    onNavigateBack = { navController.popBackStack() }
+                )
+            }
         }
     }
 }

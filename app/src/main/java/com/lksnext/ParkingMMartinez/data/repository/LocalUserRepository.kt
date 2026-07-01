@@ -25,4 +25,8 @@ class LocalUserRepository(context: Context) : UserRepository {
         return userManager.getAllUsers().find { it.id == userId }
             ?: UserMock.users.find { it.id == userId }
     }
+
+    override suspend fun updateAvatar(userId: String, url: String): Boolean {
+        return true
+    }
 }

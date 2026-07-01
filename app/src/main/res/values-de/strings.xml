@@ -1,0 +1,183 @@
+<resources>
+    <string name="app_name">lksParking</string>
+
+    <!-- TEXTO BOOKING_SCREEN EN ALEMÁN -->
+    <string name="booking_header_label">SIE BUCHEN EINEN PARKPLATZ IN</string>
+    <string name="booking_select_vehicle">Fahrzeug auswählen</string>
+    <string name="booking_selected_start_time">Ausgewählte Startzeit</string>
+    <string name="booking_manage">Verwalten</string>
+    <string name="booking_error_active">Sie haben bereits eine aktive Reservierung.</string>
+    <string name="booking_error_past">Buchungen in der Vergangenheit sind nicht möglich. Bitte wählen Sie eine zukünftige Zeit.</string>
+    <string name="booking_btn_confirm">Reservierung bestätigen</string>
+    <string name="booking_btn_update">Reservierung aktualisieren</string>
+    <string name="booking_no_vehicles">Keine kompatiblen Fahrzeuge für %1$s gefunden.</string>
+    <string name="booking_add_vehicle_hint">Bitte fügen Sie unter \'Verwalten\' ein Fahrzeug dieses Typs hinzu, um fortzufahren.</string>
+    <string name="booking_select_date">Datum auswählen</string>
+    <string name="booking_time_duration">Uhrzeit &amp; Dauer</string>
+    <string name="booking_start_time">STARTZEIT</string>
+    <string name="booking_duration_label">DAUER</string>
+    <string name="booking_ending_at">ENDET UM %1$s UNHR</string>
+    <string name="booking_next_day_warning">(+1 Tag)</string>
+    <string name="booking_hours_unit">Stunden</string>
+    <string name="booking_today">HEUTE</string>
+    <string name="booking_change_vehicle_hint">Hier klicken, um Ihr Fahrzeug zu ändern!</string>
+    <string name="booking_select_vehicle_hint">Klicke hier, um dein Fahrzeug auszuwählen!</string>
+    <string name="booking_error_overlap">Nächste Buchung um %1$s, daher können Sie maximal %2$s Stunden reservieren</string>
+    <string name="booking_error_vehicle_required">Bitte wähle ein Fahrzeug aus, um die Reservierung zu bestätigen!</string>
+
+    <!-- TEXTO BOOKING_REGISTER_SCREEN EN ALEMÁN -->
+    <string name="register_title">Meine Reservierungen</string>
+    <string name="register_empty">Keine aktiven Reservierungen</string>
+
+    <string name="reservation_missed">NICHT ERSCHIENEN</string>
+    <string name="reservation_past">VERGANGEN</string>
+    <string name="reservation_checked_in">EINGECHECKT</string>
+    <string name="reservation_done">ABGESCHLOSSEN</string>
+
+    <string name="notification_tab_active">Aktiv (%1$d)</string>
+    <string name="notification_tab_past">Verlauf (%1$d)</string>
+    <string name="notification_past_empty">Keine Einträge im Verlauf gefunden</string>
+
+    <!-- TEXTO MAP SCREEN EN ALEMÁN -->
+    <string name="map_header_title">LKS Next Parking</string>
+    <string name="map_header_subtitle">Wählen Sie eine Zone aus, um sofort zu buchen</string>
+
+    <!-- TEXTO PROFILE SCREEN EN ALEMÁN -->
+    <string name="profile_vehicles">Meine Fahrzeuge</string>
+    <string name="profile_add_vehicle_title">+ Neues Fahrzeug hinzufügen</string>
+    <string name="profile_label_nickname">SPITZNAME</string>
+    <string name="profile_hint_nickname">Spitzname</string>
+    <string name="profile_placeholder_nickname">z. B. Dienstwagen</string>
+    <string name="profile_label_plate">KENNZEICHEN</string>
+    <string name="profile_hint_plate">Kennzeichen</string>
+    <string name="profile_placeholder_plate">1234 ABC</string>
+    <string name="profile_label_type">FAHRZEUGTYP</string>
+    <string name="profile_btn_save">Fahrzeug speichern</string>
+    <string name="profile_delete_title">Löschen bestätigen</string>
+    <string name="profile_delete_msg">Sind Sie sicher, dass Sie %1$s entfernen möchten? Diese Aktion kann nicht rückgängig gemacht werden.</string>
+    <string name="btn_cancel">Abbrechen</string>
+    <string name="btn_delete">Löschen</string>
+    <string name="error_empty_fields">Felder dürfen nicht leer sein.</string>
+    <string name="error_duplicate_plate">Ein Fahrzeug mit diesem Kennzeichen existiert bereits.</string>
+    <string name="error_active_booking">Löschen nicht möglich: Dieses Fahrzeug hat eine aktive Parkreservierung.</string>
+    <string name="error_generic">Ein unerwarteter Fehler ist aufgetreten. Bitte versuchen Sie es erneut.</string>
+
+    <!-- TEXTO LOGIN/REGISTER/RECOVERY EN ALEMÁN -->
+    <string name="login_welcome">Willkommen zurück</string>
+    <string name="login_username">Benutzername</string>
+    <string name="login_password">Passwort</string>
+    <string name="login_remember">An mich erinnern</string>
+    <string name="login_forgot">Passwort vergessen?</string>
+    <string name="login_btn">ANMELDEN</string>
+    <string name="login_no_account">Haben Sie noch kein Konto?</string>
+    <string name="login_register_link">Hier registrieren!</string>
+    <string name="login_email_label">E-Mail</string>
+
+    <string name="reg_title">Registrieren</string>
+    <string name="reg_label_name">Vorname</string>
+    <string name="reg_label_plate">Kennzeichen</string>
+    <string name="reg_vehicle_type">Fahrzeugtyp</string>
+    <string name="reg_vehicle_name">Fahrzeugname</string>
+    <string name="reg_btn">REGISTRIEREN</string>
+    <string name="reg_label_lastname">Nachname</string>
+    <string name="reg_label_email">E-Mail</string>
+    <string name="reg_label_confirm_password">Passwort bestätigen</string>
+    <string name="reg_already_have_account">Haben Sie bereits ein Konto? </string>
+    <string name="reg_login_link">Anmelden</string>
+
+    <string name="rec_title">Passwort wiederherstellen</string>
+    <string name="rec_placeholder">Verwenden Sie Ihre Registrierungs-E-Mail</string>
+    <string name="rec_btn_continue">Weiter</string>
+
+    <string name="err_login_failed">Ungültige E-Mail-Adresse oder Passwort</string>
+    <string name="err_invalid_email">Bitte geben Sie eine gültige E-Mail-Adresse ein</string>
+    <string name="err_password_short">Das Passwort muss mindestens 6 Zeichen lang sein</string>
+    <string name="err_password_mismatch">Die Passwörter stimmen nicht überein</string>
+    <string name="err_invalid_plate">Ungültiges Kennzeichenformat (1234ABC)</string>
+    <string name="err_user_exists">Dieser Benutzername ist bereits vergeben</string>
+    <string name="err_registration_failed">Registrierung fehlgeschlagen</string>
+    <string name="error_invalid_email_or_not_found">Diese E-Mail ist in unserem System nicht registriert.</string>
+
+    <string name="rec_success_title">E-Mail Gesendet</string>
+    <string name="rec_success_body">Wenn die E-Mail registriert ist, erhalten Sie in Kürze einen Link. Bitte überprüfen Sie Ihren Posteingang und Ihren Spam-Ordner.</string>
+    <string name="btn_understood">Verstanden</string>
+
+    <!-- TEXTO DE LAS NOTIFICACIONES EN ALEMÁN -->
+    <string name="notification_channel_name">Parkbenachrichtigungen</string>
+    <string name="notification_default_title">Parkplatz-Update</string>
+    <string name="notification_default_body">Sie haben ein neues Update erhalten.</string>
+
+    <string name="notification_screen_title">Benachrichtigungscenter aktiv</string>
+    <string name="notification_screen_body">Sie erhalten Echtzeit-Benachrichtigungen auf Ihrem Gerät, wenn Ihre Reservierungen kurz vor dem Start stehen, ablaufen oder wenn Sie den Check-in vergessen haben.</string>
+    <string name="notification_screen_icon_desc">Symbol für aktive Benachrichtigungen</string>
+
+    <string name="notification_channel_id">parking_alerts_channel</string>
+    <string name="notification_title_start">Ihre Buchung beginnt bald!</string>
+    <string name="notification_body_start">Es verbleiben noch 30 Minuten, bis Ihre Buchung in %1$s (%2$s) beginnt.</string>
+
+    <string name="notification_title_end">Ihre Zeit läuft ab!</string>
+    <string name="notification_body_end">Es verbleiben noch 15 Minuten, bis Ihre Buchung endet. Denken Sie daran, Ihr Fahrzeug zu entfernen.</string>
+    <string name="notification_title_default">Parkplatz-Benachrichtigung</string>
+
+    <string name="zone_default_standard">Standard-Zone</string>
+
+    <string name="notification_title_checkin_reminder">Ausstehender Check-In</string>
+    <string name="notification_body_checkin_reminder">Sie haben eine aktive Reservierung in %1$s. Bitte checken Sie jetzt ein oder stornieren Sie Ihre Buchung, falls Sie sie nicht nutzen.</string>
+    <string name="notification_unrestricted_battery">Um Benachrichtigungen bei geschlossener App zu erhalten, tippen Sie hier, aktivieren Sie \"Nicht eingeschränkte Akku-Nutzung\" und starten Sie die App neu.</string>
+
+    <string name="notification_system_alerts">Systembenachrichtigungen</string>
+    <string name="notification_missed_title">Reservierung automatisch storniert</string>
+    <string name="notification_missed_body">Ihre Reservierung für das Fahrzeug %1$s (%2$s) in Zone %3$s am %4$s (%5$s bis %6$s) wurde storniert, da die Check-in-Zeit überschritten wurde.</string>
+
+    <!-- TEXTO DE LOS COMPONENTES EN ALEMÁN -->
+    <string name="footer_map">Karte</string>
+    <string name="footer_bookings">Buchungen</string>
+    <string name="footer_alerts">Meldungen</string>
+    <string name="footer_profile">Profil</string>
+
+    <string name="timepick_confirm">Bestätigen</string>
+    <string name="timepick_cancel">Abbrechen</string>
+    <string name="timepick_selecttime">Zeit auswählen</string>
+
+    <string name="label_location">Ebene 1</string>
+    <string name="label_date">DATUM</string>
+    <string name="label_time">UHRZEIT</string>
+    <string name="label_vehicle">FAHRZEUG</string>
+    <string name="label_available">VERFÜGBAR</string>
+    <string name="label_almost_full">FAST VOLL</string>
+    <string name="label_free">frei</string>
+    <string name="label_full">VOLL</string>
+    <string name="status_active">AKTIV</string>
+    <string name="btn_edit">Bearbeiten</string>
+    <string name="btn_check_in">Jetzt einchecken</string>
+
+    <!-- TEXTO DE LAS ZONAS DEL MAPA EN ALEMÁN -->
+    <string name="zone_standard">Standard-Zone</string>
+    <string name="zone_disability">Behindertenparkplatz-Zone</string>
+    <string name="zone_ev">E-Ladestation-Zone</string>
+    <string name="zone_motorcycle">Motorrad-Zone</string>
+
+    <string name="vehicle_type_standard">Standard</string>
+    <string name="vehicle_type_motorcycle">Motorrad</string>
+    <string name="vehicle_type_electric">Elektro</string>
+    <string name="vehicle_type_adapted">Barrierefrei</string>
+
+    <string name="settings_title">Einstellungen</string>
+    <string name="settings_language_section">App-Sprache</string>
+    <string name="settings_profile_section">Profil-Details</string>
+    <string name="settings_password_section">Passwort ändern</string>
+    <string name="settings_label_username">Benutzername</string>
+    <string name="settings_label_old_password">Aktuelles Passwort</string>
+    <string name="settings_label_new_password">Neues Passwort</string>
+    <string name="settings_btn_save_profile">Profil speichern</string>
+    <string name="settings_btn_change_password">Passwort aktualisieren</string>
+    <string name="error_password_too_short">Das Passwort muss mindestens 6 Zeichen lang sein.</string>
+    <string name="error_wrong_old_password">Das eingegebene aktuelle Passwort ist falsch.</string>
+    <string name="success_profile_updated">Profil erfolgreich aktualisiert!</string>
+    <string name="success_password_changed">Passwort erfolgreich aktualisiert!</string>
+
+    <string name="reservation_cancel_title">Reservierung stornieren</string>
+    <string name="reservation_cancel_msg">Sind Sie sicher, dass Sie diese Reservierung stornieren möchten?</string>
+    <string name="reservation_cancel_confirm">Ja, stornieren</string>
+
+</resources>

@@ -1,24 +1,35 @@
 package com.lksnext.ParkingMMartinez.ui.viewmodel
 
+import android.app.AlarmManager
+import android.app.PendingIntent
+import android.content.Context
+import android.content.Intent
+import android.os.Build
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.lksnext.ParkingMMartinez.R
 import com.lksnext.ParkingMMartinez.data.ParkingManager
 import com.lksnext.ParkingMMartinez.data.SessionManager
+import com.lksnext.ParkingMMartinez.data.receiver.BookingAlarmReceiver
 import com.lksnext.ParkingMMartinez.data.repository.BookingRepository
 import com.lksnext.ParkingMMartinez.data.repository.VehicleRepository
 import com.lksnext.ParkingMMartinez.model.ParkingZone
 import com.lksnext.ParkingMMartinez.model.Reservation
 import com.lksnext.ParkingMMartinez.model.Vehicle
-import com.lksnext.ParkingMMartinez.model.ZoneNames
 import com.lksnext.ParkingMMartinez.model.VehicleType
+import com.lksnext.ParkingMMartinez.model.ZoneNames
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.time.LocalTime
-import java.util.*
+import java.util.Calendar
+import java.util.Date
+import java.util.Locale
+import java.util.UUID
 
+private const val TIME_FORMAT = "%02d:%02d"
 class BookingViewModel (
     private val repository: BookingRepository,
     private val vehicleRepository: VehicleRepository,
@@ -34,7 +45,8 @@ class BookingViewModel (
         private set
     var showTimePicker by mutableStateOf(false)
         private set
-    var parkingZone by mutableStateOf("Standard Zone")
+
+    var parkingZone by mutableStateOf(ZoneNames.STANDARD)
         private set
     var hasActiveReservation by mutableStateOf(false)
         private set
@@ -45,6 +57,9 @@ class BookingViewModel (
     var selectedVehicle by mutableStateOf<Vehicle?>(null)
 
     var editingReservationId by mutableStateOf<String?>(null)
+        private set
+
+    var isEditingCheckedIn by mutableStateOf(false)
         private set
 
     var nextCollisionTime by mutableStateOf<String?>(null)
@@ -58,7 +73,12 @@ class BookingViewModel (
     var isButtonEnabled by mutableStateOf(false)
         private set
 
-    // Logica para los proximos 7 dias
+    var isLoading by mutableStateOf(false)
+        private set
+
+    private var cachedBookings: List<Reservation> = emptyList()
+    private var isInitialDataLoaded = false
+
     val availableDates: List<Pair<Int, String>> by lazy {
         val calendar = Calendar.getInstance()
         (0..7).map { offset ->
@@ -71,35 +91,37 @@ class BookingViewModel (
         }
     }
 
+    fun onVehicleSelected(vehicle: Vehicle) {
+        selectedVehicle = vehicle
+        if (isInitialDataLoaded) validateBooking()
+    }
+
     fun onTimeChange(h: Int, m: Int) {
         startHour = h
         startMinute = m
+        if (isInitialDataLoaded) validateBooking()
     }
 
     fun onDurationChange(newDuration: Float) {
-        // duration = if (newDuration > 9f) 9f else newDuration
-        // Para forzar que nunca pase de 8.0f aunque el slider se mueva raro (Por si acaso)
         duration = newDuration.coerceIn(1.0f, 8.0f)
+        if (isInitialDataLoaded) validateBooking()
     }
 
     fun onDateSelected(date: Date) {
         selectedDate = date
+        if (isInitialDataLoaded) validateBooking()
     }
 
-    // Cálculos derivados (Lo que dice el PDF sobre reactividad)
     fun getEndTime(): String {
-        // Usamos Calendar para que él haga el trabajo sucio de las horas y minutos
         val calendar = Calendar.getInstance()
         calendar.set(Calendar.HOUR_OF_DAY, startHour)
         calendar.set(Calendar.MINUTE, startMinute)
-
-        // Sumamos la duración (en horas)
         calendar.add(Calendar.HOUR_OF_DAY, duration.toInt())
 
         val endHour = calendar.get(Calendar.HOUR_OF_DAY)
         val endMinute = calendar.get(Calendar.MINUTE)
 
-        return String.format("%02d:%02d", endHour, endMinute)
+        return String.format(Locale.getDefault(), TIME_FORMAT, endHour, endMinute)
     }
 
     fun isNextDay(): Boolean {
@@ -115,10 +137,16 @@ class BookingViewModel (
     }
 
     fun confirmReservation(
+        context: Context,
         vehicle: Vehicle,
         zone: ParkingZone,
         onComplete: () -> Unit
     ) {
+        if (isLoading) {
+            return
+        }
+        isLoading = true
+
         val userId = sessionManager.getActiveUserId() ?: ""
         val vehicleWithId = vehicle.copy(id = userId)
         val start = LocalTime.of(startHour, startMinute)
@@ -133,46 +161,84 @@ class BookingViewModel (
         }
 
         viewModelScope.launch {
-            // CORRECCIÓN CRÍTICA: Nos descargamos las reservas actuales para calcular la plaza libre real
-            val allBookings = repository.getAllReservations()
+            try {
+                val allBookings = repository.getAllReservations()
 
-            // Calculamos de forma inteligente el primer número de plaza desocupado en ese tramo
-            val calculatedSpotNumber = ParkingManager.findFirstAvailableSpotNumber(
-                allBookings = allBookings,
-                zoneName = parkingZone,
-                vehicleType = vehicle.type,
-                selectedDate = calendar.time,
-                slotStart = start,
-                slotEnd = end,
-                editingReservationId = editingReservationId
-            )
+                val calculatedSpotNumber = ParkingManager.findFirstAvailableSpotNumber(
+                    allBookings = allBookings,
+                    zoneName = parkingZone,
+                    vehicleType = vehicle.type,
+                    selectedDate = calendar.time,
+                    slotStart = start,
+                    slotEnd = end,
+                    editingReservationId = editingReservationId
+                )
 
-            val newReservation = Reservation(
-                id = editingReservationId ?: UUID.randomUUID().toString(),
-                vehicle = vehicleWithId,
-                zone = zone,
-                date = calendar.time,
-                startTime = start,
-                endTime = end,
-                isCheckedIn = false,
-                spotNumber = calculatedSpotNumber // <--- ¡Y le asignamos su plaza real! (1, 35, etc.)
-            )
+                val newReservation = Reservation(
+                    id = editingReservationId ?: UUID.randomUUID().toString(),
+                    vehicle = vehicleWithId,
+                    zone = zone,
+                    date = calendar.time,
+                    startTime = start,
+                    endTime = end,
+                    isCheckedIn = isEditingCheckedIn,
+                    spotNumber = calculatedSpotNumber
+                )
 
-            editingReservationId?.let { repository.cancelReservation(it) }
-            repository.saveReservation(newReservation)
+                editingReservationId?.let { repository.cancelReservation(it) }
+                repository.saveReservation(newReservation)
 
-            editingReservationId = null
-            hasActiveReservation = true
-            onComplete()
+                programarAlertasDeReserva(context, newReservation)
+
+                editingReservationId = null
+                isEditingCheckedIn = false
+                hasActiveReservation = true
+
+                isLoading = false
+                onComplete()
+            } catch (e: Exception) {
+                android.util.Log.e("BOOKING_ERROR", "Error al guardar reserva: ${e.message}")
+                isLoading = false
+            }
         }
     }
+    
+    fun resetLoadingState() {
+        isLoading = false
+    }
+
     fun checkUserReservationStatus() {
         val currentUserId = sessionManager.getActiveUserId() ?: return
 
         viewModelScope.launch {
             val allBookings = repository.getAllReservations()
-            hasActiveReservation = allBookings.any { it.vehicle.userId == currentUserId }
+            val nowMillis = System.currentTimeMillis()
+
+            hasActiveReservation = allBookings.any { booking ->
+                val isUserReservation = booking.vehicle.userId == currentUserId
+
+
+                val isTotallyFinished = isReservationPastEntirely(booking, nowMillis)
+                val isNotSelf = booking.id != editingReservationId
+
+                isUserReservation && !isTotallyFinished && isNotSelf
+            }
         }
+    }
+
+    private fun isReservationPastEntirely(res: Reservation, nowMillis: Long): Boolean {
+        val endCal = Calendar.getInstance().apply {
+            time = res.date
+            set(Calendar.HOUR_OF_DAY, res.endTime.hour)
+            set(Calendar.MINUTE, res.endTime.minute)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+
+            if (res.endTime.hour < res.startTime.hour) {
+                add(Calendar.DAY_OF_YEAR, 1)
+            }
+        }
+        return endCal.timeInMillis <= nowMillis
     }
 
     fun loadAndFilterVehicles() {
@@ -193,7 +259,19 @@ class BookingViewModel (
                 val filtered = allVehicles.filter { it.type == requiredType }
 
                 userVehicles = filtered
-                selectedVehicle = if (filtered.isNotEmpty()) filtered[0] else null
+                val currentSelectionStillValid = filtered.any { it.plate == selectedVehicle?.plate }
+
+                if (!currentSelectionStillValid) {
+                    selectedVehicle = if (filtered.size == 1) {
+                        // 1 solo vehiculo, se selecciona automaticamente
+                        filtered[0]
+                    } else {
+                    // El usuario elige el vehiculo que quiere
+                        null
+                    }
+                } else {
+                    selectedVehicle = filtered.find { it.plate == selectedVehicle?.plate }
+                }
 
                 validateBooking()
 
@@ -206,6 +284,10 @@ class BookingViewModel (
     }
 
     fun isDateTimeValid(): Boolean {
+        if (editingReservationId != null && isEditingCheckedIn) {
+            return true
+        }
+
         val now = Calendar.getInstance()
         now.add(Calendar.MINUTE, -5)
 
@@ -222,51 +304,56 @@ class BookingViewModel (
 
     fun loadReservationForEditing(reservation: Reservation) {
         editingReservationId = reservation.id
+        isEditingCheckedIn = reservation.isCheckedIn
         parkingZone = reservation.zone.name
         startHour = reservation.startTime.hour
         startMinute = reservation.startTime.minute
         selectedDate = reservation.date
-        // Calculamos la duración más o menos
         val diff = java.time.Duration.between(reservation.startTime, reservation.endTime).toHours()
         duration = diff.toFloat().coerceIn(1f, 8f)
     }
 
     fun cancelEditing() {
         editingReservationId = null
-
+        isEditingCheckedIn = false
     }
 
     fun validateBooking() {
-        viewModelScope.launch {
-            isButtonEnabled = performValidation()
-        }
+        if (!isInitialDataLoaded) return
+        isButtonEnabled = performValidationLocally()
     }
 
-    private suspend fun performValidation(): Boolean {
+    private fun performValidationLocally(): Boolean {
+        if (isLoading) return false
+
         isOverlapConflict = false
         nextCollisionTime = null
         maxAllowedHours = 0
 
         if (!isDateTimeValid() || selectedVehicle == null) return false
-        if (editingReservationId != null) return true
 
-        val currentUserId = sessionManager.getActiveUserId() ?: return false
-        val allBookings = repository.getAllReservations()
-
-        if (allBookings.any { it.vehicle.userId == currentUserId }) return false
+        if (hasActiveReservation) {
+            return false
+        }
 
         val proposedStart = LocalTime.of(startHour, startMinute)
         val proposedEnd = proposedStart.plusHours(duration.toLong())
-        val mockZone = com.lksnext.ParkingMMartinez.data.ParkingManager.zones.find { it.name == parkingZone }
+        val mockZone = ParkingManager.zones.find { it.name == parkingZone }
         val maxSpotsInZone = mockZone?.totalSpots ?: 4
 
-        val conflictingBookings = allBookings.filter { booking ->
+        val nowMillis = System.currentTimeMillis()
+
+        val conflictingBookings = cachedBookings.filter { booking ->
             val calProposed = Calendar.getInstance().apply { time = selectedDate }
             val calBooking = Calendar.getInstance().apply { time = booking.date }
+            val isConflictingUserPresent = !isReservationPastEntirely(booking, nowMillis) || booking.isCheckedIn
+            val isNotSelf = booking.id != editingReservationId
 
             calProposed.get(Calendar.YEAR) == calBooking.get(Calendar.YEAR) &&
                     calProposed.get(Calendar.DAY_OF_YEAR) == calBooking.get(Calendar.DAY_OF_YEAR) &&
-                    booking.zone.name == parkingZone
+                    booking.zone.name == parkingZone &&
+                    isConflictingUserPresent &&
+                    isNotSelf
         }
 
         var tempTime = proposedStart
@@ -283,11 +370,209 @@ class BookingViewModel (
 
         if (earliestCollision != null) {
             isOverlapConflict = true
-            nextCollisionTime = String.format("%02d:%02d", earliestCollision.hour, earliestCollision.minute)
+            nextCollisionTime = String.format(Locale.getDefault(), TIME_FORMAT, earliestCollision.hour, earliestCollision.minute)
             maxAllowedHours = (java.time.Duration.between(proposedStart, earliestCollision).toMinutes() / 60).toInt()
             return false
         }
+
         return true
     }
 
+    fun programarAlertasDeReserva(context: Context, reservation: Reservation) {
+        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+
+        val idAlertaInicio = reservation.id.hashCode() + 1
+        val idAlertaFin = reservation.id.hashCode() + 2
+        val idAlertaCheckIn = reservation.id.hashCode() + 3
+
+        // --- CANCELAR ALARMAS VIEJAS POR SI ES UNA EDICIÓN ---
+        cancelarAlarmaExistente(context, alarmManager, idAlertaInicio)
+        cancelarAlarmaExistente(context, alarmManager, idAlertaFin)
+        cancelarAlarmaExistente(context, alarmManager, idAlertaCheckIn)
+
+        val nowMillis = System.currentTimeMillis()
+
+        // --- 1. CONFIGURAR NUEVA ALERTA DE INICIO (30 minutos antes) ---
+        val calInicio = Calendar.getInstance().apply {
+            time = reservation.date
+            set(Calendar.HOUR_OF_DAY, reservation.startTime.hour)
+            set(Calendar.MINUTE, reservation.startTime.minute)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+            add(Calendar.MINUTE, -30) //- 30
+        }
+
+        if (calInicio.timeInMillis > nowMillis) {
+            val horaFormateada = String.format(Locale.getDefault(), TIME_FORMAT, reservation.startTime.hour, reservation.startTime.minute)
+
+            // 🔒 Pasamos solo IDs lógicos y argumentos, nada de Strings fijos
+            configurarAlertaNativa(
+                context = context,
+                alarmManager = alarmManager,
+                triggerAtMillis = calInicio.timeInMillis,
+                notificationId = idAlertaInicio,
+                titleResId = R.string.notification_title_start,
+                bodyResId = R.string.notification_body_start,
+                // Pasamos los argumentos que necesita el string (la zona y la hora)
+                args = arrayOf(reservation.zone.name, horaFormateada)
+            )
+        }
+
+        // --- 2. CONFIGURAR NUEVA ALERTA DE RECORDATORIO CHECK-IN (+15 minutos de la hora de inicio) ---
+        if (!reservation.isCheckedIn) {
+            val calCheckIn = Calendar.getInstance().apply {
+                time = reservation.date
+                set(Calendar.HOUR_OF_DAY, reservation.startTime.hour)
+                set(Calendar.MINUTE, reservation.startTime.minute)
+                set(Calendar.SECOND, 0)
+                set(Calendar.MILLISECOND, 0)
+                add(Calendar.MINUTE, 15) // 15
+            }
+
+            if (calCheckIn.timeInMillis > nowMillis) {
+                configurarAlertaNativa(
+                    context = context,
+                    alarmManager = alarmManager,
+                    triggerAtMillis = calCheckIn.timeInMillis,
+                    notificationId = idAlertaCheckIn,
+                    titleResId = R.string.notification_title_checkin_reminder,
+                    bodyResId = R.string.notification_body_checkin_reminder,
+                    args = arrayOf(reservation.zone.name)
+                )
+            }
+        }
+
+        // --- 3. CONFIGURAR NUEVA ALERTA DE FIN (15 minutos antes de salir) ---
+        val calFin = Calendar.getInstance().apply {
+            time = reservation.date
+            set(Calendar.HOUR_OF_DAY, reservation.endTime.hour)
+            set(Calendar.MINUTE, reservation.endTime.minute)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+
+            if (reservation.endTime.hour < reservation.startTime.hour) {
+                add(Calendar.DAY_OF_YEAR, 1)
+            }
+            add(Calendar.MINUTE, -15) // - 15
+        }
+
+        if (calFin.timeInMillis > nowMillis) {
+            configurarAlertaNativa(
+                context = context,
+                alarmManager = alarmManager,
+                triggerAtMillis = calFin.timeInMillis,
+                notificationId = idAlertaFin,
+                titleResId = R.string.notification_title_end,
+                bodyResId = R.string.notification_body_end
+            )
+        }
+    }
+
+    // Funcion para configurar la alerta nativa
+    private fun configurarAlertaNativa(
+        context: Context,
+        alarmManager: AlarmManager,
+        triggerAtMillis: Long,
+        notificationId: Int,
+        titleResId: Int,
+        bodyResId: Int,
+        args: Array<String> = emptyArray()
+    ) {
+        val appContext = context.applicationContext
+
+        val intent = Intent(appContext, BookingAlarmReceiver::class.java).apply {
+            // Mandamos los recursos lógicos, no textos fijos pre-renderizados
+            putExtra("NOTIFICATION_TITLE_RES", titleResId)
+            putExtra("NOTIFICATION_BODY_RES", bodyResId)
+            putExtra("NOTIFICATION_ARGS", args)
+            addFlags(Intent.FLAG_RECEIVER_FOREGROUND)
+        }
+
+        val pendingIntent = PendingIntent.getBroadcast(
+            appContext,
+            notificationId,
+            intent,
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        )
+
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                val alarmInfo = AlarmManager.AlarmClockInfo(triggerAtMillis, pendingIntent)
+                alarmManager.setAlarmClock(alarmInfo, pendingIntent)
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent)
+            } else {
+                alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent)
+            }
+        } catch (e: SecurityException) {
+            alarmManager.set(AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent)
+        }
+    }
+
+    // Función auxiliar para mantener limpio el flujo de cancelación
+    private fun cancelarAlarmaExistente(context: Context, alarmManager: AlarmManager, idAlerta: Int) {
+        val appContext = context.applicationContext
+        val intentCancel = Intent(appContext, BookingAlarmReceiver::class.java)
+        val piCancel = PendingIntent.getBroadcast(
+            appContext, idAlerta, intentCancel, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_NO_CREATE
+        )
+        if (piCancel != null) {
+            alarmManager.cancel(piCancel)
+            piCancel.cancel()
+        }
+    }
+
+    fun inicializarPantalla(initialZone: String, initialHour: Int, initialMinute: Int) {
+        setZone(initialZone)
+
+        if (editingReservationId == null) {
+            cancelEditing()
+            startHour = initialHour
+            startMinute = initialMinute
+        }
+
+        // 🛡️ Abrimos UN SOLO hilo para garantizar el orden en el celular
+        viewModelScope.launch {
+            try {
+                isLoading = true
+                val currentUserId = sessionManager.getActiveUserId() ?: ""
+                cachedBookings = repository.getAllReservations()
+                val nowMillis = System.currentTimeMillis()
+
+                hasActiveReservation = cachedBookings.any { booking ->
+                    val isUserReservation = booking.vehicle.userId == currentUserId
+                    val isTotallyFinished = isReservationPastEntirely(booking, nowMillis)
+                    val isNotSelf = booking.id != editingReservationId
+                    isUserReservation && !isTotallyFinished && isNotSelf
+                }
+
+                val allVehicles = vehicleRepository.getVehicles(currentUserId)
+                val requiredType = when (parkingZone) {
+                    "Disability", ZoneNames.DISABILITY -> VehicleType.ADAPTED
+                    "EV", ZoneNames.EV -> VehicleType.ELECTRIC
+                    "Motorcycle", ZoneNames.MOTORCYCLE -> VehicleType.MOTORCYCLE
+                    "Standard", ZoneNames.STANDARD -> VehicleType.STANDARD
+                    else -> VehicleType.STANDARD
+                }
+
+                val filtered = allVehicles.filter { it.type == requiredType }
+                userVehicles = filtered
+
+                val currentSelectionStillValid = filtered.any { it.plate == selectedVehicle?.plate }
+                if (!currentSelectionStillValid) {
+                    selectedVehicle = if (filtered.size == 1) filtered[0] else null
+                } else {
+                    selectedVehicle = filtered.find { it.plate == selectedVehicle?.plate }
+                }
+
+                isInitialDataLoaded = true
+
+            } catch (e: Exception) {
+                android.util.Log.e("FIREBASE_ERROR", "Error: ${e.message}")
+            } finally {
+                isLoading = false
+                validateBooking()
+            }
+        }
+    }
 }

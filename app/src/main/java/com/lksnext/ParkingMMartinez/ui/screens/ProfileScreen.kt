@@ -1,5 +1,6 @@
 package com.lksnext.ParkingMMartinez.ui.screens
 
+import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -50,6 +51,7 @@ import com.lksnext.ParkingMMartinez.ui.components.LksButton
 import com.lksnext.ParkingMMartinez.ui.components.LksTextField
 import com.lksnext.ParkingMMartinez.ui.components.ProfileHeaderSection
 import com.lksnext.ParkingMMartinez.ui.components.VehicleCard
+import com.lksnext.ParkingMMartinez.ui.components.LanguageSelectorSection
 import com.lksnext.ParkingMMartinez.ui.theme.LksOrange
 import com.lksnext.ParkingMMartinez.ui.theme.lightGray
 import com.lksnext.ParkingMMartinez.ui.theme.navyBlue
@@ -59,20 +61,33 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.ui.platform.testTag
 import com.lksnext.ParkingMMartinez.ui.constants.TestTags
+import androidx.compose.material.icons.filled.Settings
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 
 @Composable
 fun ProfileScreen(
     viewModel: ProfileViewModel = viewModel(),
-    onLogoutClick: () -> Unit
+    onLogoutClick: () -> Unit,
+    onNavigateToSettings: () -> Unit
 ){
     val focusManager = LocalFocusManager.current
+
+    val context = androidx.compose.ui.platform.LocalContext.current
+
+    val galleryLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ){
+        uri: Uri? ->
+        uri?.let {viewModel.uploadProfileImage(context, it)}
+    }
 
     LaunchedEffect(Unit) {
         viewModel.loadUserData()
     }
 
     Scaffold(
-        containerColor = Color.White,
+        containerColor = MaterialTheme.colorScheme.background,
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { viewModel.onOpenDialog() },
@@ -89,7 +104,7 @@ fun ProfileScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .background(Color.White)
+                .background(MaterialTheme.colorScheme.background)
                 .pointerInput(Unit) {
                     detectTapGestures(onTap = {
                         focusManager.clearFocus()
@@ -101,26 +116,51 @@ fun ProfileScreen(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 8.dp, vertical = 8.dp),
-                horizontalArrangement = Arrangement.End
+                    .padding(horizontal = 24.dp, vertical = 12.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                IconButton(
-                    onClick = onLogoutClick,
-                    modifier = Modifier.testTag(TestTags.PROFILE_LOGOUT_BTN)
+                //LanguageSelectorSection()
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                        //.padding(horizontal = 8.dp, vertical = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(
-                        Icons.AutoMirrored.Default.Logout,
-                        null,
-                        tint = Color.Gray,
-                        modifier = Modifier.size(28.dp)
-                    )
+                    IconButton(
+                        onClick = onNavigateToSettings,
+                        modifier = Modifier.testTag("PROFILE_SETTINGS_BTN")
+                    ) {
+                        Icon(
+                            Icons.Default.Settings,
+                            contentDescription = "Settings",
+                            tint = Color.Gray,
+                            modifier = Modifier.size(26.dp)
+                        )
+                    }
+
+                    IconButton(
+                        onClick = onLogoutClick,
+                        modifier = Modifier.testTag(TestTags.PROFILE_LOGOUT_BTN)
+                    ) {
+                        Icon(
+                            Icons.AutoMirrored.Default.Logout,
+                            null,
+                            tint = Color.Gray,
+                            modifier = Modifier.size(28.dp)
+                        )
+                    }
                 }
             }
 
             ProfileHeaderSection(
                 viewModel.userName,
                 viewModel.userRole,
-                viewModel.userEmail
+                viewModel.userEmail,
+                photoUrl = viewModel.userAvatar,
+                onImageClick = { galleryLauncher.launch("image/*") }
             )
 
             HorizontalDivider(modifier = Modifier.padding(vertical = 24.dp), thickness = 1.dp, color = lightGray)
@@ -162,6 +202,7 @@ fun ProfileScreen(
                         modifier = Modifier.testTag("${TestTags.PROFILE_VEHICLE_CARD_PREFIX}${vehicle.plate}")
                     )
                 }
+                Spacer(modifier = Modifier.height(80.dp))
             }
         }
 
@@ -247,13 +288,14 @@ fun AddVehicleDialog(viewModel: ProfileViewModel) {
                         .horizontalScroll(rememberScrollState()),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
+
                     VehicleType.values().forEach { type ->
                         val isSelected = viewModel.selectedVehicleType == type
                         FilterChip(
                             selected = isSelected,
                             onClick = { viewModel.onVehicleTypeChange(type) },
                             label = {
-                                Text(type.name.replace("_", " ").lowercase().replaceFirstChar { it.uppercase() })
+                                Text(text = stringResource(id = getVehicleTypeDisplayNameRes(type)))
                             },
                             colors = FilterChipDefaults.filterChipColors(
                                 selectedContainerColor = LksOrange.copy(alpha = 0.2f),
@@ -352,4 +394,15 @@ fun DeleteConfirmationDialog(viewModel: ProfileViewModel) {
         containerColor = Color.White,
         modifier = Modifier.testTag(TestTags.PROFILE_DELETE_DIALOG)
     )
+}
+
+fun getVehicleTypeDisplayNameRes(type: VehicleType): Int {
+    return when (type) {
+        VehicleType.STANDARD -> R.string.vehicle_type_standard
+        VehicleType.MOTORCYCLE -> R.string.vehicle_type_motorcycle
+        VehicleType.ELECTRIC -> R.string.vehicle_type_electric
+        VehicleType.ADAPTED -> R.string.vehicle_type_adapted
+        // Por si acaso hay algún fallback o tipo por defecto:
+        else -> R.string.vehicle_type_standard
+    }
 }

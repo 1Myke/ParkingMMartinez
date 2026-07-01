@@ -4,6 +4,7 @@
     <!-- TEXTO BOOKING_SCREEN EN INGLES -->
     <string name ="booking_header_label">YOU ARE BOOKING A SPOT IN</string>
     <string name="booking_select_vehicle">Select Vehicle</string>
+    <string name="booking_selected_start_time">Selected Start Time</string>
     <string name="booking_manage">Manage</string>
     <string name="booking_error_active">You already have an active reservation.</string>
     <string name="booking_error_past">Cannot book in the past. Select a future time.</string>
@@ -19,12 +20,24 @@
     <string name="booking_next_day_warning">(+1 day)</string>
     <string name="booking_hours_unit">hours</string>
     <string name="booking_today">TODAY</string>
+    <string name="booking_change_vehicle_hint">Click here to change your vehicle!</string>
+    <string name="booking_select_vehicle_hint">Click here to select your vehicle!</string>
     <string name="booking_error_overlap">Next booking at %1$s so you can maximum reserve %2$s hours</string>
+    <string name="booking_error_vehicle_required">Plese select your vehicle to confirm the reservation!</string>
 
 
     <!-- TEXTO BOOKING_REGISTER_SCREEN EN INGLES -->
     <string name="register_title">My Reservations</string>
     <string name="register_empty">No active reservations</string>
+
+    <string name="reservation_missed">MISSED</string>
+    <string name="reservation_past">PAST</string>
+    <string name="reservation_checked_in">CHECKED IN</string>
+    <string name="reservation_done">DONE</string>
+
+    <string name="notification_tab_active">Active (%1$d)</string>
+    <string name="notification_tab_past">History (%1$d)</string>
+    <string name="notification_past_empty">No history logs found</string>
 
     <!-- TEXTO MAP SCREEN EN INGLES -->
     <string name="map_header_title">LKS Next Parking</string>
@@ -67,6 +80,11 @@
     <string name="reg_vehicle_type">Vehicle Type</string>
     <string name="reg_vehicle_name">Vehicle Name</string>
     <string name="reg_btn">SIGN UP</string>
+    <string name="reg_label_lastname">Last Name</string>
+    <string name="reg_label_email">Email</string>
+    <string name="reg_label_confirm_password">Confirm Password</string>
+    <string name="reg_already_have_account">Already have an account? </string>
+    <string name="reg_login_link">Log In</string>
 
     <string name="rec_title">Recover your password</string>
     <string name="rec_placeholder">Use your registration email</string>
@@ -79,6 +97,38 @@
     <string name="err_invalid_plate">License plate format is invalid (1234ABC)</string>
     <string name="err_user_exists">This username is already taken</string>
     <string name="err_registration_failed">Registration failed</string>
+    <string name="error_invalid_email_or_not_found">This email is not registered in our system.</string>
+
+    <string name="rec_success_title">Email Sent</string>
+    <string name="rec_success_body">If the email is registered, you will receive a link shortly. Please check your inbox and your spam folder.</string>
+    <string name="btn_understood">Understood</string>
+
+    <!-- TEXTO DE LAS NOTIFICACIONES -->
+    <string name="notification_channel_name">Parking Alerts</string>
+    <string name="notification_default_title">Parking Update</string>
+    <string name="notification_default_body">You have received a new update.</string>
+
+    <string name="notification_screen_title">Alerts Center Active</string>
+    <string name="notification_screen_body">You will receive real-time alerts on your device when your reservations are about to start, expire, or when you forgot about doing the check-in.</string>
+    <string name="notification_screen_icon_desc">Active alerts icon</string>
+
+    <string name="notification_channel_id">parking_alerts_channel</string>
+    <string name="notification_title_start">Your booking starts soon!</string>
+    <string name="notification_body_start">There are 30 minutes left until your booking begins in %1$s (%2$s).</string>
+
+    <string name="notification_title_end">Your time is running out!</string>
+    <string name="notification_body_end">There are 15 minutes left until your booking ends. Remember to remove your vehicle.</string>
+    <string name="notification_title_default">Parking Alert</string>
+
+    <string name="zone_default_standard">Standard Zone</string>
+
+    <string name="notification_title_checkin_reminder">Pending Check-In</string>
+    <string name="notification_body_checkin_reminder">You have a reservation active in %1$s. Please check in now or cancel your booking if you are not using it.</string>
+    <string name="notification_unrestricted_battery">To receive alerts with the app closed, tap here and enable "Unrestricted battery" and restart the app.</string>
+
+    <string name="notification_system_alerts">System Alerts</string>
+    <string name="notification_missed_title">Reservation Automatically Cancelled</string>
+    <string name="notification_missed_body">Your reservation for vehicle %1$s (%2$s) in Zone %3$s on %4$s (%5$s to %6$s) was cancelled due to missing the check-in time.</string>
 
     <!-- TEXTO DE LOS COMPONENTES EN INGLES -->
     <string name="footer_map">Map</string>
@@ -95,11 +145,40 @@
     <string name="label_time">TIME</string>
     <string name="label_vehicle">VEHICLE</string>
     <string name="label_available">AVAILABLE</string>
+    <string name="label_almost_full">ALMOST FULL</string>
+    <string name="label_free">free</string>
+    <string name="label_full">FULL</string>
     <string name="status_active">ACTIVE</string>
     <string name="btn_edit">Edit</string>
     <string name="btn_check_in">Check-in Now</string>
 
+    <!-- TEXTO DE LAS ZONAS DEL MAPA -->
+    <string name="zone_standard">Standard Zone</string>
+    <string name="zone_disability">Disability Zone</string>
+    <string name="zone_ev">EV Charging Zone</string>
+    <string name="zone_motorcycle">Motorcycle Zone</string>
 
+    <string name="vehicle_type_standard">Standard</string>
+    <string name="vehicle_type_motorcycle">Motorcycle</string>
+    <string name="vehicle_type_electric">Electric</string>
+    <string name="vehicle_type_adapted">Adapted</string>
 
+    <!--- TEXTO DE SETTINGS -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_language_section">Application Language</string>
+    <string name="settings_profile_section">Profile Details</string>
+    <string name="settings_password_section">Change Password</string>
+    <string name="settings_label_username">Username</string>
+    <string name="settings_label_old_password">Current Password</string>
+    <string name="settings_label_new_password">New Password</string>
+    <string name="settings_btn_save_profile">Save Profile</string>
+    <string name="settings_btn_change_password">Update Password</string>
+    <string name="error_password_too_short">Password must be at least 6 characters.</string>
+    <string name="error_wrong_old_password">The current password you entered is incorrect.</string>
+    <string name="success_profile_updated">Profile updated successfully!</string>
+    <string name="success_password_changed">Password updated successfully!</string>
 
+    <string name="reservation_cancel_title">Cancel Reservation</string>
+    <string name="reservation_cancel_msg">Are you sure you want to cancel this reservation?</string>
+    <string name="reservation_cancel_confirm">Yes, cancel</string>
 </resources>

@@ -20,7 +20,8 @@ class FirebaseUserRepository : UserRepository {
                 "name" to user.name,
                 "lastName" to user.lastName,
                 "username" to user.username,
-                "email" to user.email
+                "email" to user.email,
+                "avatarURL" to user.avatarURL
             )
 
             // Añadimos un log para verificar que llegamos aquí
@@ -59,11 +60,23 @@ class FirebaseUserRepository : UserRepository {
                     name = snapshot.getString("name") ?: "",
                     lastName = snapshot.getString("lastName") ?: "",
                     username = snapshot.getString("username") ?: "",
-                    email = snapshot.getString("email") ?: ""
+                    email = snapshot.getString("email") ?: "",
+                    avatarURL = snapshot.getString("avatarURL")
                 )
             } else null
         } catch (e: Exception) {
             null
+        }
+    }
+
+    override suspend fun updateAvatar(userId: String, url: String): Boolean {
+        return try {
+            val db = FirebaseFirestore.getInstance()
+            db.collection("users").document(userId).update("avatarURL", url).await()
+            true
+        } catch (e: Exception) {
+            println("DEBUG_FIRESTORE_PATCH_ERROR: ${e.message}")
+            false
         }
     }
 }

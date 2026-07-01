@@ -1,0 +1,174 @@
+<resources>
+    <string name="app_name">lksParking</string>
+
+    <string name="booking_header_label">ESTÁ A RESERVAR LUGAR EM</string>
+    <string name="booking_select_vehicle">Selecionar veículo</string>
+    <string name="booking_selected_start_time">Hora de início selecionada</string>
+    <string name="booking_manage">Gerir</string>
+    <string name="booking_error_active">Já tem uma reserva ativa.</string>
+    <string name="booking_error_past">Não é possível reservar no passado. Selecione uma hora futura.</string>
+    <string name="booking_btn_confirm">Confirmar reserva</string>
+    <string name="booking_btn_update">Atualizar reserva</string>
+    <string name="booking_no_vehicles">Nenhum veículo compatível encontrado para %1$s.</string>
+    <string name="booking_add_vehicle_hint">Por favor, adicione un veículo deste tipo em \'Gerir\' para continuar.</string>
+    <string name="booking_select_date">Selecionar data</string>
+    <string name="booking_time_duration">Hora e duração</string>
+    <string name="booking_start_time">HORA DE INÍCIO</string>
+    <string name="booking_duration_label">DURAÇÃO</string>
+    <string name="booking_ending_at">TERMINA ÀS %1$s</string>
+    <string name="booking_next_day_warning">(+1 dia)</string>
+    <string name="booking_hours_unit">horas</string>
+    <string name="booking_today">HOJE</string>
+    <string name="booking_change_vehicle_hint">Clique aqui para alterar o seu veículo!</string>
+    <string name="booking_select_vehicle_hint">Clique aqui para selecionar o seu veículo!</string>
+    <string name="booking_error_overlap">Próxima reserva às %1$s, pelo que só pode reservar no máximo %2$s horas</string>
+    <string name="booking_error_vehicle_required">Por favor, selecione um veículo para confirmar a reserva!</string>
+
+    <string name="register_title">As minhas reservas</string>
+    <string name="register_empty">Não existem reservas ativas</string>
+
+    <string name="reservation_missed">NÃO APRESENTADO</string>
+    <string name="reservation_past">PASSADA</string>
+    <string name="reservation_checked_in">CHECK-IN EFETUADO</string>
+    <string name="reservation_done">CONCLUÍDA</string>
+
+    <string name="notification_tab_active">Ativas (%1$d)</string>
+    <string name="notification_tab_past">Histórico (%1$d)</string>
+    <string name="notification_past_empty">Nenhum registo encontrado no histórico</string>
+
+    <string name="map_header_title">LKS Next Parking</string>
+    <string name="map_header_subtitle">Selecione uma zona para reservar instantaneamente</string>
+
+    <string name="profile_vehicles">Os meus veículos</string>
+    <string name="profile_add_vehicle_title">+ Adicionar novo veículo</string>
+    <string name="profile_label_nickname">ALCUNHA</string>
+    <string name="profile_hint_nickname">Alcunha</string>
+    <string name="profile_placeholder_nickname">ex. Carro do trabalho</string>
+    <string name="profile_label_plate">MATRÍCULA</string>
+    <string name="profile_hint_plate">Matrícula</string>
+    <string name="profile_placeholder_plate">1234 ABC</string>
+    <string name="profile_label_type">TIPO DE VEÍCULO</string>
+    <string name="profile_btn_save">Guardar veículo</string>
+    <string name="profile_delete_title">Confirmar eliminação</string>
+    <string name="profile_delete_msg">Tem a certeza de que deseja remover %1$s? Esta ação não pode ser desfeita.</string>
+    <string name="btn_cancel">Cancelar</string>
+    <string name="btn_delete">Eliminar</string>
+    <string name="error_empty_fields">Os campos não podem estar vazios.</string>
+    <string name="error_duplicate_plate">Já existe um veículo com esta matrícula.</string>
+    <string name="error_active_booking">Não é possível eliminar: este veículo tem uma reserva de estacionamento ativa.</string>
+    <string name="error_generic">Ocorreu um erro inesperado. Por favor, tente novamente.</string>
+
+    <string name="login_welcome">Bem-vindo de volta</string>
+    <string name="login_username">Nome de utilizador</string>
+    <string name="login_password">Palavra-passe</string>
+    <string name="login_remember">Lembrar-me</string>
+    <string name="login_forgot">Esqueceu-se da palavra-passe?</string>
+    <string name="login_btn">INICIAR SESSÃO</string>
+    <string name="login_no_account">Não tem uma conta?</string>
+    <string name="login_register_link">Registe-se aqui!</string>
+    <string name="login_email_label">E-mail</string>
+
+    <string name="reg_title">Registo</string>
+    <string name="reg_label_name">Nome</string>
+    <string name="reg_label_plate">Matrícula</string>
+    <string name="reg_vehicle_type">Tipo de veículo</string>
+    <string name="reg_vehicle_name">Nome do veículo</string>
+    <string name="reg_btn">REGISTAR</string>
+    <string name="reg_label_lastname">Apelido</string>
+    <string name="reg_label_email">E-mail</string>
+    <string name="reg_label_confirm_password">Confirmar palavra-passe</string>
+    <string name="reg_already_have_account">Já tem uma conta? </string>
+    <string name="reg_login_link">Iniciar sessão</string>
+
+    <string name="rec_title">Recuperar a sua palavra-passe</string>
+    <string name="rec_placeholder">Utilize o seu e-mail de registo</string>
+    <string name="rec_btn_continue">Continuar</string>
+
+    <string name="err_login_failed">E-mail ou palavra-passe inválidos</string>
+    <string name="err_invalid_email">Por favor, introduza um endereço de e-mail válido</string>
+    <string name="err_password_short">A palavra-passe deve ter pelo menos 6 caracteres</string>
+    <string name="err_password_mismatch">As palavras-passe não coincidem</string>
+    <string name="err_invalid_plate">O formato da matrícula é inválido (1234ABC)</string>
+    <string name="err_user_exists">Este nome de utilizador já está em uso</string>
+    <string name="err_registration_failed">Falha no registo</string>
+    <string name="error_invalid_email_or_not_found">Este e-mail não corresponde a nenhum usuário registrado.</string>
+
+    <string name="rec_success_title">E-mail Enviado</string>
+    <string name="rec_success_body">Se o e-mail estiver registrado, você receberá um link em breve. Por favor, verifique sua caixa de entrada e a pasta de spam.</string>
+    <string name="btn_understood">Entendido</string>
+
+    <string name="notification_channel_name">Alertas de estacionamento</string>
+    <string name="notification_default_title">Atualização de estacionamento</string>
+    <string name="notification_default_body">Recebeu uma nova atualização.</string>
+
+    <string name="notification_screen_title">Centro de alertas ativo</string>
+    <string name="notification_screen_body">Receberá alertas em tempo real no seu dispositivo quando as suas reservas estiverem prestes a começar, a expirar ou quando se tiver esquecido de efetuar o check-in.</string>
+    <string name="notification_screen_icon_desc">Ícone de alertas ativos</string>
+
+    <string name="notification_channel_id">parking_alerts_channel</string>
+    <string name="notification_title_start">A sua reserva começa em breve!</string>
+    <string name="notification_body_start">Faltam 15 minutos para o início da sua reserva em %1$s (%2$s).</string>
+
+    <string name="notification_title_end">O seu tempo está a esgotar-se!</string>
+    <string name="notification_body_end">Faltam 15 minutos para terminar a sua reserva. Lembre-se de retirar o seu veículo.</string>
+    <string name="notification_title_default">Alerta de estacionamento</string>
+
+    <string name="zone_default_standard">Zona Padrão</string>
+
+    <string name="notification_title_checkin_reminder">Check-In pendente</string>
+    <string name="notification_body_checkin_reminder">Tem uma reserva ativa em %1$s. Por favor, efetue o check-in agora ou cancele a reserva se não a for utilizar.</string>
+    <string name="notification_unrestricted_battery">Para receber alertas com a aplicação fechada, toque aqui, ative \"Bateria sem restrições\" e reinicie a aplicação.</string>
+
+    <string name="notification_system_alerts">Alertas do sistema</string>
+    <string name="notification_missed_title">Reserva cancelada automaticamente</string>
+    <string name="notification_missed_body">A sua reserva para o veículo %1$s (%2$s) na Zona %3$s em %4$s (das %5$s às %6$s) foi cancelada por não ter efetuado o check-in dentro do tempo limite.</string>
+
+    <string name="footer_map">Mapa</string>
+    <string name="footer_bookings">Reservas</string>
+    <string name="footer_alerts">Alertas</string>
+    <string name="footer_profile">Perfil</string>
+
+    <string name="timepick_confirm">Confirmar</string>
+    <string name="timepick_cancel">Cancelar</string>
+    <string name="timepick_selecttime">Selecionar hora</string>
+
+    <string name="label_location">Piso 1</string>
+    <string name="label_date">DATA</string>
+    <string name="label_time">HORA</string>
+    <string name="label_vehicle">VEÍCULO</string>
+    <string name="label_available">DISPONÍVEL</string>
+    <string name="label_almost_full">QUASE CHEIO</string>
+    <string name="label_free">livres</string>
+    <string name="label_full">CHEIO</string>
+    <string name="status_active">ATIVA</string>
+    <string name="btn_edit">Editar</string>
+    <string name="btn_check_in">Efetuar check-in agora</string>
+
+    <string name="zone_standard">Zona Padrão</string>
+    <string name="zone_disability">Zona para Mobilidade Reduzida</string>
+    <string name="zone_ev">Zona de Carregamento VE</string>
+    <string name="zone_motorcycle">Zona de Motos</string>
+
+    <string name="vehicle_type_standard">Padrão</string>
+    <string name="vehicle_type_motorcycle">Moto</string>
+    <string name="vehicle_type_electric">Elétrico</string>
+    <string name="vehicle_type_adapted">Adaptado</string>
+
+    <string name="settings_title">Definições</string>
+    <string name="settings_language_section">Idioma da aplicação</string>
+    <string name="settings_profile_section">Detalhes do perfil</string>
+    <string name="settings_password_section">Alterar senha</string>
+    <string name="settings_label_username">Nome de utilizador</string> <string name="settings_label_old_password">Senha atual</string>
+    <string name="settings_label_new_password">Nova senha</string>
+    <string name="settings_btn_save_profile">Salvar perfil</string>
+    <string name="settings_btn_change_password">Atualizar senha</string>
+    <string name="error_password_too_short">A senha deve ter pelo menos 6 caracteres.</string>
+    <string name="error_wrong_old_password">A senha atual introduzida está incorreta.</string>
+    <string name="success_profile_updated">Perfil atualizado com sucesso!</string>
+    <string name="success_password_changed">Senha atualizada com sucesso!</string>
+
+    <string name="reservation_cancel_title">Cancelar reserva</string>
+    <string name="reservation_cancel_msg">Tem certeza de que deseja cancelar esta reserva?</string>
+    <string name="reservation_cancel_confirm">Sim, cancelar</string>
+
+</resources>

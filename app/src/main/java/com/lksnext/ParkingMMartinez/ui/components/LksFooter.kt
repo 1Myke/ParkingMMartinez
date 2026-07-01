@@ -1,5 +1,6 @@
 package com.lksnext.ParkingMMartinez.ui.components
 
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -30,32 +31,37 @@ fun LksFooter(navController: NavController, modifier: Modifier = Modifier) {
         Triple(Screen.Profile.route, Icons.Default.Person, stringResource(R.string.footer_profile))
     )
 
-    NavigationBar(
-        containerColor = Color.White,
+    Surface(
+        modifier = modifier,
+        shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp),
         tonalElevation = 8.dp,
-        modifier = modifier
+        shadowElevation = 8.dp
     ) {
-        items.forEach { (route, icon, label) ->
-            val isSelected = isTabSelected(route, currentRoute)
+        NavigationBar(
+            containerColor = Color.White
+        ) {
+            items.forEach { (route, icon, label) ->
+                val isSelected = isTabSelected(route, currentRoute)
 
-            NavigationBarItem(
-                selected = isSelected,
-                onClick = {
-                    if (currentRoute != route) {
-                        handleNavigationClick(navController, route)
-                    }
-                },
-                label = { Text(label) },
-                icon = { Icon(icon, contentDescription = label) },
-                modifier = Modifier.testTag("${TestTags.FOOTER_TAB_PREFIX}$route"),
-                colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = LksOrange,
-                    selectedTextColor = LksOrange,
-                    indicatorColor = LksOrange.copy(alpha = 0.1f),
-                    unselectedIconColor = Color.Gray,
-                    unselectedTextColor = Color.Gray
+                NavigationBarItem(
+                    selected = isSelected,
+                    onClick = {
+                        if (currentRoute != route) {
+                            handleNavigationClick(navController, route)
+                        }
+                    },
+                    label = { Text(label) },
+                    icon = { Icon(icon, contentDescription = label) },
+                    modifier = Modifier.testTag("${TestTags.FOOTER_TAB_PREFIX}$route"),
+                    colors = NavigationBarItemDefaults.colors(
+                        selectedIconColor = LksOrange,
+                        selectedTextColor = LksOrange,
+                        indicatorColor = LksOrange.copy(alpha = 0.1f),
+                        unselectedIconColor = Color.Gray,
+                        unselectedTextColor = Color.Gray
+                    )
                 )
-            )
+            }
         }
     }
 }
@@ -89,7 +95,7 @@ private fun handleNavigationClick(navController: NavController, targetRoute: Str
 
 private fun navigateToNormalTab(navController: NavController, route: String) {
     navController.navigate(route) {
-        popUpTo(navController.graph.findStartDestination().id) {
+        popUpTo(Screen.Map.route) {
             saveState = true
         }
         launchSingleTop = true

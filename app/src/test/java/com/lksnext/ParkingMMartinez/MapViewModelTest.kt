@@ -2,6 +2,8 @@ package com.lksnext.ParkingMMartinez
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.lksnext.ParkingMMartinez.data.repository.BookingRepository
+import com.lksnext.ParkingMMartinez.data.repository.NotificationRepository
+import com.lksnext.ParkingMMartinez.data.SessionManager
 import com.lksnext.ParkingMMartinez.ui.viewmodel.MapViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -24,16 +26,21 @@ class MapViewModelTest {
     val instantTaskExecutorRule = InstantTaskExecutorRule()
 
     private lateinit var mockBookingRepo: BookingRepository
+    private lateinit var mockNotificationRepo: NotificationRepository
+    private lateinit var mockSessionManager: SessionManager
     private lateinit var viewModel: MapViewModel
 
     @Before
     fun setUp() {
         Dispatchers.setMain(UnconfinedTestDispatcher())
         mockBookingRepo = mock(BookingRepository::class.java)
+        mockNotificationRepo = mock(NotificationRepository::class.java)
+        mockSessionManager = mock(SessionManager::class.java)
+
         runBlocking {
             `when`(mockBookingRepo.getAllReservations()).thenReturn(emptyList())
         }
-        viewModel = MapViewModel(mockBookingRepo)
+        viewModel = MapViewModel(mockBookingRepo, mockNotificationRepo, mockSessionManager)
     }
 
     @After

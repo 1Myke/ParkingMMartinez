@@ -129,8 +129,15 @@ class BookingRegisterViewModelTest {
         val resId = "res_xyz"
         `when`(mockRepository.getUserReservations(userId)).thenReturn(emptyList())
 
-        // Act
-        viewModel.cancelReservation(mockContext, resId)
+        // Act 1: Simulamos que el usuario le da al botón de cancelar en la tarjeta
+        viewModel.askCancelReservation(resId)
+
+        // Comprobamos que el diálogo se abre y guarda el ID correctamente
+        assertTrue(viewModel.showCancelConfirmation)
+        assertEquals(resId, viewModel.reservationToCancel)
+
+        // Act 2: Simulamos que el usuario confirma en el diálogo
+        viewModel.confirmCancelReservation(mockContext)
         testDispatcher.scheduler.advanceUntilIdle()
 
         // Assert
@@ -138,6 +145,9 @@ class BookingRegisterViewModelTest {
         verify(mockRepository).getUserReservations(userId)
         assertTrue(viewModel.activeReservations.isEmpty())
         assertTrue(viewModel.pastReservations.isEmpty())
+
+        // Comprobamos que el diálogo se ha cerrado tras borrar
+        assertFalse(viewModel.showCancelConfirmation)
     }
 
     // ==========================================

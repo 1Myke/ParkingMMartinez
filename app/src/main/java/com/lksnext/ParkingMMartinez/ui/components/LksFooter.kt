@@ -20,7 +20,11 @@ import androidx.compose.ui.platform.testTag
 import com.lksnext.ParkingMMartinez.ui.constants.TestTags
 
 @Composable
-fun LksFooter(navController: NavController, modifier: Modifier = Modifier) {
+fun LksFooter(
+    navController: NavController,
+    unreadAlertsCount: Int = 0,
+    modifier: Modifier = Modifier
+) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
@@ -51,7 +55,24 @@ fun LksFooter(navController: NavController, modifier: Modifier = Modifier) {
                         }
                     },
                     label = { Text(label) },
-                    icon = { Icon(icon, contentDescription = label) },
+                    icon = {
+                        if (route == Screen.Alerts.route && unreadAlertsCount > 0) {
+                            BadgedBox(
+                                badge = {
+                                    Badge(
+                                        containerColor = LksOrange,
+                                        contentColor = Color.White
+                                    ) {
+                                        Text(unreadAlertsCount.toString())
+                                    }
+                                }
+                            ) {
+                                Icon(icon, contentDescription = label)
+                            }
+                        } else {
+                            Icon(icon, contentDescription = label)
+                        }
+                    },
                     modifier = Modifier.testTag("${TestTags.FOOTER_TAB_PREFIX}$route"),
                     colors = NavigationBarItemDefaults.colors(
                         selectedIconColor = LksOrange,

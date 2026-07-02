@@ -23,9 +23,14 @@ class NotificationViewModel(
     var isBatteryOptimized by mutableStateOf(false)
         private set
 
+    private var isInitialized = false
+
     fun initViewModel(context: Context) {
         checkBatteryStatus(context)
-        loadNotifications()
+        if (!isInitialized) {
+            loadNotifications()
+            isInitialized = true
+        }
     }
 
     private fun loadNotifications() {

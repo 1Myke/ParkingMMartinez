@@ -325,8 +325,9 @@ class BookingViewModel (
 
 
                 val isTotallyFinished = isReservationPastEntirely(booking, nowMillis)
+                val isNotSelf = booking.id != editingReservationId
 
-                isUserReservation && !isTotallyFinished
+                isUserReservation && !isTotallyFinished && isNotSelf
             }
         }
     }
@@ -436,7 +437,6 @@ class BookingViewModel (
         maxAllowedHours = 0
 
         if (!isDateTimeValid() || selectedVehicle == null) return false
-        if (editingReservationId != null) return true
 
         if (hasActiveReservation) {
             return false
@@ -453,11 +453,13 @@ class BookingViewModel (
             val calProposed = Calendar.getInstance().apply { time = selectedDate }
             val calBooking = Calendar.getInstance().apply { time = booking.date }
             val isConflictingUserPresent = !isReservationPastEntirely(booking, nowMillis) || booking.isCheckedIn
+            val isNotSelf = booking.id != editingReservationId
 
             calProposed.get(Calendar.YEAR) == calBooking.get(Calendar.YEAR) &&
                     calProposed.get(Calendar.DAY_OF_YEAR) == calBooking.get(Calendar.DAY_OF_YEAR) &&
                     booking.zone.name == parkingZone &&
-                    isConflictingUserPresent
+                    isConflictingUserPresent &&
+                    isNotSelf
         }
 
         var tempTime = proposedStart
@@ -649,7 +651,8 @@ class BookingViewModel (
                 hasActiveReservation = cachedBookings.any { booking ->
                     val isUserReservation = booking.vehicle.userId == currentUserId
                     val isTotallyFinished = isReservationPastEntirely(booking, nowMillis)
-                    isUserReservation && !isTotallyFinished
+                    val isNotSelf = booking.id != editingReservationId
+                    isUserReservation && !isTotallyFinished && isNotSelf
                 }
 
                 val allVehicles = vehicleRepository.getVehicles(currentUserId)

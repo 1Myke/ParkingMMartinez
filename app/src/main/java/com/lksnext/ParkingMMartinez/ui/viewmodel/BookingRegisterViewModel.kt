@@ -29,6 +29,42 @@ class BookingRegisterViewModel(
 
     var selectedTab by mutableStateOf(0)
 
+    var showCancelConfirmation by mutableStateOf(false)
+        private set
+
+    var reservationToCancel by mutableStateOf<String?>(null)
+        private set
+
+    fun askCancelReservation(reservationId: String) {
+        reservationToCancel = reservationId
+        showCancelConfirmation = true
+    }
+
+    fun dismissCancelDialog() {
+        showCancelConfirmation = false
+        reservationToCancel = null
+    }
+
+    fun confirmCancelReservation(context: Context, onCancelled: () -> Unit = {}) {
+        val reservationId = reservationToCancel ?: return
+        viewModelScope.launch {
+            repository.cancelReservation(reservationId)
+
+            val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+            val idAlertaInicio = reservationId.hashCode() + 1
+            val idAlertaFin = reservationId.hashCode() + 2
+            val idAlertaCheckIn = reservationId.hashCode() + 3
+
+            cancelarAlarmaExistente(context, alarmManager, idAlertaInicio)
+            cancelarAlarmaExistente(context, alarmManager, idAlertaFin)
+            cancelarAlarmaExistente(context, alarmManager, idAlertaCheckIn)
+
+            loadReservations()
+            onCancelled()
+            dismissCancelDialog()
+        }
+    }
+
     fun loadReservations() {
         val currentUserId = sessionManager.getActiveUserId() ?: return
 
@@ -59,7 +95,7 @@ class BookingRegisterViewModel(
         val now = System.currentTimeMillis()
         val startMillis = getReservationStartMillis(res)
         val windowStart = startMillis - 15 * 60 * 1000
-        val windowEnd = getReservationEndMillis(res) // Activo desde 15 min antes hasta que termine por completo
+        val windowEnd = getReservationEndMillis(res)
         return now in windowStart..windowEnd
     }
 
@@ -93,24 +129,6 @@ class BookingRegisterViewModel(
                 add(Calendar.DAY_OF_YEAR, 1)
             }
         }.timeInMillis
-    }
-
-    fun cancelReservation(context: Context, reservationId: String, onCancelled: () -> Unit = {}) {
-        viewModelScope.launch {
-            repository.cancelReservation(reservationId)
-
-            val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-            val idAlertaInicio  = reservationId.hashCode() + 1
-            val idAlertaFin     = reservationId.hashCode() + 2
-            val idAlertaCheckIn = reservationId.hashCode() + 3
-
-            cancelarAlarmaExistente(context, alarmManager, idAlertaInicio)
-            cancelarAlarmaExistente(context, alarmManager, idAlertaFin)
-            cancelarAlarmaExistente(context, alarmManager, idAlertaCheckIn)
-
-            loadReservations()
-            onCancelled()
-        }
     }
 
     private fun cancelarAlarmaExistente(context: Context, alarmManager: AlarmManager, idAlerta: Int) {

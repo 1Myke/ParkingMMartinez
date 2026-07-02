@@ -175,4 +175,8 @@
     <string name="success_profile_updated">Perfil atualizado com sucesso!</string>
     <string name="success_password_changed">Senha atualizada com sucesso!</string>
 
+    <string name="reservation_cancel_title">Cancelar reserva</string>
+    <string name="reservation_cancel_msg">Tem certeza de que deseja cancelar esta reserva?</string>
+    <string name="reservation_cancel_confirm">Sim, cancelar</string>
+
 </resources>

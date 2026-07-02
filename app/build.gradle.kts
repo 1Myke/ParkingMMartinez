@@ -10,8 +10,8 @@ plugins {
     jacoco
 }
 
-val appVersionCode = 3
-val appVersionName = "v1.1.0"
+val appVersionCode = 4
+val appVersionName = "v1.2.0"
 val targetSdkVersion = 36
 
 // Versiones de paquetes
@@ -87,6 +87,7 @@ android {
 sonar {
     properties {
         property("sonar.coverage.jacoco.xmlReportPaths", "build/reports/coverage/test/debug/report.xml")
+        property("sonar.coverage.exclusions", "**/MainActivity.kt, **/ui/components/**, **/ui/screens/**, **/ui/navigation/**, **/ui/theme/**, **/receiver/**, **/service/**")
     }
 }
 

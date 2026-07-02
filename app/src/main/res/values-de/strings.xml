@@ -184,4 +184,8 @@
     <string name="success_profile_updated">Profil erfolgreich aktualisiert!</string>
     <string name="success_password_changed">Passwort erfolgreich aktualisiert!</string>
 
+    <string name="reservation_cancel_title">Reservierung stornieren</string>
+    <string name="reservation_cancel_msg">Sind Sie sicher, dass Sie diese Reservierung stornieren möchten?</string>
+    <string name="reservation_cancel_confirm">Ja, stornieren</string>
+
 </resources>

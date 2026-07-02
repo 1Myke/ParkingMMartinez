@@ -176,4 +176,7 @@
     <string name="success_profile_updated">¡Perfil actualizado correctamente!</string>
     <string name="success_password_changed">¡Contraseña actualizada correctamente!</string>
 
+    <string name="reservation_cancel_title">Cancelar Reserva</string>
+    <string name="reservation_cancel_msg">¿Estás seguro de que quieres cancelar esta reserva?</string>
+    <string name="reservation_cancel_confirm">Sí, cancelar</string>
 </resources>

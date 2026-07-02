@@ -184,4 +184,8 @@
     <string name="success_profile_updated">Profil mis à jour avec succès !</string>
     <string name="success_password_changed">Mot de passe mis à jour avec succès !</string>
 
+    <string name="reservation_cancel_title">Annuler la réservation</string>
+    <string name="reservation_cancel_msg">Êtes-vous sûr de vouloir annuler cette réservation ?</string>
+    <string name="reservation_cancel_confirm">Oui, annuler</string>
+
 </resources>

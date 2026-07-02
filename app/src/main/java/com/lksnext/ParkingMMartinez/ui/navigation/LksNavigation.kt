@@ -122,6 +122,7 @@ fun LksNavigation() {
             session.getActiveUserId()?.let { userId ->
                 notificationRepository.linkDeviceWithUser(userId)
             }
+            notificationViewModel.initViewModel(context)
         }
     }
 
@@ -150,7 +151,8 @@ fun LksNavigation() {
         },
         bottomBar = {
             if (showFooter) {
-                LksFooter(navController = navController)
+                val unreadAlertsCount = notificationViewModel.notifications.count { !it.isRead }
+                LksFooter(navController = navController, unreadAlertsCount = unreadAlertsCount)
             }
         }
     ) { paddingValues ->
@@ -167,6 +169,7 @@ fun LksNavigation() {
                         session.getActiveUserId()?.let { userId ->
                             notificationRepository.linkDeviceWithUser(userId)
                         }
+                        notificationViewModel.initViewModel(context)
                         navController.navigate(Screen.Map.route) {
                             popUpTo(Screen.Login.route) { inclusive = true }
                         }
@@ -183,6 +186,7 @@ fun LksNavigation() {
                         session.getActiveUserId()?.let { userId ->
                             notificationRepository.linkDeviceWithUser(userId)
                         }
+                        notificationViewModel.initViewModel(context)
                         navController.navigate(Screen.Map.route) {
                             popUpTo(Screen.Register.route) { inclusive = true }
                         }

@@ -15,6 +15,7 @@ import com.lksnext.ParkingMMartinez.data.ParkingManager
 import com.lksnext.ParkingMMartinez.data.SessionManager
 import com.lksnext.ParkingMMartinez.data.receiver.BookingAlarmReceiver
 import com.lksnext.ParkingMMartinez.data.repository.BookingRepository
+import com.lksnext.ParkingMMartinez.data.repository.NotificationRepository
 import com.lksnext.ParkingMMartinez.data.repository.VehicleRepository
 import com.lksnext.ParkingMMartinez.model.ParkingZone
 import com.lksnext.ParkingMMartinez.model.Reservation
@@ -33,8 +34,19 @@ private const val TIME_FORMAT = "%02d:%02d"
 class BookingViewModel (
     private val repository: BookingRepository,
     private val vehicleRepository: VehicleRepository,
-    private val sessionManager: SessionManager
+    private val sessionManager: SessionManager,
+    private val notificationRepository: NotificationRepository
 ): ViewModel() {
+
+    private val halfCapacityNotifiedZones = mutableSetOf<String>()
+
+    private fun dateKey(date: Date): String =
+        SimpleDateFormat("yyyy-MM-dd", Locale.US).format(date)
+
+    private fun displayDate(date: Date): String =
+        SimpleDateFormat("EEEE, MMM d", Locale.getDefault()).format(date)
+
+    private fun guardKey(zoneName: String, date: Date) = "$zoneName|${dateKey(date)}"
     var startHour by mutableStateOf(8)
         private set
     var startMinute by mutableStateOf(0)
@@ -188,6 +200,8 @@ class BookingViewModel (
                 editingReservationId?.let { repository.cancelReservation(it) }
                 repository.saveReservation(newReservation)
 
+                checkAndBroadcastIfHalfCapacity(context, allBookings, newReservation)
+
                 programarAlertasDeReserva(context, newReservation)
 
                 editingReservationId = null
@@ -205,6 +219,98 @@ class BookingViewModel (
     
     fun resetLoadingState() {
         isLoading = false
+    }
+
+    private fun checkAndBroadcastIfHalfCapacity(
+        context: Context,
+        existingBookings: List<Reservation>,
+        newReservation: Reservation
+    ) {
+        val vehicleType = newReservation.vehicle.type
+        val zoneName    = newReservation.zone.name
+        val key         = guardKey(zoneName, newReservation.date)
+
+        if (key in halfCapacityNotifiedZones) return
+
+        val allIncludingNew = existingBookings + newReservation
+        ParkingManager.syncWithReservationsForTimeSlot(
+            allBookings  = allIncludingNew,
+            selectedDate = newReservation.date,
+            slotStart    = newReservation.startTime,
+            slotEnd      = newReservation.endTime
+        )
+
+        val totalSpots     = ParkingManager.getTotalSpotsCount(vehicleType)
+        val availableSpots = ParkingManager.getAvailableSpotsCount(vehicleType)
+        val occupiedCount  = totalSpots - availableSpots
+
+        android.util.Log.d(
+            "BOOKING_HALF_CAPACITY",
+            "Zona '$zoneName' (${displayDate(newReservation.date)}): $occupiedCount/$totalSpots ocupadas."
+        )
+
+        if (totalSpots > 0 && occupiedCount * 2 >= totalSpots) {
+            halfCapacityNotifiedZones.add(key)
+            val dateIso = SimpleDateFormat("yyyy-MM-dd", Locale.US).format(newReservation.date)
+            notificationRepository.sendBroadcastNotification(
+                context,
+                R.string.notification_half_capacity_title,
+                R.string.notification_half_capacity_body,
+                listOf(zoneName, dateIso)
+            )
+            android.util.Log.d(
+                "BOOKING_HALF_CAPACITY",
+                "Broadcast para '$zoneName' el ${displayDate(newReservation.date)} ($occupiedCount/$totalSpots)."
+            )
+        }
+    }
+
+
+    fun onReservationCancelled(context: Context, cancelledReservation: Reservation) {
+        viewModelScope.launch {
+            try {
+                val remainingBookings = repository.getAllReservations()
+                val vehicleType       = cancelledReservation.vehicle.type
+                val zoneName          = cancelledReservation.zone.name
+                val key               = guardKey(zoneName, cancelledReservation.date)
+                val iso               = dateKey(cancelledReservation.date)
+
+                ParkingManager.syncWithReservationsForTimeSlot(
+                    allBookings  = remainingBookings,
+                    selectedDate = cancelledReservation.date,
+                    slotStart    = cancelledReservation.startTime,
+                    slotEnd      = cancelledReservation.endTime
+                )
+
+                val totalSpots     = ParkingManager.getTotalSpotsCount(vehicleType)
+                val availableSpots = ParkingManager.getAvailableSpotsCount(vehicleType)
+                val occupiedCount  = totalSpots - availableSpots
+
+                // ── 1. Reset 50 % broadcast guard ───────────────────────────
+                if (key in halfCapacityNotifiedZones && totalSpots > 0 && occupiedCount * 2 < totalSpots) {
+                    halfCapacityNotifiedZones.remove(key)
+                    android.util.Log.d(
+                        "BOOKING_HALF_CAPACITY",
+                        "Guard reseteado para '$zoneName' el ${displayDate(cancelledReservation.date)} ($occupiedCount/$totalSpots)."
+                    )
+                }
+
+                // ── 2. Notify bell subscribers if zone now has availability ──
+                if (availableSpots > 0) {
+                    notificationRepository.notifyAndClearZoneSubscribers(
+                        context       = context,
+                        zoneName      = zoneName,
+                        dateKey       = iso,
+                        titleResId    = R.string.notification_zone_available_title,
+                        bodyResId     = R.string.notification_zone_available_body,
+                        bodyFormatArgs = listOf(zoneName, iso)
+                    )
+                }
+
+            } catch (e: Exception) {
+                android.util.Log.e("BOOKING_HALF_CAPACITY", "Error en onReservationCancelled", e)
+            }
+        }
     }
 
     fun checkUserReservationStatus() {
@@ -437,7 +543,8 @@ class BookingViewModel (
                     notificationId = idAlertaCheckIn,
                     titleResId = R.string.notification_title_checkin_reminder,
                     bodyResId = R.string.notification_body_checkin_reminder,
-                    args = arrayOf(reservation.zone.name)
+                    args = arrayOf(reservation.zone.name),
+                    reservationId = reservation.id
                 )
             }
         }
@@ -476,7 +583,8 @@ class BookingViewModel (
         notificationId: Int,
         titleResId: Int,
         bodyResId: Int,
-        args: Array<String> = emptyArray()
+        args: Array<String> = emptyArray(),
+        reservationId: String? = null
     ) {
         val appContext = context.applicationContext
 
@@ -485,6 +593,9 @@ class BookingViewModel (
             putExtra("NOTIFICATION_TITLE_RES", titleResId)
             putExtra("NOTIFICATION_BODY_RES", bodyResId)
             putExtra("NOTIFICATION_ARGS", args)
+            if (reservationId != null) {
+                putExtra("RESERVATION_ID", reservationId)
+            }
             addFlags(Intent.FLAG_RECEIVER_FOREGROUND)
         }
 
@@ -514,12 +625,10 @@ class BookingViewModel (
         val appContext = context.applicationContext
         val intentCancel = Intent(appContext, BookingAlarmReceiver::class.java)
         val piCancel = PendingIntent.getBroadcast(
-            appContext, idAlerta, intentCancel, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_NO_CREATE
+            appContext, idAlerta, intentCancel, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
-        if (piCancel != null) {
-            alarmManager.cancel(piCancel)
-            piCancel.cancel()
-        }
+        alarmManager.cancel(piCancel)
+        piCancel.cancel()
     }
 
     fun inicializarPantalla(initialZone: String, initialHour: Int, initialMinute: Int) {

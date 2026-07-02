@@ -119,6 +119,14 @@
     <string name="notification_body_checkin_reminder">Tienes una reserva activa en %1$s. Por favor, realiza el check-in ahora o cancela tu reserva si no la vas a utilizar.</string>
     <string name="notification_unrestricted_battery">Para recibir alertas con la aplicación cerrada, pulsa aquí, activa \"Batería sin restricciones\" y reinicia la aplicación.</string>
 
+    <!-- NOTIFICACIONES DE CAPACIDAD DE ZONA -->
+    <string name="notification_half_capacity_title">⚠️ Zona de aparcamiento al límite</string>
+    <string name="notification_half_capacity_body">La %1$s se está quedando sin plazas el %2$s. ¡Reserva la tuya ahora!</string>
+    <string name="notification_zone_available_title">🅿️ ¡Plaza disponible!</string>
+    <string name="notification_zone_available_body">Acaba de quedar libre una plaza en la %1$s el %2$s. ¡Reserva antes de que la cojan!</string>
+    <string name="map_bell_subscribe">Avisarme cuando haya plaza</string>
+    <string name="map_bell_unsubscribe">Cancelar aviso de disponibilidad</string>
+
     <string name="notification_system_alerts">Alertas del sistema</string>
     <string name="notification_missed_title">Reserva cancelada automáticamente</string>
     <string name="notification_missed_body">Tu reserva para el vehículo %1$s (%2$s) en la Zona %3$s el %4$s (%5$s a %6$s) ha sido cancelada por no haber realizado el check-in a tiempo.</string>

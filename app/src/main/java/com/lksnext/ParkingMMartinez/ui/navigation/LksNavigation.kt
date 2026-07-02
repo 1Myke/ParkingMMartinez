@@ -3,6 +3,7 @@ package com.lksnext.ParkingMMartinez.ui.navigation
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -68,7 +69,7 @@ fun LksNavigation() {
     val sharedBookingViewModel: BookingViewModel = viewModel(
         factory = viewModelFactory {
             addInitializer(BookingViewModel::class) {
-                BookingViewModel(bookingRepository, vehicleRepository, session)
+                BookingViewModel(bookingRepository, vehicleRepository, session, notificationRepository)
             }
         }
     )
@@ -84,7 +85,7 @@ fun LksNavigation() {
     val mapViewModel: MapViewModel = viewModel(
         factory = viewModelFactory {
             addInitializer(MapViewModel::class) {
-                MapViewModel(bookingRepository)
+                MapViewModel(bookingRepository, notificationRepository, session)
             }
         }
     )
@@ -115,6 +116,15 @@ fun LksNavigation() {
 
 
     val startDestination = if (session.isLoggedIn()) Screen.Map.route else Screen.Login.route
+
+    LaunchedEffect(Unit) {
+        if (session.isLoggedIn()) {
+            session.getActiveUserId()?.let { userId ->
+                notificationRepository.linkDeviceWithUser(userId)
+            }
+        }
+    }
+
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
@@ -154,6 +164,9 @@ fun LksNavigation() {
                     viewModel = loginViewModel,
                     onLoginSuccess = { shouldRemember ->
                         if (shouldRemember) session.saveSession(true)
+                        session.getActiveUserId()?.let { userId ->
+                            notificationRepository.linkDeviceWithUser(userId)
+                        }
                         navController.navigate(Screen.Map.route) {
                             popUpTo(Screen.Login.route) { inclusive = true }
                         }
@@ -167,6 +180,9 @@ fun LksNavigation() {
                 RegistrationScreen(
                     viewModel = registrationViewModel,
                     onRegisterSuccess = {
+                        session.getActiveUserId()?.let { userId ->
+                            notificationRepository.linkDeviceWithUser(userId)
+                        }
                         navController.navigate(Screen.Map.route) {
                             popUpTo(Screen.Register.route) { inclusive = true }
                         }

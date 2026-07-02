@@ -45,7 +45,7 @@ class BookingRegisterViewModel(
         reservationToCancel = null
     }
 
-    fun confirmCancelReservation(context: Context) {
+    fun confirmCancelReservation(context: Context, onCancelled: () -> Unit = {}) {
         val reservationId = reservationToCancel ?: return
         viewModelScope.launch {
             repository.cancelReservation(reservationId)
@@ -60,6 +60,7 @@ class BookingRegisterViewModel(
             cancelarAlarmaExistente(context, alarmManager, idAlertaCheckIn)
 
             loadReservations()
+            onCancelled()
             dismissCancelDialog()
         }
     }
@@ -94,7 +95,7 @@ class BookingRegisterViewModel(
         val now = System.currentTimeMillis()
         val startMillis = getReservationStartMillis(res)
         val windowStart = startMillis - 15 * 60 * 1000
-        val windowEnd = getReservationEndMillis(res) // Activo desde 15 min antes hasta que termine por completo
+        val windowEnd = getReservationEndMillis(res)
         return now in windowStart..windowEnd
     }
 
@@ -130,31 +131,13 @@ class BookingRegisterViewModel(
         }.timeInMillis
     }
 
-    fun cancelReservation(context: Context, reservationId: String) {
-        viewModelScope.launch {
-            repository.cancelReservation(reservationId)
-
-            val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-            val idAlertaInicio = reservationId.hashCode() + 1
-            val idAlertaFin = reservationId.hashCode() + 2
-            val idAlertaCheckIn = reservationId.hashCode() + 3
-
-            cancelarAlarmaExistente(context, alarmManager, idAlertaInicio)
-            cancelarAlarmaExistente(context, alarmManager, idAlertaFin)
-            cancelarAlarmaExistente(context, alarmManager, idAlertaCheckIn)
-
-            loadReservations()
-        }
-    }
-
     private fun cancelarAlarmaExistente(context: Context, alarmManager: AlarmManager, idAlerta: Int) {
-        val intentCancel = Intent(context, BookingAlarmReceiver::class.java)
+        val appContext = context.applicationContext
+        val intentCancel = Intent(appContext, BookingAlarmReceiver::class.java)
         val piCancel = PendingIntent.getBroadcast(
-            context, idAlerta, intentCancel, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_NO_CREATE
+            appContext, idAlerta, intentCancel, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
-        if (piCancel != null) {
-            alarmManager.cancel(piCancel)
-            piCancel.cancel()
-        }
+        alarmManager.cancel(piCancel)
+        piCancel.cancel()
     }
 }

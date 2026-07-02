@@ -51,6 +51,11 @@ class BookingRegisterViewModelTest {
 
         `when`(mockContext.getSystemService(Context.ALARM_SERVICE)).thenReturn(mockAlarmManager)
 
+        // Sin este mock, context.applicationContext devuelve null y PendingIntent.getBroadcast
+        // no es interceptado por el mock estático, causando NPE en piCancel.cancel() dentro
+        // de cancelarAlarmaExistente, lo que interrumpe la corrutina antes de llamar a loadReservations()
+        `when`(mockContext.applicationContext).thenReturn(mockContext)
+
         // Mockeamos estáticamente PendingIntent para evitar el error "Method getBroadcast not mocked"
         mockedPendingIntent = mockStatic(PendingIntent::class.java)
         val mockPendingIntent = mock(PendingIntent::class.java)
@@ -124,8 +129,15 @@ class BookingRegisterViewModelTest {
         val resId = "res_xyz"
         `when`(mockRepository.getUserReservations(userId)).thenReturn(emptyList())
 
-        // Act
-        viewModel.cancelReservation(mockContext, resId)
+        // Act 1: Simulamos que el usuario le da al botón de cancelar en la tarjeta
+        viewModel.askCancelReservation(resId)
+
+        // Comprobamos que el diálogo se abre y guarda el ID correctamente
+        assertTrue(viewModel.showCancelConfirmation)
+        assertEquals(resId, viewModel.reservationToCancel)
+
+        // Act 2: Simulamos que el usuario confirma en el diálogo
+        viewModel.confirmCancelReservation(mockContext)
         testDispatcher.scheduler.advanceUntilIdle()
 
         // Assert
@@ -133,6 +145,9 @@ class BookingRegisterViewModelTest {
         verify(mockRepository).getUserReservations(userId)
         assertTrue(viewModel.activeReservations.isEmpty())
         assertTrue(viewModel.pastReservations.isEmpty())
+
+        // Comprobamos que el diálogo se ha cerrado tras borrar
+        assertFalse(viewModel.showCancelConfirmation)
     }
 
     // ==========================================

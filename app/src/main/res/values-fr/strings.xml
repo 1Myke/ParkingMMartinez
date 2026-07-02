@@ -125,7 +125,15 @@
     <string name="notification_body_checkin_reminder">Vous avez une réservation active à %1$s. Veuillez vous enregistrer maintenant ou annuler votre réservation si vous ne l\'utilisez pas.</string>
     <string name="notification_unrestricted_battery">Pour recevoir des alertes lorsque l\'application est fermée, appuyez ici, activez \"Batterie non restreinte\" et redémarrez l\'application.</string>
 
-    <string name="notification_system_alerts">Alertes système</string>
+    <!-- NOTIFICATIONS DE CAPACITÉ DE ZONE -->
+    <string name="notification_half_capacity_title">⚠️ Zone de parking presque pleine</string>
+    <string name="notification_half_capacity_body">La %1$s manque de places le %2$s. Réservez la vôtre maintenant !</string>
+    <string name="notification_zone_available_title">🅿️ Place disponible !</string>
+    <string name="notification_zone_available_body">Une place vient de se libérer dans la %1$s le %2$s. Réservez vite avant qu\'elle ne soit prise !</string>
+    <string name="map_bell_subscribe">Me prévenir quand une place se libère</string>
+    <string name="map_bell_unsubscribe">Annuler l\'alerte de disponibilité</string>
+
+    <string name="notification_system_alerts">Alertes systme</string>
     <string name="notification_missed_title">Réservation annulée automatiquement</string>
     <string name="notification_missed_body">Votre réservation pour le véhicule %1$s (%2$s) dans la Zone %3$s le %4$s (de %5$s à %6$s) a été annulée car l\'heure limite d\'enregistrement a été dépassée.</string>
 

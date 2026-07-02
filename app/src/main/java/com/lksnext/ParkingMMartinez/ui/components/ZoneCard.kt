@@ -19,7 +19,7 @@ import com.lksnext.ParkingMMartinez.model.ParkingZone
 import com.lksnext.ParkingMMartinez.R
 import com.lksnext.ParkingMMartinez.model.ZoneNames
 import com.lksnext.ParkingMMartinez.ui.theme.LksGreen
-import com.lksnext.ParkingMMartinez.ui.theme.alertOrange
+import com.lksnext.ParkingMMartinez.ui.theme.LksOrange
 import com.lksnext.ParkingMMartinez.ui.theme.automaticOrange
 import com.lksnext.ParkingMMartinez.ui.theme.automaticRed
 import com.lksnext.ParkingMMartinez.ui.theme.verdePino
@@ -28,6 +28,8 @@ import com.lksnext.ParkingMMartinez.ui.theme.verdePino
 fun ZoneCard(
     zone: ParkingZone,
     modifier: Modifier = Modifier,
+    isSubscribed: Boolean = false,
+    onBellClick: () -> Unit = {},
     onClick: () -> Unit
 ) {
     val isZoneFull = zone.availableSpots <= 0
@@ -52,7 +54,12 @@ fun ZoneCard(
 
             ZoneInfoSection(zone = zone, isZoneFull = isZoneFull, isZoneHalfFull = isZoneHalfFull, modifier = Modifier.weight(1f))
 
-            ZoneBadgeSection(isZoneFull = isZoneFull, isZoneHalfFull = isZoneHalfFull)
+            ZoneBadgeSection(
+                isZoneFull   = isZoneFull,
+                isSubscribed = isSubscribed,
+                onBellClick  = onBellClick,
+                isZoneHalfFull = isZoneHalfFull
+            )
         }
     }
 }
@@ -104,9 +111,29 @@ private fun ZoneInfoSection(
 }
 
 @Composable
-private fun ZoneBadgeSection(isZoneFull: Boolean, isZoneHalfFull: Boolean) {
+private fun ZoneBadgeSection(
+    isZoneFull: Boolean,
+    isZoneHalfFull: Boolean, // Mantener de la rama A
+    isSubscribed: Boolean = false, // Mantener de la rama B
+    onBellClick: () -> Unit = {} // Mantener de la rama B
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        // Le pasamos ambos estados al badge para que pinte el color y texto correcto
+        ZoneStatusBadge(isZoneFull = isZoneFull, isZoneHalfFull = isZoneHalfFull)
+
+        if (isZoneFull) {
+            BellSubscribeButton(isSubscribed = isSubscribed, onClick = onBellClick)
+        }
+    }
+}
+
+@Composable
+private fun ZoneStatusBadge(isZoneFull: Boolean, isZoneHalfFull: Boolean) {
     Surface(
-        color = if (isZoneFull) Color(0xFFE53935) else if (isZoneHalfFull) Color(0xFFFF9800) else LksGreen,
+        color = if (isZoneFull) LksGreen else if (isZoneHalfFull) Color(0xFFFF9800) else LksGreen,
         shape = RoundedCornerShape(8.dp)
     ) {
         Text(
@@ -115,6 +142,23 @@ private fun ZoneBadgeSection(isZoneFull: Boolean, isZoneHalfFull: Boolean) {
             color = Color.White,
             style = MaterialTheme.typography.labelSmall,
             fontWeight = FontWeight.Bold
+        )
+    }
+}
+
+@Composable
+private fun BellSubscribeButton(isSubscribed: Boolean, onClick: () -> Unit) {
+    IconButton(
+        onClick = onClick,
+        modifier = Modifier.size(32.dp)
+    ) {
+        Icon(
+            imageVector = if (isSubscribed) Icons.Default.Notifications
+                          else Icons.Default.NotificationsNone,
+            contentDescription = if (isSubscribed) stringResource(R.string.map_bell_unsubscribe)
+                                 else stringResource(R.string.map_bell_subscribe),
+            tint = if (isSubscribed) LksOrange else Color.Gray,
+            modifier = Modifier.size(20.dp)
         )
     }
 }

@@ -89,7 +89,10 @@ fun SettingsScreen(
         // Seleccion de Idioma
         Text(text = stringResource(R.string.settings_language_section), fontWeight = FontWeight.SemiBold)
         Spacer(modifier = Modifier.height(8.dp))
-        LanguageSelectorSection(modifier = Modifier.fillMaxWidth())
+        LanguageSelectorSection(
+            modifier = Modifier.fillMaxWidth(),
+            onLanguageChanged = { viewModel.saveLanguagePreference(it) }
+        )
 
         Spacer(modifier = Modifier.height(24.dp))
         HorizontalDivider(color = Color.LightGray)

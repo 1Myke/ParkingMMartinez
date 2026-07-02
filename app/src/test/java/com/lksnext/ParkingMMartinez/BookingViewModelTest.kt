@@ -5,6 +5,7 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.compose.ui.graphics.Color
 import com.lksnext.ParkingMMartinez.data.SessionManager
 import com.lksnext.ParkingMMartinez.data.repository.BookingRepository
+import com.lksnext.ParkingMMartinez.data.repository.NotificationRepository
 import com.lksnext.ParkingMMartinez.data.repository.VehicleRepository
 import com.lksnext.ParkingMMartinez.model.ParkingZone
 import com.lksnext.ParkingMMartinez.model.Reservation
@@ -38,6 +39,7 @@ class BookingViewModelTest {
     private lateinit var mockVehicleRepository: VehicleRepository
     private lateinit var mockSessionManager: SessionManager
     private lateinit var mockContext: Context
+    private lateinit var mockNotificationRepository: NotificationRepository
     private lateinit var viewModel: BookingViewModel
 
     private val testDispatcher = StandardTestDispatcher()
@@ -64,10 +66,15 @@ class BookingViewModelTest {
         mockVehicleRepository = mock(VehicleRepository::class.java)
         mockSessionManager = mock(SessionManager::class.java)
         mockContext = mock(Context::class.java)
+        mockNotificationRepository = mock(NotificationRepository::class.java)
 
         // Mock del servicio de alarmas nativo
         val mockAlarmManager = mock(android.app.AlarmManager::class.java)
         `when`(mockContext.getSystemService(Context.ALARM_SERVICE)).thenReturn(mockAlarmManager)
+
+        // Sin este mock, context.applicationContext devuelve null y PendingIntent.getBroadcast
+        // no es interceptado por el mock estático (any() no captura null), causando NPE en piCancel.cancel()
+        `when`(mockContext.applicationContext).thenReturn(mockContext)
 
         // Interceptamos la creación de cualquier 'new Intent(...)' para que putExtra no rompa el entorno de la JVM
         mockedIntent = mockConstruction(android.content.Intent::class.java) { mock, _ ->
@@ -96,7 +103,7 @@ class BookingViewModelTest {
         // Evitamos que las corrutinas del repositorio queden en un limbo asíncrono
         `when`(mockRepository.getAllReservations()).thenReturn(emptyList())
 
-        viewModel = BookingViewModel(mockRepository, mockVehicleRepository, mockSessionManager)
+        viewModel = BookingViewModel(mockRepository, mockVehicleRepository, mockSessionManager, mockNotificationRepository)
     }
 
     @After
@@ -210,9 +217,12 @@ class BookingViewModelTest {
             spotNumber = 5,
             vehicle = matchingVehicle,
             zone = fakeZone,
-            date = Date(),
-            startTime = LocalTime.now(),
-            endTime = LocalTime.now().plusHours(2),
+            // Fecha futura y horas fijas: la reserva está garantizada como "no terminada"
+            // independientemente de la hora a la que se ejecute el test (evita flakiness
+            // por cruce de medianoche en CI/UTC).
+            date = GregorianCalendar(2099, Calendar.JANUARY, 1).time,
+            startTime = LocalTime.of(10, 0),
+            endTime = LocalTime.of(12, 0),
             isCheckedIn = false
         )
 

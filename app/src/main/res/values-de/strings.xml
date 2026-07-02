@@ -125,6 +125,14 @@
     <string name="notification_body_checkin_reminder">Sie haben eine aktive Reservierung in %1$s. Bitte checken Sie jetzt ein oder stornieren Sie Ihre Buchung, falls Sie sie nicht nutzen.</string>
     <string name="notification_unrestricted_battery">Um Benachrichtigungen bei geschlossener App zu erhalten, tippen Sie hier, aktivieren Sie \"Nicht eingeschränkte Akku-Nutzung\" und starten Sie die App neu.</string>
 
+    <!-- BENACHRICHTIGUNGEN ZUR ZONENKAPAZITÄT -->
+    <string name="notification_half_capacity_title">⚠️ Parkzone fast voll</string>
+    <string name="notification_half_capacity_body">Die %1$s hat für den %2$s fast keine Plätze mehr. Reservieren Sie jetzt Ihren!</string>
+    <string name="notification_zone_available_title">🅿️ Parkplatz frei!</string>
+    <string name="notification_zone_available_body">In der %1$s ist am %2$s soeben ein Platz frei geworden. Reservieren Sie jetzt, bevor er weg ist!</string>
+    <string name="map_bell_subscribe">Benachrichtigen wenn Platz frei</string>
+    <string name="map_bell_unsubscribe">Verfügbarkeitsbenachrichtigung abbrechen</string>
+
     <string name="notification_system_alerts">Systembenachrichtigungen</string>
     <string name="notification_missed_title">Reservierung automatisch storniert</string>
     <string name="notification_missed_body">Ihre Reservierung für das Fahrzeug %1$s (%2$s) in Zone %3$s am %4$s (%5$s bis %6$s) wurde storniert, da die Check-in-Zeit überschritten wurde.</string>

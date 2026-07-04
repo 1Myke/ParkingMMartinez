@@ -1,4 +1,4 @@
-<resources>
+﻿<resources>
     <string name="app_name">lksParking</string>
 
     <!-- TEXTO BOOKING_SCREEN EN FRANÇAIS -->
@@ -188,4 +188,33 @@
     <string name="reservation_cancel_msg">Êtes-vous sûr de vouloir annuler cette réservation ?</string>
     <string name="reservation_cancel_confirm">Oui, annuler</string>
 
+    <string name="bot_vocab">réserver,réservation,zone,électrique,moto,handicapé,heure,maximum,futur,jours,modifier,changer,prolonger,checkin,check,actif,temps,annuler,invalider,véhicule,voiture,ajouter,insérer,plaque,immatriculation,nom,paramètres,profil,compte,mot_de_passe,photo,image,cercle,oublié,récupérer,notification,avis,alerte,50%,moitié,plein,cloche,prévenir,batterie,pas,arriver,autorisations,arrière,plan</string>
+    <string name="bot_fallback">Désolé, je suis l\'assistant du parking. Vous pouvez me poser des questions sur les réservations, votre profil, les véhicules, les annulations ou les problèmes de notifications. Si vous utilisez l\'application dans une autre langue, essayez de changer la langue !</string>
+    <string name="system_temporarily_inactive">Le système est temporairement inactif. Veuillez réessayer plus tard.</string>
+
+    <string name="res_clase_0">Il s\'agit d\'un parking d\'entreprise, toutes les réservations sont donc totalement gratuites. Vous pouvez réserver d\'aujourd\'hui jusqu\'à 7 jours à l\'avance pour des durées comprises entre 1h et 8h maximum. Nous disposons de 4 zones : Recharge Électrique, Personnes à Mobilité Réduite (PMR), Normales et Motos. N\'oubliez pas que vous ne pouvez avoir qu\'une seule réservation active à la fois et que vous pouvez l\'annuler à tout moment depuis l\'application si vous changez d\'avis.</string>
+    <string name="res_clase_1">Oui, vous pouvez modifier vos réservations ! Si vous avez besoin de prolonger la durée de votre réservation actuelle, il est OBLIGATOIRE d\'avoir préalablement effectué votre check-in à votre arrivée. Si vous êtes dans le créneau horaire de votre réservation mais que vous n\'avez pas encore validé votre check-in, le système ne vous permettra pas de prolonger le temps. N\'oubliez pas d\'enregistrer votre arrivée !</string>
+    <string name="res_clase_2">Bien sûr. Si vous changez d\'avis ou si vos projets évoluent, vous pouvez annuler votre réservation actuelle directement depuis l\'application, sans aucun frais. En l\'annulant, vous libérerez la place pour vos collègues et votre compte sera immédiatement disponible pour planifier une nouvelle réservation dès que vous en aurez besoin.</string>
+    <string name="res_clase_3">Il n\'y a pas de limite de flotte sur votre compte ! Vous pouvez ajouter, enregistrer et gérer autant de véhicules que nécessaire au sein de l\'application. Lors de la réservation, assurez-vous simplement de sélectionner lequel de vos véhicules enregistrés vous utiliserez ce jour-là.</string>
+    <string name="res_clase_4">Pour mettre à jour vos données de profil, vous disposez de deux options : Vous pouvez modifier votre nom d\'utilisateur ou votre mot de passe en toute sécurité depuis la section \'Paramètres\'. Si vous souhaitez changer votre photo de profil, rendez-vous sur votre \'Profil\' et appuyez directement sur le cercle de l\'image pour en télécharger une nouvelle.</string>
+    <string name="res_clase_5">Si vous avez oublié votre mot de passe pour vous connecter, ne vous inquiétez pas. Rendez-vous sur l\'écran d\'accueil de l\'application et appuyez sur le bouton \"Mot de passe oublié\". Suivez les instructions à l\'écran pour le réinitialiser en toute sécurité et vous connecter à nouveau.</string>
+    <string name="res_clase_6">L\'application propose deux alertes d\'occupation : Nous vous enverrons une notification automatique lorsque le parking atteindra 50% de sa capacité. Si le parking est déjà complet, vous verrez l\'icône d\'une cloche ; si vous l\'activez, nous vous enverrons une alerte immédiate si un autre utilisateur annule sa réservation afin que vous puissiez profiter de la place libérée.</string>
+    <string name="res_clase_7">L\'application envoie 5 types de notifications importantes : alerte de parking à 50%, alertes de la cloche (annulations), rappel avant le début, rappel pour faire le check-in et alerte de fin de réservation. Si vous ne les recevez pas, rendez-vous dans le menu \'Notifications\' de l\'application où vous trouverez les instructions pour désactiver l\'optimisation de la batterie de votre mobile, car votre système d\'exploitation pourrait les bloquer en arrière-plan.</string>
+
+    <string name="chat_empty_title">Comment puis-je vous aider ?</string>
+    <string name="chat_empty_body">Posez-moi des questions sur les zones de stationnement, les horaires ou vos réservations de parking LKS.</string>
+    <string name="chat_loading">Réflexion...</string>
+    <string name="chat_input_label">Votre requête</string>
+    <string name="chat_input_placeholder">Tapez votre question sur le parking...</string>
+    <string name="chat_input_send">Envoyer</string>
+    <string name="chat_sender_you">Vous</string>
+    <string name="chat_sender_bot">Assistant LKS</string>
+    <string name="chat_sug_1">Comment puis-je réserver?</string>
+    <string name="chat_sug_2">Puis-je modifier une réservation?</string>
+    <string name="chat_sug_3">Puis-je annuler une réservation?</string>
+    <string name="chat_sug_4">Puis-je ajouter un autre véhicule?</string>
+    <string name="chat_sug_5">Puis-je modifier mon compte dans le profil?</string>
+    <string name="chat_sug_6">Puis-je changer mon mot de passe?</string>
+    <string name="chat_sug_7">L\'application a-t-elle des alertes?</string>
+    <string name="chat_sug_8">Pourquoi je ne reçois pas d\'alertes?</string>
 </resources>

@@ -31,10 +31,13 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.google.firebase.Firebase
 import com.lksnext.ParkingMMartinez.data.repository.FirebaseNotificationRepository
+import com.lksnext.ParkingMMartinez.data.repository.NeuralNetworkChatRepository
 import com.lksnext.ParkingMMartinez.ui.screens.NotificationScreen
 import com.lksnext.ParkingMMartinez.ui.viewmodel.NotificationViewModel
 import com.lksnext.ParkingMMartinez.ui.viewmodel.SettingsViewModel
 import com.lksnext.ParkingMMartinez.ui.components.LksAppHeader
+import com.lksnext.ParkingMMartinez.ui.viewmodel.ChatViewModel
+import com.lksnext.ParkingMMartinez.ui.screens.ChatScreen
 
 @Composable
 fun LksNavigation() {
@@ -44,6 +47,7 @@ fun LksNavigation() {
     val userRepository = FirebaseUserRepository()
     val vehicleRepository = FirebaseVehicleRepository()
     val notificationRepository = FirebaseNotificationRepository()
+    val chatRepository = NeuralNetworkChatRepository(context)
     val session = SessionManager(context)
 
     val navController = rememberNavController()
@@ -114,6 +118,13 @@ fun LksNavigation() {
         }
     )
 
+    val chatViewModel: ChatViewModel = viewModel(
+        factory = viewModelFactory {
+            addInitializer(ChatViewModel::class) {
+                ChatViewModel(chatRepository)
+            }
+        }
+    )
 
     val startDestination = if (session.isLoggedIn()) Screen.Map.route else Screen.Login.route
 
@@ -134,14 +145,16 @@ fun LksNavigation() {
             currentRoute != Screen.Register.route &&
             currentRoute != Screen.Recovery.route &&
             currentRoute != Screen.Settings.route &&
-            currentRoute != Screen.Booking.route
+            currentRoute != Screen.Booking.route &&
+            currentRoute != Screen.Chat.route
 
     val showHeader = currentRoute != null &&
             currentRoute != Screen.Login.route &&
             currentRoute != Screen.Register.route &&
             currentRoute != Screen.Recovery.route &&
             currentRoute != Screen.Map.route &&
-            currentRoute != Screen.Booking.route
+            currentRoute != Screen.Booking.route &&
+            currentRoute != Screen.Chat.route
 
     Scaffold(
         topBar = {
@@ -219,6 +232,9 @@ fun LksNavigation() {
                                 minute = mapViewModel.selectedStartTime.minute
                             )
                         )
+                    },
+                    onNavigateToChat = {
+                        navController.navigate(Screen.Chat.route)
                     }
                 )
             }
@@ -298,6 +314,11 @@ fun LksNavigation() {
                     viewModel = settingsViewModel,
                     onNavigateBack = { navController.popBackStack() }
                 )
+            }
+
+            // --- CHAT ---
+            composable(Screen.Chat.route) {
+                ChatScreen(viewModel = chatViewModel)
             }
         }
     }

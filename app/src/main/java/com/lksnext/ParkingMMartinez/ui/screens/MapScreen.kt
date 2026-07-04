@@ -8,7 +8,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.filled.AccessTime
+import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
@@ -27,7 +29,6 @@ import com.lksnext.ParkingMMartinez.ui.components.LksTimePicker
 import com.lksnext.ParkingMMartinez.ui.components.ZoneCard
 import com.lksnext.ParkingMMartinez.ui.theme.bookingCardColor
 import com.lksnext.ParkingMMartinez.ui.theme.lightGray
-import com.lksnext.ParkingMMartinez.ui.theme.mistGray
 import com.lksnext.ParkingMMartinez.ui.viewmodel.MapViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import com.lksnext.ParkingMMartinez.ui.viewmodel.BookingViewModel
@@ -40,7 +41,8 @@ import java.util.Calendar
 fun MapScreen(
     viewModel: MapViewModel = viewModel(),
     bookingViewModel: BookingViewModel,
-    onZoneClick: (String) -> Unit
+    onZoneClick: (String) -> Unit,
+    onNavigateToChat: () -> Unit
 ) {
     val context  = LocalContext.current
     val scope    = rememberCoroutineScope()
@@ -49,7 +51,7 @@ fun MapScreen(
         bookingViewModel.cancelEditing()
         bookingViewModel.checkUserReservationStatus()
 
-        //Metodo manual, ya que no disponemos de los servicios cloud de firebase
+        // Metodo manual, ya que no disponemos de los servicios cloud de firebase
         val job = scope.launch {
             while (true) {
                 viewModel.refreshParking()
@@ -75,34 +77,52 @@ fun MapScreen(
         )
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-    ) {
-        LksHeader(
-            title = stringResource(R.string.map_header_title),
-            subtitle = stringResource(R.string.map_header_subtitle),
-            modifier = Modifier.testTag(TestTags.MAP_HEADER)
-        )
-
+    Scaffold(
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = onNavigateToChat,
+                containerColor = Color(0xFFF36F21), // Naranja corporativo LKS
+                contentColor = Color.White,
+                modifier = Modifier.padding(bottom = 16.dp) // Margen extra sobre el footer
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Default.Chat,
+                    contentDescription = "Chat de Ayuda FAQ"
+                )
+            }
+        },
+        containerColor = MaterialTheme.colorScheme.background,
+        modifier = Modifier.fillMaxSize()
+    ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 16.dp)
-                .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .padding(paddingValues)
         ) {
-            Spacer(Modifier.height(4.dp))
+            LksHeader(
+                title = stringResource(R.string.map_header_title),
+                subtitle = stringResource(R.string.map_header_subtitle),
+                modifier = Modifier.testTag(TestTags.MAP_HEADER)
+            )
 
-            // --- SELECTOR DE FECHAS HORIZONTAL ---
-            DateSelectorSection(viewModel)
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 16.dp)
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Spacer(Modifier.height(4.dp))
 
-            // --- SELECTOR DE HORA DE INICIO ---
-            TimeSelectorSection(viewModel)
+                // --- SELECTOR DE FECHAS HORIZONTAL ---
+                DateSelectorSection(viewModel)
 
-            // --- ZONAS DE APARCAMIENTO ---
-            ParkingZonesSection(viewModel, bookingViewModel, context, onZoneClick)
+                // --- SELECTOR DE HORA DE INICIO ---
+                TimeSelectorSection(viewModel)
+
+                // --- ZONAS DE APARCAMIENTO ---
+                ParkingZonesSection(viewModel, bookingViewModel, context, onZoneClick)
+            }
         }
     }
 }
@@ -120,7 +140,6 @@ private fun DateSelectorSection(viewModel: MapViewModel) {
         viewModel.availableDates.forEach { (fullDate, label) ->
             val displayLabel = if (label == "TODAY") todayStr else {
                 val sdf = java.text.SimpleDateFormat("EEE", java.util.Locale.getDefault())
-
                 sdf.format(fullDate).replaceFirstChar { it.uppercase() }
             }
 

@@ -25,6 +25,7 @@ val appcompatVersion = "1.7.0"
 val coilVersion = "2.6.0"
 val mockitoKotlinVersion = "5.2.1"
 val oneSignalVersion = "5.1.23"
+val tensorflowVersion = "1.4.0"
 
 android {
     namespace = "com.lksnext.ParkingMMartinez"
@@ -38,6 +39,10 @@ android {
         unitTests {
             isReturnDefaultValues = true
         }
+    }
+
+    androidResources {
+        noCompress.add("tflite")
     }
 
     defaultConfig {
@@ -121,6 +126,8 @@ dependencies {
     implementation("com.google.firebase:firebase-messaging")
     implementation("io.coil-kt:coil-compose:$coilVersion")
     implementation("com.onesignal:OneSignal:$oneSignalVersion")
+    implementation("com.google.ai.edge.litert:litert:${tensorflowVersion}")
+    implementation("com.google.ai.edge.litert:litert-api:${tensorflowVersion}")
     testImplementation("org.mockito:mockito-core:$mockitoVersion")
     testImplementation("org.mockito.kotlin:mockito-kotlin:$mockitoKotlinVersion")
     testImplementation("androidx.arch.core:core-testing:$archVersion")

@@ -1,11 +1,11 @@
-<resources>
+﻿<resources>
     <string name="app_name">lksParking</string>
 
     <string name="booking_header_label">STAI PRENOTANDO UN POSTO IN</string>
     <string name="booking_select_vehicle">Seleziona veicolo</string>
     <string name="booking_selected_start_time">Orario di inizio selezionato</string>
     <string name="booking_manage">Gestisci</string>
-    <string name="booking_error_active">Hai già una prenotazione attiva.</string>
+    <string name="booking_error_active">Hai giÃ  una prenotazione attiva.</string>
     <string name="booking_error_past">Impossibile prenotare nel passato. Seleziona un orario futuro.</string>
     <string name="booking_btn_confirm">Conferma prenotazione</string>
     <string name="booking_btn_update">Aggiorna prenotazione</string>
@@ -50,13 +50,13 @@
     <string name="profile_label_type">TIPO DI VEICOLO</string>
     <string name="profile_btn_save">Salva veicolo</string>
     <string name="profile_delete_title">Conferma eliminazione</string>
-    <string name="profile_delete_msg">Sei sicuro di voler rimuovere %1$s? Questa azione non può essere annullata.</string>
+    <string name="profile_delete_msg">Sei sicuro di voler rimuovere %1$s? Questa azione non puÃ² essere annullata.</string>
     <string name="btn_cancel">Annulla</string>
     <string name="btn_delete">Elimina</string>
     <string name="error_empty_fields">I campi non possono essere vuoti.</string>
-    <string name="error_duplicate_plate">Esiste già un veicolo con questa targa.</string>
+    <string name="error_duplicate_plate">Esiste giÃ  un veicolo con questa targa.</string>
     <string name="error_active_booking">Impossibile eliminare: questo veicolo ha una prenotazione di parcheggio attiva.</string>
-    <string name="error_generic">Si è verificato un errore imprevisto. Per favore, riprova.</string>
+    <string name="error_generic">Si Ã¨ verificato un errore imprevisto. Per favore, riprova.</string>
 
     <string name="login_welcome">Bentornato</string>
     <string name="login_username">Nome utente</string>
@@ -77,7 +77,7 @@
     <string name="reg_label_lastname">Cognome</string>
     <string name="reg_label_email">Email</string>
     <string name="reg_label_confirm_password">Conferma password</string>
-    <string name="reg_already_have_account">Hai già un account? </string>
+    <string name="reg_already_have_account">Hai giÃ  un account? </string>
     <string name="reg_login_link">Accedi</string>
 
     <string name="rec_title">Recupera la tua password</string>
@@ -88,8 +88,8 @@
     <string name="err_invalid_email">Inserisci un indirizzo email valido</string>
     <string name="err_password_short">La password deve contenere almeno 6 caratteri</string>
     <string name="err_password_mismatch">Le password non corrispondono</string>
-    <string name="err_invalid_plate">Il formato della targa non è valido (1234ABC)</string>
-    <string name="err_user_exists">Questo nome utente è già utilizzato</string>
+    <string name="err_invalid_plate">Il formato della targa non Ã¨ valido (1234ABC)</string>
+    <string name="err_user_exists">Questo nome utente Ã¨ giÃ  utilizzato</string>
     <string name="err_registration_failed">Registrazione fallita</string>
     <string name="error_invalid_email_or_not_found">Questa email non corrisponde a nessun utente registrato.</string>
 
@@ -180,4 +180,35 @@
     <string name="reservation_cancel_msg">Sei sicuro di voler annulle questa prenotazione?</string>
     <string name="reservation_cancel_confirm">Sì, annulla</string>
 
+    <string name="bot_vocab">prenotare,prenotazione,zona,elettrica,moto,disabili,ora,massimo,futuro,giorni,modificare,cambiare,prolungare,checkin,check,attivo,tempo,cancellare,annullare,veicolo,auto,aggiungere,inserire,targa,matrice,nome,impostazioni,profilo,account,password,foto,immagine,cerchio,dimenticato,recuperare,notifica,avviso,alerta,50%,metà,pieno,campanella,notificare,batteria,non,arrivano,permessi,background,sfondo</string>
+    <string name="bot_fallback">Scusa, sono l\'assistente del parcheggio. Puoi chiedermi informazioni su prenotazioni, profilo, veicoli, cancellazioni o problemi con le notifiche. Se usi l\'app in un\'altra lingua, prova a cambiare la lingua!</string>
+    <string name="system_temporarily_inactive">Il sistema è temporaneamente inattivo. Riprova più tardi.</string>
+
+    <string name="res_clase_0">Questo è un parcheggio aziendale, quindi tutte le prenotazioni sono totalmente gratuite. Puoi prenotare da oggi fino a 7 giorni in anticipo per soste da 1 a 8 ore al massimo. Disponiamo di 4 zone: Ricarica Elettrica, Disabili, Normali e Moto. Ricorda che puoi avere solo una prenotazione attiva alla volta e che puoi cancellarla in qualsiasi momento dall\'app se cambi idea.</string>
+    <string name="res_clase_1">Sì, puoi modificare le tue prenotazioni! Se hai bisogno di prolungare la durata della tua prenotazione attuale, è OBBLIGATORIO aver effettuato preventivamente il check-in al tuo arrivo. Se ti trovi all\'interno dell\'orario della tua prenotazione ma non hai ancora effettuato il check-in, il sistema non ti permetterà di estendere il tempo. Non dimenticare di registrare il tuo ingresso!</string>
+    <string name="res_clase_2">Certamente. Se cambi idea o i tuoi piani variano, puoi cancellare la tua prenotazione attuale direttamente dall\'applicazione senza alcun costo. Cancellandola, libererai il posto per i tuoi colleghi e il tuo account tornerà immediatamente disponibile per pianificare una nuova prenotazione quando ne avrai bisogno.</string>
+    <string name="res_clase_3">Non c\'è alcun limite di flotta sul tuo account! Puoi aggiungere, registrare e gestire tutti i veicoli di cui hai bisogno all\'interno dell\'applicazione. Quando effettui una prenotazione, assicurati semplicemente di selezionare quale dei tuoi veicoli registrati utilizzerai quel giorno.</string>
+    <string name="res_clase_4">Per aggiornare i dati del tuo profilo hai due opzioni: Puoi modificare il tuo nome utente o la tua password in modo sicuro dalla sezione \'Impostazioni\'. Se invece desideri cambiare la tua foto di profilo, vai su \'Profilo\' e premi direttamente sul cerchio dell\'immagine per caricarne una nuova.</string>
+    <string name="res_clase_5">Se non ricordi la tua password per accedere, non preoccuparti. Vai alla schermata di acesso principale dell\'app e premi sul pulsante \"Recupera password\". Segui le istruzioni sullo schermo per reimpostarla in modo sicuro e accedere nuovamente al tuo account.</string>
+    <string name="res_clase_6">L\'app dispone di due avvisi di occupazione: Ti invieremo una notifica automatica quando il parcheggio raggiungerà il 50% della sua capacità. Nel caso in cui il parcheggio sia già completo, verrai l\'icona di una campanella; attivandola, ti invieremo un avviso immediato se un altro utente cancella la sua prenotazione, così potrai usufruire del posto libero.</string>
+    <string name="res_clase_7">L\'applicazione invia 5 tipi di notifiche importanti: avviso di parcheggio al 50%, avvisi della campanella (cancellazioni), promemoria prima dell\'inizio, avviso per effettuare il check-in e avviso di fine prenotazione. Se non le ricevi, vai al menu \'Notifiche\' dell\'app dove troverai le istruzioni per disattivare l\'ottimizzazione della batteria del tuo cellulare, poiché il tuo sistema operativo potrebbe bloccarle in background.</string>
+
+    <string name="chat_empty_title">Come posso aiutarti?</string>
+    <string name="chat_empty_body">Chiedimi informazioni sulle zone di parcheggio, gli orari o le tue prenotazioni al parcheggio LKS.</string>
+    <string name="chat_loading">Pensando...</string>
+    <string name="chat_input_label">La tua richiesta</string>
+    <string name="chat_input_placeholder">Scrivi la tua domanda sul parcheggio...</string>
+    <string name="chat_input_send">Invia</string>
+    <string name="chat_sender_you">Tu</string>
+    <string name="chat_sender_bot">Assistente LKS</string>
+    <string name="chat_sug_1">Come posso prenotare?</string>
+    <string name="chat_sug_2">Posso modificare una prenotazione?</string>
+    <string name="chat_sug_3">Posso cancellare una prenotazione?</string>
+    <string name="chat_sug_4">Posso aggiungere un altro veicolo?</string>
+    <string name="chat_sug_5">Posso modificare il mio profilo?</string>
+    <string name="chat_sug_6">Posso cambiare la mia password?</string>
+    <string name="chat_sug_7">L\'app ha degli avvisi?</string>
+    <string name="chat_sug_8">Perché non ricevo gli avvisi?</string>
 </resources>
+
+

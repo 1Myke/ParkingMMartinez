@@ -25,6 +25,7 @@ val appcompatVersion = "1.7.0"
 val coilVersion = "2.6.0"
 val mockitoKotlinVersion = "5.2.1"
 val oneSignalVersion = "5.1.23"
+val testRulesVersion = "1.6.1"
 
 android {
     namespace = "com.lksnext.ParkingMMartinez"
@@ -128,6 +129,7 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation("androidx.test:rules:$testRulesVersion")
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.tooling)

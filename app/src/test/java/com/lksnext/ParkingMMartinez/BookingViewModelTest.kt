@@ -28,6 +28,7 @@ import org.mockito.Mockito.*
 import java.time.LocalTime
 import java.util.*
 import kotlin.collections.emptyList
+import com.lksnext.ParkingMMartinez.R
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class BookingViewModelTest {
@@ -412,5 +413,148 @@ class BookingViewModelTest {
         // 4. VERIFICACIÓN FINAL: El repositorio solo debió haber sido consultado 1 única vez.
         // Si el candado hubiera fallado, el método confirmReservation habría entrado dos veces y llamado 2 veces a getAllReservations().
         verify(mockRepository, times(1)).getAllReservations()
+    }
+
+    // ==========================================
+    // 7. TESTS DE PUNTOS CIEGOS SONARQUBE
+    // ==========================================
+
+    @Test
+    fun inicializarPantalla_whenZoneIsDisability_filtersAdaptedVehicles() = runTest {
+        val adaptedCar = Vehicle("id1", userId, "Van", "1111AAA", VehicleType.ADAPTED)
+        val standardCar = Vehicle("id2", userId, "Golf", "2222BBB", VehicleType.STANDARD)
+
+        `when`(mockVehicleRepository.getVehicles(userId)).thenReturn(listOf(adaptedCar, standardCar))
+        `when`(mockRepository.getAllReservations()).thenReturn(emptyList())
+
+        viewModel.inicializarPantalla(ZoneNames.DISABILITY, 20, 0)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        assertEquals(1, viewModel.userVehicles.size)
+        assertEquals(VehicleType.ADAPTED, viewModel.userVehicles[0].type)
+        assertEquals(ZoneNames.DISABILITY, viewModel.parkingZone)
+        assertEquals(20, viewModel.startHour)
+        assertEquals(0, viewModel.startMinute)
+    }
+
+    @Test
+    fun confirmReservation_triggersHalfCapacityBroadcast_whenCapacityReaches50Percent() = runTest {
+        val baseDate = GregorianCalendar(2099, Calendar.JANUARY, 1).apply {
+            set(Calendar.HOUR_OF_DAY, 0)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }.time
+        viewModel.onDateSelected(baseDate)
+        viewModel.setZone(ZoneNames.EV)
+        viewModel.onTimeChange(10, 0)
+        viewModel.onDurationChange(2.0f)
+
+        val electricVehicle = Vehicle("ev_1", userId, "Tesla", "1234EV", VehicleType.ELECTRIC)
+        val evZone = ParkingZone(ZoneNames.EV, 4, 4, 0, Color(0xFF455A64))
+
+        val existingRes = Reservation(
+            id = "res_1",
+            spotNumber = 1,
+            vehicle = electricVehicle.copy(userId = "other_user"),
+            zone = evZone,
+            date = baseDate,
+            startTime = LocalTime.of(10, 0),
+            endTime = LocalTime.of(12, 0),
+            isCheckedIn = false
+        )
+
+        `when`(mockRepository.getAllReservations()).thenReturn(listOf(existingRes))
+        `when`(mockSessionManager.getActiveUserId()).thenReturn(userId)
+
+        var onCompleteCalled = false
+        viewModel.confirmReservation(mockContext, electricVehicle, evZone) {
+            onCompleteCalled = true
+        }
+        testDispatcher.scheduler.advanceUntilIdle()
+        
+        assertTrue(onCompleteCalled)
+        
+        val expectedDateIso = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US).format(baseDate)
+        verify(mockNotificationRepository).sendBroadcastNotification(
+            mockContext,
+            R.string.notification_half_capacity_title,
+            R.string.notification_half_capacity_body,
+            listOf(ZoneNames.EV, expectedDateIso)
+        )
+    }
+
+    @Test
+    fun onReservationCancelled_notifiesSubscribers_whenSpotsBecomeAvailable() = runTest {
+        val baseDate = GregorianCalendar(2099, Calendar.JANUARY, 1).apply {
+            set(Calendar.HOUR_OF_DAY, 0)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }.time
+
+        val evZone = ParkingZone(ZoneNames.EV, 4, 4, 0, Color(0xFF455A64))
+        val cancelledVehicle = Vehicle("ev_1", userId, "Tesla", "1234EV", VehicleType.ELECTRIC)
+        val cancelledRes = Reservation(
+            id = "res_1",
+            spotNumber = 1,
+            vehicle = cancelledVehicle,
+            zone = evZone,
+            date = baseDate,
+            startTime = LocalTime.of(10, 0),
+            endTime = LocalTime.of(12, 0),
+            isCheckedIn = false
+        )
+
+        `when`(mockRepository.getAllReservations()).thenReturn(emptyList())
+
+        viewModel.onReservationCancelled(mockContext, cancelledRes)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        val expectedDateIso = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US).format(baseDate)
+        verify(mockNotificationRepository).notifyAndClearZoneSubscribers(
+            mockContext,
+            ZoneNames.EV,
+            expectedDateIso,
+            R.string.notification_zone_available_title,
+            R.string.notification_zone_available_body,
+            listOf(ZoneNames.EV, expectedDateIso)
+        )
+    }
+
+    @Test
+    fun performValidationLocally_detectsOverlapConflict_andDisablesButton() = runTest {
+        val baseDate = GregorianCalendar(2099, Calendar.JANUARY, 1).apply {
+            set(Calendar.HOUR_OF_DAY, 0)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }.time
+
+        val electricVehicle = Vehicle("ev_1", userId, "Tesla", "1234EV", VehicleType.ELECTRIC)
+
+        val conflictingBookings = (1..4).map {
+            Reservation(
+                id = "conflicting_$it",
+                spotNumber = it,
+                vehicle = electricVehicle.copy(userId = "user_$it"),
+                zone = ParkingZone(ZoneNames.EV, 4, 4, 0, Color(0xFF455A64)),
+                date = baseDate,
+                startTime = LocalTime.of(10, 0),
+                endTime = LocalTime.of(12, 0),
+                isCheckedIn = false
+            )
+        }
+
+        `when`(mockRepository.getAllReservations()).thenReturn(conflictingBookings)
+        `when`(mockVehicleRepository.getVehicles(userId)).thenReturn(listOf(electricVehicle))
+
+        viewModel.onDateSelected(baseDate)
+        viewModel.inicializarPantalla(ZoneNames.EV, 10, 0)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        assertTrue(viewModel.isOverlapConflict)
+        assertFalse(viewModel.isButtonEnabled)
+        assertEquals("10:00", viewModel.nextCollisionTime)
     }
 }

@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import com.lksnext.ParkingMMartinez.data.SessionManager
 import com.lksnext.ParkingMMartinez.data.repository.UserRepository
 import kotlinx.coroutines.launch
@@ -16,7 +17,8 @@ class SettingsViewModel(
     private val sessionManager: SessionManager
 ) : ViewModel() {
 
-    private val auth = FirebaseAuth.getInstance()
+    private val auth      = FirebaseAuth.getInstance()
+    private val firestore = FirebaseFirestore.getInstance()
     private val currentUser get() = auth.currentUser
 
     var username by mutableStateOf("")
@@ -47,6 +49,24 @@ class SettingsViewModel(
     fun clearMessages() {
         errorCode = null
         successCode = null
+    }
+
+    /**
+     * Persists the user's language preference (BCP-47 code, e.g. "es") in their
+     * Firestore document. The `language` field is read later by
+     * [FirebaseNotificationRepository.sendBroadcastNotification] to save each user's
+     * in-app notification record in their own language.
+     */
+    fun saveLanguagePreference(languageCode: String) {
+        val userId = sessionManager.getActiveUserId() ?: return
+        firestore.collection("users").document(userId)
+            .update("language", languageCode)
+            .addOnSuccessListener {
+                android.util.Log.d("SettingsVM", "Language preference saved: $languageCode")
+            }
+            .addOnFailureListener { e ->
+                android.util.Log.e("SettingsVM", "Failed to save language preference", e)
+            }
     }
 
     fun updateProfile() {

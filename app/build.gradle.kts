@@ -1,3 +1,6 @@
+import java.util.Properties
+import java.io.FileInputStream
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -7,8 +10,8 @@ plugins {
     jacoco
 }
 
-val appVersionCode = 4
-val appVersionName = "v1.2.0"
+val appVersionCode = 5
+val appVersionName = "v1.2.1"
 val targetSdkVersion = 36
 
 // Versiones de paquetes
@@ -21,7 +24,7 @@ val coroutinesVersion = "1.7.3"
 val appcompatVersion = "1.7.0"
 val coilVersion = "2.6.0"
 val mockitoKotlinVersion = "5.2.1"
-
+val oneSignalVersion = "5.1.23"
 
 android {
     namespace = "com.lksnext.ParkingMMartinez"
@@ -45,6 +48,18 @@ android {
         versionName = appVersionName
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // Busca en variables de entorno, si no, en gradle.properties (local o global)
+        val osId = System.getenv("ONESIGNAL_APP_ID")
+            ?: (project.findProperty("onesignal.app.id") as? String ?: "")
+
+        resValue("string", "onesignal_app_id_secret", osId)
+
+        // OneSignal REST API Key — needed to authorize server-to-device push calls.
+        val osRestApiKey = System.getenv("ONESIGNAL_REST_API_KEY")
+            ?: (project.findProperty("onesignal.rest.api.key") as? String ?: "")
+
+        resValue("string", "onesignal_rest_api_key_secret", osRestApiKey)
     }
 
     buildTypes {
@@ -65,6 +80,7 @@ android {
     }
     buildFeatures {
         compose = true
+        resValues = true
     }
 }
 
@@ -73,6 +89,12 @@ sonar {
         property("sonar.coverage.jacoco.xmlReportPaths", "build/reports/coverage/test/debug/report.xml")
         property("sonar.coverage.exclusions", "**/MainActivity.kt, **/ui/components/**, **/ui/screens/**, **/ui/navigation/**, **/ui/theme/**, **/receiver/**, **/service/**")
     }
+}
+
+tasks.matching { it.name == "sonarResolver" }.configureEach {
+    dependsOn(tasks.matching {
+        it.name.startsWith("generate") && it.name.endsWith("AndroidTestResValues")
+    })
 }
 
 dependencies {
@@ -98,6 +120,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:$coroutinesVersion")
     implementation("com.google.firebase:firebase-messaging")
     implementation("io.coil-kt:coil-compose:$coilVersion")
+    implementation("com.onesignal:OneSignal:$oneSignalVersion")
     testImplementation("org.mockito:mockito-core:$mockitoVersion")
     testImplementation("org.mockito.kotlin:mockito-kotlin:$mockitoKotlinVersion")
     testImplementation("androidx.arch.core:core-testing:$archVersion")

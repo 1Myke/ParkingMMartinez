@@ -12,6 +12,7 @@ import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -41,7 +42,8 @@ fun MapScreen(
     bookingViewModel: BookingViewModel,
     onZoneClick: (String) -> Unit
 ) {
-    val scope = rememberCoroutineScope()
+    val context  = LocalContext.current
+    val scope    = rememberCoroutineScope()
 
     LifecycleResumeEffect(Unit) {
         bookingViewModel.cancelEditing()
@@ -100,7 +102,7 @@ fun MapScreen(
             TimeSelectorSection(viewModel)
 
             // --- ZONAS DE APARCAMIENTO ---
-            ParkingZonesSection(viewModel, bookingViewModel, onZoneClick)
+            ParkingZonesSection(viewModel, bookingViewModel, context, onZoneClick)
         }
     }
 }
@@ -181,6 +183,7 @@ private fun TimeSelectorSection(viewModel: MapViewModel) {
 private fun ParkingZonesSection(
     viewModel: MapViewModel,
     bookingViewModel: BookingViewModel,
+    context: android.content.Context,
     onZoneClick: (String) -> Unit
 ) {
     Column(
@@ -193,8 +196,10 @@ private fun ParkingZonesSection(
             val isZoneFull = zone.availableSpots <= 0
 
             ZoneCard(
-                zone = zone,
-                modifier = Modifier.testTag("${TestTags.MAP_ZONE_CARD_PREFIX}${zone.name}"),
+                zone         = zone,
+                modifier     = Modifier.testTag("${TestTags.MAP_ZONE_CARD_PREFIX}${zone.name}"),
+                isSubscribed = zone.name in viewModel.subscribedZoneNames,
+                onBellClick  = { viewModel.toggleZoneSubscription(context, zone.name) },
                 onClick = {
                     if (!isZoneFull) {
                         bookingViewModel.onDateSelected(viewModel.selectedDate)

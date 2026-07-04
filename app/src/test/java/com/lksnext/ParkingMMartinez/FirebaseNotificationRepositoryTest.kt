@@ -37,6 +37,7 @@ class FirebaseNotificationRepositoryTest {
         mockedFirestoreStatic.`when`<FirebaseFirestore> { FirebaseFirestore.getInstance() }.thenReturn(mockFirestore)
 
         `when`(mockFirestore.collection("notifications")).thenReturn(mockCollection)
+        `when`(mockFirestore.collection("zone_subscriptions")).thenReturn(mockCollection)
         `when`(mockCollection.document(anyString())).thenReturn(mockDocument)
         `when`(mockCollection.document()).thenReturn(mockDocument)
         `when`(mockDocument.id).thenReturn("new_id")

@@ -51,6 +51,7 @@ fun BookingRegisterScreen(
 
         Spacer(modifier = Modifier.height(12.dp))
 
+        // Componente de pestañas de develop
         BookingTabs(
             currentTab = currentTab,
             activeCount = viewModel.activeReservations.size,
@@ -58,6 +59,7 @@ fun BookingRegisterScreen(
             onTabSelected = { viewModel.selectedTab = it }
         )
 
+        // Control de estado vacío o lista de develop
         if (currentReservations.isEmpty()) {
             EmptyState(isPastTab = isPastTab)
         } else {
@@ -70,8 +72,13 @@ fun BookingRegisterScreen(
             )
         }
 
+        // Diálogo de confirmación con tu bookingViewModel inyectado
         if (viewModel.showCancelConfirmation) {
-            CancelConfirmationDialog(viewModel = viewModel, context = context)
+            CancelConfirmationDialog(
+                viewModel = viewModel,
+                bookingViewModel = bookingViewModel,
+                context = context
+            )
         }
     }
 }
@@ -154,6 +161,7 @@ private fun ReservationList(
                 isPast = isPastTab,
                 isCheckInWindowActive = viewModel.isCheckInWindowActive(reservation),
                 actions = ReservationActions(
+                    // Llama al flujo de confirmación de develop
                     onCancelClick = { viewModel.askCancelReservation(reservation.id) },
                     onCheckInClick = {
                         if (isCheckInEnabled) {
@@ -177,14 +185,28 @@ private fun ReservationList(
 }
 
 @Composable
-fun CancelConfirmationDialog(viewModel: BookingRegisterViewModel, context: android.content.Context) {
+fun CancelConfirmationDialog(
+    viewModel: BookingRegisterViewModel,
+    bookingViewModel: BookingViewModel,
+    context: android.content.Context
+) {
+    val reservationId = viewModel.reservationToCancel
+    val reservation = viewModel.activeReservations.find { it.id == reservationId }
+        ?: viewModel.pastReservations.find { it.id == reservationId }
+
     AlertDialog(
         onDismissRequest = { viewModel.dismissCancelDialog() },
         title = { Text(text = stringResource(R.string.reservation_cancel_title)) },
         text = { Text(text = stringResource(R.string.reservation_cancel_msg)) },
         confirmButton = {
             TextButton(
-                onClick = { viewModel.confirmCancelReservation(context) }
+                onClick = {
+                    viewModel.confirmCancelReservation(context) {
+                        if (reservation != null) {
+                            bookingViewModel.onReservationCancelled(context, reservation)
+                        }
+                    }
+                }
             ) {
                 Text(
                     text = stringResource(R.string.reservation_cancel_confirm),

@@ -20,7 +20,11 @@ import androidx.compose.ui.platform.testTag
 import com.lksnext.ParkingMMartinez.ui.constants.TestTags
 
 @Composable
-fun LksFooter(navController: NavController, modifier: Modifier = Modifier) {
+fun LksFooter(
+    navController: NavController,
+    unreadAlertsCount: Int = 0,
+    modifier: Modifier = Modifier
+) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
@@ -51,7 +55,24 @@ fun LksFooter(navController: NavController, modifier: Modifier = Modifier) {
                         }
                     },
                     label = { Text(label) },
-                    icon = { Icon(icon, contentDescription = label) },
+                    icon = {
+                        if (route == Screen.Alerts.route && unreadAlertsCount > 0) {
+                            BadgedBox(
+                                badge = {
+                                    Badge(
+                                        containerColor = LksOrange,
+                                        contentColor = Color.White
+                                    ) {
+                                        Text(unreadAlertsCount.toString())
+                                    }
+                                }
+                            ) {
+                                Icon(icon, contentDescription = label)
+                            }
+                        } else {
+                            Icon(icon, contentDescription = label)
+                        }
+                    },
                     modifier = Modifier.testTag("${TestTags.FOOTER_TAB_PREFIX}$route"),
                     colors = NavigationBarItemDefaults.colors(
                         selectedIconColor = LksOrange,
@@ -78,19 +99,14 @@ private fun isTabSelected(route: String, currentRoute: String?): Boolean {
 }
 
 private fun handleNavigationClick(navController: NavController, targetRoute: String) {
-    if (targetRoute == Screen.Map.route) {
-        val previousEntry = navController.previousBackStackEntry
-        val previousRoute = previousEntry?.destination?.route
-
-        if (previousRoute?.startsWith("booking") == true && previousRoute != Screen.BookingsList.route) {
-            navController.popBackStack()
-            return
-        }
-
-        navigateToNormalTab(navController, Screen.Map.route)
-    } else {
-        navigateToNormalTab(navController, targetRoute)
-    }
+    // Always use the standard pop-to-start + launchSingleTop navigation.
+    // The previous special-case that called popBackStack() based on previousBackStackEntry
+    // was fragile: if the back stack was [Map, BookingsList] (the state after confirming a
+    // booking), previousBackStackEntry was "map" which did NOT start with "booking", but any
+    // slight difference in back-stack state (e.g. on real devices) caused the wrong branch to
+    // fire and the Map tab click had the same effect as the hardware back button instead of
+    // navigating to Map properly.
+    navigateToNormalTab(navController, targetRoute)
 }
 
 private fun navigateToNormalTab(navController: NavController, route: String) {

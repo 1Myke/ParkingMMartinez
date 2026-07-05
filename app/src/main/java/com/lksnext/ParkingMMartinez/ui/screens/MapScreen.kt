@@ -85,7 +85,6 @@ fun MapScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
         ) {
             Column(
                 modifier = Modifier.fillMaxSize()
@@ -99,6 +98,7 @@ fun MapScreen(
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
+                        .padding(paddingValues)
                         .padding(horizontal = 16.dp)
                         .verticalScroll(rememberScrollState()),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -122,7 +122,7 @@ fun MapScreen(
                 contentColor = Color.White,
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
-                    .padding(end = 16.dp, bottom = 0.dp)
+                    .padding(end = 16.dp, bottom = 4.dp)
             ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Default.Chat,

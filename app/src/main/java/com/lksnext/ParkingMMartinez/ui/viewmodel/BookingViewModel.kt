@@ -148,15 +148,77 @@ class BookingViewModel (
         parkingZone = name
     }
 
+    private suspend fun executeSaveWithRetries(
+        userId: String, vehicleWithId: Vehicle, zone: ParkingZone,
+        start: LocalTime, end: LocalTime, calendarTime: Date
+    ): Pair<Reservation?, List<Reservation>> {
+        var isSaved = false
+        var retries = 0
+        var finalReservation: Reservation? = null
+        var finalBookings: List<Reservation> = emptyList()
+
+        while (!isSaved && retries < 3) {
+            val (allBookings, version) = repository.getAllReservationsWithVersion()
+
+            if (checkUserHasActiveReservationDb(allBookings, userId)) {
+                return Pair(null, emptyList())
+            }
+
+            val calculatedSpotNumber = ParkingManager.findFirstAvailableSpotNumber(
+                allBookings = allBookings, zoneName = parkingZone, vehicleType = vehicleWithId.type,
+                selectedDate = calendarTime, slotStart = start, slotEnd = end, editingReservationId = editingReservationId
+            )
+
+            val newReservation = Reservation(
+                id = editingReservationId ?: UUID.randomUUID().toString(),
+                vehicle = vehicleWithId, zone = zone, date = calendarTime,
+                startTime = start, endTime = end, isCheckedIn = isEditingCheckedIn, spotNumber = calculatedSpotNumber
+            )
+
+            isSaved = repository.trySaveReservationAtomic(newReservation, version)
+            if (isSaved) {
+                finalReservation = newReservation
+                finalBookings = allBookings
+            } else {
+                retries++
+                kotlinx.coroutines.delay((100..300).random().toLong())
+            }
+        }
+
+        if (!isSaved || finalReservation == null) {
+            val allBookings = repository.getAllReservations()
+            val fallbackSpot = ParkingManager.findFirstAvailableSpotNumber(
+                allBookings, parkingZone, vehicleWithId.type, calendarTime, start, end, editingReservationId
+            )
+            finalReservation = Reservation(
+                id = editingReservationId ?: UUID.randomUUID().toString(),
+                vehicle = vehicleWithId, zone = zone, date = calendarTime, startTime = start, endTime = end,
+                isCheckedIn = isEditingCheckedIn, spotNumber = fallbackSpot
+            )
+            repository.saveReservation(finalReservation)
+            finalBookings = allBookings
+        }
+
+        return Pair(finalReservation, finalBookings)
+    }
+
+    private fun checkUserHasActiveReservationDb(allBookings: List<Reservation>, userId: String): Boolean {
+        val nowMillis = System.currentTimeMillis()
+        return allBookings.any { booking ->
+            val isUserReservation = booking.vehicle.userId == userId
+            val isTotallyFinished = isReservationPastEntirely(booking, nowMillis)
+            val isNotSelf = booking.id != editingReservationId
+            isUserReservation && !isTotallyFinished && isNotSelf
+        }
+    }
+
     fun confirmReservation(
         context: Context,
         vehicle: Vehicle,
         zone: ParkingZone,
         onComplete: () -> Unit
     ) {
-        if (isLoading) {
-            return
-        }
+        if (isLoading) return
         isLoading = true
 
         val userId = sessionManager.getActiveUserId() ?: ""
@@ -174,35 +236,18 @@ class BookingViewModel (
 
         viewModelScope.launch {
             try {
-                val allBookings = repository.getAllReservations()
-
-                val calculatedSpotNumber = ParkingManager.findFirstAvailableSpotNumber(
-                    allBookings = allBookings,
-                    zoneName = parkingZone,
-                    vehicleType = vehicle.type,
-                    selectedDate = calendar.time,
-                    slotStart = start,
-                    slotEnd = end,
-                    editingReservationId = editingReservationId
+                val (finalReservation, finalBookings) = executeSaveWithRetries(
+                    userId, vehicleWithId, zone, start, end, calendar.time
                 )
 
-                val newReservation = Reservation(
-                    id = editingReservationId ?: UUID.randomUUID().toString(),
-                    vehicle = vehicleWithId,
-                    zone = zone,
-                    date = calendar.time,
-                    startTime = start,
-                    endTime = end,
-                    isCheckedIn = isEditingCheckedIn,
-                    spotNumber = calculatedSpotNumber
-                )
+                if (finalReservation == null) {
+                    hasActiveReservation = true
+                    isLoading = false
+                    return@launch
+                }
 
-                editingReservationId?.let { repository.cancelReservation(it) }
-                repository.saveReservation(newReservation)
-
-                checkAndBroadcastIfHalfCapacity(context, allBookings, newReservation)
-
-                programarAlertasDeReserva(context, newReservation)
+                checkAndBroadcastIfHalfCapacity(context, finalBookings, finalReservation)
+                programarAlertasDeReserva(context, finalReservation)
 
                 editingReservationId = null
                 isEditingCheckedIn = false
@@ -417,6 +462,7 @@ class BookingViewModel (
         selectedDate = reservation.date
         val diff = java.time.Duration.between(reservation.startTime, reservation.endTime).toHours()
         duration = diff.toFloat().coerceIn(1f, 8f)
+        selectedVehicle = reservation.vehicle
     }
 
     fun cancelEditing() {

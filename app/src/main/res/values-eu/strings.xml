@@ -1,5 +1,5 @@
-<resources>
-    <string name="app_name">lksParking</string>
+﻿<resources>
+    <string name="app_name">Click&amp;Park</string>
 
     <!-- TEXTO BOOKING_SCREEN EN EUSKERA -->
     <string name="booking_header_label">HEMEN ERRESERBATZEN ARI ZARA PLAZA BAT:</string>
@@ -32,7 +32,7 @@
     <string name="reservation_missed">EZ AURKEZTUA</string>
     <string name="reservation_past">IRAGANA</string>
     <string name="reservation_checked_in">CHECK-IN EGINDA</string>
-    <string name="reservation_done">AMAITUTA</string>
+    <string name="reservation_done">EGINDA</string>
 
     <string name="notification_tab_active">Aktiboak (%1$d)</string>
     <string name="notification_tab_past">Historiala (%1$d)</string>
@@ -188,4 +188,35 @@
     <string name="reservation_cancel_msg">Ziur zaude erreserba hau bertan behera utzi nahi duzula?</string>
     <string name="reservation_cancel_confirm">Bai, bertan behera utzi</string>
 
+    <string name="bot_vocab">erreserbatu,erreserba,erreserbak,gunea,guneak,elektrikoa,elektrikoak,motoa,motoak,desgaitua,desgaituak,ordua,orduak,gehienez,etorkizuna,eguna,egunak,aparkalekua,aparkalekuak,parking,tokia,tokiak,plaza,plazak,editatu,aldatu,luzatu,checkin,check,aktiboa,aktiboa,aktiboak,aktiboak,denbora,denborak,modifikatu,luzatu,luzatu,ezeztatu,bertan_behera,kendu,ezabatu,borratu,ibilgailua,ibilgailuak,autoa,autoak,gehitu,gehitu,plaka,plakak,matrikula,matrikulak,turismoa,turismoak,autoa,autoak,izena,izenak,ezarpenak,profila,profilak,kontua,kontuak,pasahitza,pasahitzak,argazkia,argazkiak,irudia,irudiak,borobila,borobilak,zirkulua,zirkuluak,avatara,ahaztu,berreskuratu,gakoa,gakoak,pasahitza,sarrera,sarrerak,sartu,jakinarazpena,jakinarazpenak,abisua,abisuak,alerta,alertak,50%,erdia,beterik,kanpaia,kanpaiak,abisatu,okupazioa,bateria,bateriak,ez,iritsi,baimenak,atzealdea,planoa,blokeatu,optimizazioa,funtsa</string>
+    <string name="bot_fallback">Barkatu, aparkalekuko laguntzailea naiz. Erreserbak, profila, ibilgailuak, ezeztapenak edo jakinarazpen arazoei buruz galdetu diezadakezu. Aplikazioa beste hizkuntza batean erabiltzen baduzu, saiatu hizkuntza aldatzen!</string>
+    <string name="system_temporarily_inactive">Sistema aldi baterako inaktibo dago. Saiatu berriro geroago.</string>
+
+    <string name="res_clase_0">Hau enpresako aparkaleku bat da, beraz, erreserba guztiak erabat doakoak dira. Gaurtik hasi eta 7 egun lehenago erreserbatu dezakezu, gehienez 1 eta 8 ordu arteko egonaldietarako. 4 gune ditugu erabilgarri: Karga Elektrikoa, Desgaituak, Normalak eta Motoak. Gogoratu une bakoitzean erreserba aktibo bakarra izan dezakezula eta, nahi izanez gero, edozein unetan ezeztatu dezakezula aplikaziotik.</string>
+    <string name="res_clase_1">Bai, zure erreserbak editatu ditzakezu! Uneko erreserbaren denbora luzatu nahi baduzu, NAHITAEZKOA da iristean check-in-a aurretik egin izana. Zure erreserba-ordutegiaren barruan bazaude baina oraindik check-in-ik egin ez baduzu, sistemak ez dizu denbora luzatzen utziko. Ez ahaztu zure sarrera erregistratzea!</string>
+    <string name="res_clase_2">Jakina. Iritzia aldatzen baduzu edo zure planak aldatzen badira, uneko erreserba zuzenean ezeztatu dezakezu aplikaziotik, inolako kosturik gabe. Ezeztatzean, lekua libre utziko duzu zure lankideentzat eta zure kontua berehala egongo da erabilgarri erreserba berri bat egiteko behar duzunean.</string>
+    <string name="res_clase_3">Ez dago ibilgailu-flota mugarik zure kontuan! Behar dituzun adina ibilgailu gehitu, erregistratu eta kudeatu ditzakezu aplikazioaren barruan. Erreserba egitean, ziurtatu egun horretan erregistratutako zein ibilgailu erabiliko duzun hautatzen duzula.</string>
+    <string name="res_clase_4">Zure profileko datuak eguneratzeko bi aukera dituzu: Zure erabiltzaile-izena edo pasahitza modu seguruan aldatu ditzakezu \'Ezarpenak\' ataletik. Zure profileko argazkia aldatu nahi baduzu, joan zure \'Profila\' atalera eta sakatu zuzenean irudiaren zirkuluaren gainean argazki berri bat igotzeko.</string>
+    <string name="res_clase_5">Saioa hasteko pasahitza ahaztu baduzu, ez kezkatu. Joan aplikazioaren sarrera-pantaila nagusira eta sakatu \"Pasahitza berreskuratu\" botoia. Jarraitu pantailako argibideak modu seguruan berrezartzeko eta zure kontuan berriro sartzeko.</string>
+    <string name="res_clase_6">Aplikazioak bi okupazio-alerta ditu: Jakinarazpen automatiko bat bidaliko dizugu aparkalekua bere edukieraren %50era iristen denean. Aparkalekua dagoeneko beteta badago, kanpai baten ikonoa ikusiko duzu; aktibatzen baduzu, berehalako alerta bat bidaliko dizugu beste erabiltzaile batek bere erreserba ezeztatzen badu, leku librea aprobetxatu dezazun.</string>
+    <string name="res_clase_7">Aplikazioak 5 jakinarazpen mota garrantzitsu bidaltzen ditu: aparkalekua %50era iristearen abisua, kanpaiaren alertak (ezeztapenak), hasi aurreko oroigarria, check-in-a egiteko abisua eta erreserba amaitzeko abisua. Jasotzen ari ez bazara, joan aplikazioko \'Abisuak\' menura; bertan ikusiko dituzu zure mugikorraren bateria-optimizazioa desaktibatzeko argibideak, zure sistema eragileak atzeko planoan blokeatzen ari baitaiteke.</string>
+
+    <string name="chat_empty_title">Zertan lagundu ahal dizut?</string>
+    <string name="chat_empty_body">Galdetu aparkaleku-eremuei, ordutegiei edo LKS aparkalekuko erreserbei buruz.</string>
+    <string name="chat_loading">Pentsatzen...</string>
+    <string name="chat_input_label">Zure kontsulta</string>
+    <string name="chat_input_placeholder">Idatzi zure aparkalekuaren zalantza...</string>
+    <string name="chat_input_send">Bidali</string>
+    <string name="chat_sender_you">Zu</string>
+    <string name="chat_sender_bot">LKS Laguntzailea</string>
+    <string name="chat_sug_1">Nola erreserbatu dezaket?</string>
+    <string name="chat_sug_2">Erreserba bat editatu al dezaket?</string>
+    <string name="chat_sug_3">Erreserba bat baliogabetu al dezaket?</string>
+    <string name="chat_sug_4">Beste ibilgailu bat gehitu al dezaket?</string>
+    <string name="chat_sug_5">Nire kontua profilean editatu al dezaket?</string>
+    <string name="chat_sug_6">Nire pasahitza aldatu al dezaket?</string>
+    <string name="chat_sug_7">Aplikazioak ba al du abisurik?</string>
+    <string name="chat_sug_8">Zergatik ez zaizkit abisuak iristen?</string>
 </resources>
+
+

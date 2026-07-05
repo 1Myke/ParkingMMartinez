@@ -28,6 +28,8 @@ class FirebaseBookingRepositoryTest {
     private lateinit var mockFirestore: FirebaseFirestore
     private lateinit var mockCollection: CollectionReference
     private lateinit var mockDocument: DocumentReference
+    private lateinit var mockMetadataCollection: CollectionReference
+    private lateinit var mockLockDoc: DocumentReference
 
     private lateinit var repository: FirebaseBookingRepository
 
@@ -36,12 +38,17 @@ class FirebaseBookingRepositoryTest {
         mockFirestore = mock(FirebaseFirestore::class.java)
         mockCollection = mock(CollectionReference::class.java)
         mockDocument = mock(DocumentReference::class.java)
+        mockMetadataCollection = mock(CollectionReference::class.java)
+        mockLockDoc = mock(DocumentReference::class.java)
 
         mockedFirestoreStatic = mockStatic(FirebaseFirestore::class.java)
         mockedFirestoreStatic.`when`<FirebaseFirestore> { FirebaseFirestore.getInstance() }.thenReturn(mockFirestore)
 
         `when`(mockFirestore.collection("bookings")).thenReturn(mockCollection)
         `when`(mockCollection.document(anyString())).thenReturn(mockDocument)
+
+        `when`(mockFirestore.collection("metadata")).thenReturn(mockMetadataCollection)
+        `when`(mockMetadataCollection.document("booking_lock")).thenReturn(mockLockDoc)
 
         repository = FirebaseBookingRepository()
     }
@@ -88,4 +95,3 @@ class FirebaseBookingRepositoryTest {
         }
     }
 }
-

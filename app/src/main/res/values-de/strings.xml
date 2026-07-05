@@ -1,5 +1,5 @@
-<resources>
-    <string name="app_name">lksParking</string>
+﻿<resources>
+    <string name="app_name">Click&amp;Park</string>
 
     <!-- TEXTO BOOKING_SCREEN EN ALEMÁN -->
     <string name="booking_header_label">SIE BUCHEN EINEN PARKPLATZ IN</string>
@@ -188,4 +188,33 @@
     <string name="reservation_cancel_msg">Sind Sie sicher, dass Sie diese Reservierung stornieren möchten?</string>
     <string name="reservation_cancel_confirm">Ja, stornieren</string>
 
+    <string name="bot_vocab">buchen,reservierung,reservierungen,zone,zonen,elektrisch,elektrische,motorrad,motorräder,behindert,behinderte,stunde,stunden,maximal,zukunft,tag,tage,parkplatz,parkplätze,parking,platz,plätze,platz,plätze,bearbeiten,ändern,verlängern,checkin,check,aktiv,aktive,aktive,aktive,zeit,zeiten,abändern,ausdehnen,verlängern,stornieren,absagen,entfernen,löschen,entfernen,fahrzeug,fahrzeuge,auto,autos,hinzufügen,ergänzen,kennzeichen,kennzeichen,nummernschild,nummernschilder,pkw,pkws,auto,autos,name,namen,einstellungen,profil,profile,konto,konten,passwort,passwörter,foto,fotos,bild,bilder,kreis,kreise,kreis,kreise,avatar,vergessen,wiederherstellen,schlüssel,schlüssel,passwort,zugang,zugänge,einloggen,benachrichtigung,benachrichtigungen,warnung,warnungen,alarm,alarme,50%,hälfte,voll,glocke,glocken,benachrichtigen,belegung,batterie,batterien,nicht,ankommen,berechtigungen,hintergrund,ebene,blockiert,optimierung,hintergrund</string>
+    <string name="bot_fallback">Entschuldigung, ich bin der Parkplatz-Assistent. Sie können mich zu Buchungen, Profilen, Fahrzeugen, Stornierungen oder Benachrichtigungsproblemen fragen. Wenn Sie die App in einer anderen Sprache verwenden, versuchen Sie, die Sprache zu ändern!</string>
+    <string name="system_temporarily_inactive">Das System ist vorübergehend inaktiv. Bitte versuchen Sie es später noch einmal.</string>
+
+    <string name="res_clase_0">Dies ist ein Firmenparkplatz, daher sind alle Reservierungen absolut kostenlos. Sie können von heute an bis zu 7 Tage im Voraus für eine Aufenthaltsdauer von mindestens 1 bis maximal 8 Stunden reservieren. Wir haben 4 Bereiche zur Verfügung: E-Ladestationen, Behindertenparkplätze, Normal und Motorräder. Bitte beachten Sie, dass Sie nur eine aktive Reservierung gleichzeitig haben können und diese jederzeit über die App stornieren können, falls Sie es sich anders überlegen.</string>
+    <string name="res_clase_1">Ja, Sie können Ihre Reservierungen bearbeiten! Wenn Sie die Dauer Ihrer aktuellen Reservierung verlängern möchten, müssen Sie bei der Ankunft zwingend vorab eingecheckt haben. Wenn Sie sich innerhalb Ihres Reservierungszeitraums befinden, den Check-in aber noch nicht durchgeführt haben, erlaubt das System keine Verlängerung der Zeit. Vergessen Sie nicht, Ihre Ankunft zu registrieren!</string>
+    <string name="res_clase_2">Natürlich. Wenn Sie Ihre Meinung ändern oder sich Ihre Pläne ändern, können Sie Ihre aktuelle Reservierung kostenlos direkt über die App stornieren. Durch die Stornierung geben Sie den Parkplatz für Ihre Kollegen frei und Ihr Konto ist sofort wieder verfügbar, um bei Bedarf eine neue Reservierung vorzunehmen.</string>
+    <string name="res_clase_3">Es gibt kein Flottenlimit für Ihr Konto! Sie können so viele Fahrzeuge in der Anwendung hinzufügen, registrieren und verwalten, wie Sie benötigen. Achten Sie bei der Reservierung einfach darauf, das registrierte Fahrzeug auszuwählen, das Sie an diesem Tag nutzen werden.</string>
+    <string name="res_clase_4">Um Ihre Profildaten zu aktualisieren, haben Sie zwei Möglichkeiten: Sie können Ihren Benutzernamen oder Ihr Passwort sicher im Bereich \'Einstellungen\' ändern. Wenn Sie Ihr Profilbild ändern möchten, gehen Sie auf Ihr \'Profil\' und tippen Sie direkt auf den Bildkreis, um ein neues Foto hochzuladen.</string>
+    <string name="res_clase_5">Wenn Sie Ihr Passwort für die Anmeldung vergessen haben, machen Sie sich keine Sorgen. Gehen Sie zum Haupt-Anmeldebildschirm der App und tippen Sie auf die Schaltfläche \"Passwort wiederherstellen\". Folgen Sie den Anweisungen auf dem Bildschirm, um es sicher zurückzusetzen und sich wieder in Ihrem Konto anzumelden.</string>
+    <string name="res_clase_6">Die App verfügt über zwei Belegungswarnungen: Wir senden Ihnen eine automatische Benachrichtigung, wenn der Parkplatz eine Auslastung von 50% erreicht. Falls der Parkplatz bereits voll ist, sehen Sie ein Glockensymbol. Wenn Sie dieses aktivieren, benachrichtigen wir Sie sofort, sobald ein anderer Nutzer seine Reservierung storniert, damit Sie den freien Platz nutzen können.</string>
+    <string name="res_clase_7">Die Anwendung sendet 5 Arten von wichtigen Benachrichtigungen: Warnung bei 50% Parkplatzauslastung, Glocken-Benachrichtigungen (Stornierungen), Erinnerung vor Beginn, Aufforderung zum Check-in und Warnung vor Ablauf der Reservierung. Wenn Sie diese nicht erhalten, gehen Sie in der App in das Menü \'Benachrichtigungen\'. Dort finden Sie Anweisungen zur Deaktivierung der Akku-Optimierung Ihres Mobiltelefons, da Ihr Betriebssystem diese im Hintergrund blockieren könnte.</string>
+
+    <string name="chat_empty_title">Wie kann ich Ihnen helfen?</string>
+    <string name="chat_empty_body">Stellen Sie mir Fragen zu Parkzonen, Fahrplänen oder Ihren LKS-Parkplatzreservierungen.</string>
+    <string name="chat_loading">Denke nach...</string>
+    <string name="chat_input_label">Ihre Anfrage</string>
+    <string name="chat_input_placeholder">Geben Sie Ihre Frage zum Parken ein...</string>
+    <string name="chat_input_send">Senden</string>
+    <string name="chat_sender_you">Sie</string>
+    <string name="chat_sender_bot">LKS Assistent</string>
+    <string name="chat_sug_1">Wie kann ich buchen?</string>
+    <string name="chat_sug_2">Kann ich eine Reservierung bearbeiten?</string>
+    <string name="chat_sug_3">Kann ich eine Reservierung stornieren?</string>
+    <string name="chat_sug_4">Kann ich ein weiteres Fahrzeug hinzufügen?</string>
+    <string name="chat_sug_5">Kann ich mein Konto im Profil bearbeiten?</string>
+    <string name="chat_sug_6">Kann ich mein Passwort ändern?</string>
+    <string name="chat_sug_7">Hat die App irgendwelche Warnungen?</string>
+    <string name="chat_sug_8">Warum erhalte ich keine Warnungen?</string>
 </resources>

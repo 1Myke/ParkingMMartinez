@@ -1,5 +1,5 @@
-<resources>
-    <string name="app_name">lksParking</string>
+﻿<resources>
+    <string name="app_name">Click&amp;Park</string>
 
     <!-- TEXTO BOOKING_SCREEN EN INGLES -->
     <string name ="booking_header_label">YOU ARE BOOKING A SPOT IN</string>
@@ -191,4 +191,38 @@
     <string name="reservation_cancel_title">Cancel Reservation</string>
     <string name="reservation_cancel_msg">Are you sure you want to cancel this reservation?</string>
     <string name="reservation_cancel_confirm">Yes, cancel</string>
+
+    <!--- TEXTO DE NN -->
+    <string name="bot_vocab">book,reservation,reservations,zone,zones,electric,electric,motorbike,motorbikes,disabled,disabled,hour,hours,maximum,future,day,days,parking,parkings,parking,space,spaces,spot,spots,edit,change,extend,checkin,check,active,active,active,active,time,times,modify,extend,prolong,cancel,void,remove,delete,erase,vehicle,vehicles,car,cars,add,add,plate,plates,license,licenses,car,cars,car,cars,name,names,settings,profile,profiles,account,accounts,password,passwords,photo,photos,image,images,circle,circles,circle,circles,avatar,forgot,recover,code,codes,password,access,accesses,enter,notification,notifications,notice,notices,alert,alerts,50%,half,full,bell,bells,notify,occupancy,battery,batteries,not,arrive,permissions,background,ground,blocks,optimization,background</string>
+    <string name="bot_fallback">Sorry, I am the parking assistant. You can ask me about bookings, profiles, vehicles, cancellations, or notification issues. If you use the app in another language, try changing the language!</string>
+    <string name="system_temporarily_inactive">The system is temporarily inactive. Please try again later.</string>
+
+    <string name="res_clase_0">This is a company parking lot, so all reservations are completely free. You can reserve from today up to 7 days in advance for stays between 1 and 8 hours maximum. We have 4 areas available: Electric Charging, Disabled, Regular, and Motorcycles. Remember that you can only have one active reservation at a time, and you can cancel it at any time from the app if you change your mind.</string>
+    <string name="res_clase_1">Yes, you can edit your reservations! If you need to extend the duration of your current reservation, it is MANDATORY to have checked in beforehand upon arrival. If you are within your reservation time slot but haven\'t checked in yet, the system will not allow you to extend the time. Don\'t forget to register your arrival!</string>
+    <string name="res_clase_2">Of course. If you change your mind or your plans change, you can cancel your current reservation directly from the app at no cost. By canceling it, you will free up the space for your colleagues, and your account will immediately become available to schedule a new reservation whenever you need it.</string>
+    <string name="res_clase_3">There is no fleet limit on your account! You can add, register, and manage as many vehicles as you need within the application. When making a reservation, just make sure to select which of your registered vehicles you will be using that day.</string>
+    <string name="res_clase_4">To update your profile data, you have two options: You can securely change your username or password from the \'Settings\' section. If you wish to change your profile picture, go to your \'Profile\' and tap directly on the image circle to upload a new photo.</string>
+    <string name="res_clase_5">If you forgot your login password, don\'t worry. Go to the main login screen of the app and tap the \"Recover password\" button. Follow the on-screen instructions to reset it securely and log back into your account.</string>
+    <string name="res_clase_6">The app features two occupancy alerts: We will send you an automatic notification when the parking lot reaches 50% capacity. If the parking lot is already full, you will see a bell icon; if you activate it, we will send you an immediate alert if another user cancels their reservation so you can take the available spot.</string>
+    <string name="res_clase_7">The application sends 5 types of important notifications: parking at 50% warning, bell alerts (cancelations), pre-start reminder, check-in prompt, and reservation end warning. If you are not receiving them, go to the \'Notifications\' menu in the app, where you will find instructions to disable your phone\'s battery optimization, as your operating system might be blocking them in the background.</string>
+
+    <string name="chat_empty_title">How can I help you?</string>
+    <string name="chat_empty_body">Ask me questions about parking zones, schedules, or your LKS parking reservations.</string>
+    <string name="chat_loading">Thinking...</string>
+    <string name="chat_input_label">Your query</string>
+    <string name="chat_input_placeholder">Type your parking question...</string>
+    <string name="chat_input_send">Send</string>
+    <string name="chat_sender_you">You</string>
+    <string name="chat_sender_bot">LKS Assistant</string>
+    <string name="chat_sug_1">How can I book?</string>
+    <string name="chat_sug_2">Can I edit a reservation?</string>
+    <string name="chat_sug_3">Can I cancel a reservation?</string>
+    <string name="chat_sug_4">Can I add another vehicle?</string>
+    <string name="chat_sug_5">Can I edit my account in the profile?</string>
+    <string name="chat_sug_6">Can I change my password?</string>
+    <string name="chat_sug_7">Does the app have any alerts?</string>
+    <string name="chat_sug_8">Why am I not receiving alerts?</string>
 </resources>
+
+
+

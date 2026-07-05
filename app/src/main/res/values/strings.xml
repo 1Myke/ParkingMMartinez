@@ -193,7 +193,7 @@
     <string name="reservation_cancel_confirm">Yes, cancel</string>
 
     <!--- TEXTO DE NN -->
-    <string name="bot_vocab">book,reservation,zone,electric,motorbike,disabled,hour,maximum,future,days,edit,change,extend,checkin,check,active,time,cancel,void,vehicle,car,add,insert,plate,license,name,settings,profile,account,password,photo,image,circle,forgot,recover,notification,notice,alert,50%,half,full,bell,notify,battery,not,arrive,permissions,background,ground</string>
+    <string name="bot_vocab">book,reservation,reservations,zone,zones,electric,electric,motorbike,motorbikes,disabled,disabled,hour,hours,maximum,future,day,days,parking,parkings,parking,space,spaces,spot,spots,edit,change,extend,checkin,check,active,active,active,active,time,times,modify,extend,prolong,cancel,void,remove,delete,erase,vehicle,vehicles,car,cars,add,add,plate,plates,license,licenses,car,cars,car,cars,name,names,settings,profile,profiles,account,accounts,password,passwords,photo,photos,image,images,circle,circles,circle,circles,avatar,forgot,recover,code,codes,password,access,accesses,enter,notification,notifications,notice,notices,alert,alerts,50%,half,full,bell,bells,notify,occupancy,battery,batteries,not,arrive,permissions,background,ground,blocks,optimization,background</string>
     <string name="bot_fallback">Sorry, I am the parking assistant. You can ask me about bookings, profiles, vehicles, cancellations, or notification issues. If you use the app in another language, try changing the language!</string>
     <string name="system_temporarily_inactive">The system is temporarily inactive. Please try again later.</string>
 

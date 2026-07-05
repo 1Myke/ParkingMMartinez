@@ -318,7 +318,10 @@ fun LksNavigation() {
 
             // --- CHAT ---
             composable(Screen.Chat.route) {
-                ChatScreen(viewModel = chatViewModel)
+                ChatScreen(
+                    viewModel = chatViewModel,
+                    onNavigateBack = { navController.popBackStack() }
+                )
             }
         }
     }

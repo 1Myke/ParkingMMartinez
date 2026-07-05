@@ -33,6 +33,7 @@ import com.lksnext.ParkingMMartinez.ui.viewmodel.MapViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import com.lksnext.ParkingMMartinez.ui.viewmodel.BookingViewModel
 import com.lksnext.ParkingMMartinez.ui.constants.TestTags
+import com.lksnext.ParkingMMartinez.ui.theme.LksOrange
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.delay
 import java.util.Calendar
@@ -78,50 +79,55 @@ fun MapScreen(
     }
 
     Scaffold(
-        floatingActionButton = {
+        containerColor = MaterialTheme.colorScheme.background,
+        modifier = Modifier.fillMaxSize()
+    ) { paddingValues ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
+            Column(
+                modifier = Modifier.fillMaxSize()
+            ) {
+                LksHeader(
+                    title = stringResource(R.string.map_header_title),
+                    subtitle = stringResource(R.string.map_header_subtitle),
+                    modifier = Modifier.testTag(TestTags.MAP_HEADER)
+                )
+
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 16.dp)
+                        .verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    Spacer(Modifier.height(4.dp))
+
+                    // --- SELECTOR DE FECHAS HORIZONTAL ---
+                    DateSelectorSection(viewModel)
+
+                    // --- SELECTOR DE HORA DE INICIO ---
+                    TimeSelectorSection(viewModel)
+
+                    // --- ZONAS DE APARCAMIENTO ---
+                    ParkingZonesSection(viewModel, bookingViewModel, context, onZoneClick)
+                }
+            }
+
             FloatingActionButton(
                 onClick = onNavigateToChat,
-                containerColor = Color(0xFFF36F21), // Naranja corporativo LKS
+                containerColor = LksOrange,
                 contentColor = Color.White,
-                modifier = Modifier.padding(bottom = 16.dp) // Margen extra sobre el footer
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(end = 16.dp, bottom = 0.dp)
             ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Default.Chat,
                     contentDescription = "Chat de Ayuda FAQ"
                 )
-            }
-        },
-        containerColor = MaterialTheme.colorScheme.background,
-        modifier = Modifier.fillMaxSize()
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-        ) {
-            LksHeader(
-                title = stringResource(R.string.map_header_title),
-                subtitle = stringResource(R.string.map_header_subtitle),
-                modifier = Modifier.testTag(TestTags.MAP_HEADER)
-            )
-
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 16.dp)
-                    .verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                Spacer(Modifier.height(4.dp))
-
-                // --- SELECTOR DE FECHAS HORIZONTAL ---
-                DateSelectorSection(viewModel)
-
-                // --- SELECTOR DE HORA DE INICIO ---
-                TimeSelectorSection(viewModel)
-
-                // --- ZONAS DE APARCAMIENTO ---
-                ParkingZonesSection(viewModel, bookingViewModel, context, onZoneClick)
             }
         }
     }

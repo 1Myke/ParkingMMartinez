@@ -21,7 +21,7 @@ class NeuralNetworkChatRepository(
 
     init {
         try {
-            val assetFileDescriptor = context.assets.openFd("parking_corp4.tflite")
+            val assetFileDescriptor = context.assets.openFd("parking_corp5.tflite")
             val inputStream = FileInputStream(assetFileDescriptor.fileDescriptor)
             val fileChannel = inputStream.channel
             val modelBuffer = fileChannel.map(

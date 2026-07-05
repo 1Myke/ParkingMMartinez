@@ -30,7 +30,7 @@
     <string name="reservation_missed">NO PRESENTADO</string>
     <string name="reservation_past">PASADA</string>
     <string name="reservation_checked_in">CHECK-IN REALIZADO</string>
-    <string name="reservation_done">FINALIZADA</string>
+    <string name="reservation_done">REALIZADO</string>
 
     <string name="notification_tab_active">Activas (%1$d)</string>
     <string name="notification_tab_past">Historial (%1$d)</string>
@@ -180,7 +180,7 @@
     <string name="reservation_cancel_msg">¿Estás seguro de que quieres cancelar esta reserva?</string>
     <string name="reservation_cancel_confirm">Sí, cancelar</string>
 
-    <string name="bot_vocab">reservar,reserva,zona,electrica,moto,discapacitado,hora,maximo,futuro,dias,editar,cambiar,alargar,checkin,check,activo,tiempo,cancelar,anular,vehiculo,coche,añadir,agregar,placa,matricula,nombre,ajustes,perfil,cuenta,contraseña,foto,imagen,redondel,olvide,recuperar,notificacion,aviso,alerta,50%,mitad,lleno,campana,avisame,bateria,no,llegan,permisos,segundo,plano</string>
+    <string name="bot_vocab">reservar,reserva,reservas,zona,zonas,electrica,electricas,moto,motos,discapacitado,discapacitados,hora,horas,maximo,futuro,dia,dias,aparcamiento,aparcamientos,parking,sitio,sitios,plaza,plazas,editar,cambiar,alargar,checkin,check,activo,activa,activas,activos,tiempo,tiempos,modificar,extender,prolongar,cancelar,anular,quitar,eliminar,borrar,vehiculo,vehiculos,coche,coches,añadir,agregar,placa,placas,matricula,matriculas,turismo,turismos,auto,autos,nombre,nombres,ajustes,perfil,perfiles,cuenta,cuentas,contraseña,contrasenas,foto,fotos,imagen,imagenes,redondel,redondeles,circulo,circulos,avatar,olvide,recuperar,clave,claves,password,acceso,accesos,entrar,notificacion,notificaciones,aviso,avisos,alerta,alertas,50%,mitad,lleno,campana,campanas,avisame,ocupacion,bateria,baterias,no,llegan,permisos,segundo,plano,bloquea,optimizacion,fondo</string>
     <string name="bot_fallback">Lo siento, soy el asistente del parking. Puedes preguntarme sobre cómo reservar, gestionar tu perfil, vehículos, cancelaciones o problemas con notificaciones. Si usas otro idioma en la app prueba a cambiar de idioma!</string>
     <string name="system_temporarily_inactive">Sistema aldi baterako inaktibo dago. Saiatu berriro geroago.</string>
 

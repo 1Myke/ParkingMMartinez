@@ -18,6 +18,11 @@ class ChatViewModel(
     private val _cargando = MutableStateFlow(false)
     val cargando: StateFlow<Boolean> = _cargando.asStateFlow()
 
+    fun resetChat() {
+        mensajes.clear()
+        _cargando.value = false
+    }
+
     fun enviarPregunta(pregunta: String) {
         if (pregunta.isBlank()) return
 
@@ -32,7 +37,6 @@ class ChatViewModel(
             resultado.onSuccess { respuestaIA ->
                 mensajes.add(Pair(respuestaIA, false))
             }.onFailure { error ->
-                // Guardamos un marcador de texto plano. No da error porque no usa Compose.
                 mensajes.add(Pair("ERROR_SYSTEM_INACTIVE", false))
                 error.printStackTrace()
             }

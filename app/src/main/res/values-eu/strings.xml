@@ -32,7 +32,7 @@
     <string name="reservation_missed">EZ AURKEZTUA</string>
     <string name="reservation_past">IRAGANA</string>
     <string name="reservation_checked_in">CHECK-IN EGINDA</string>
-    <string name="reservation_done">AMAITUTA</string>
+    <string name="reservation_done">EGINDA</string>
 
     <string name="notification_tab_active">Aktiboak (%1$d)</string>
     <string name="notification_tab_past">Historiala (%1$d)</string>
@@ -188,7 +188,7 @@
     <string name="reservation_cancel_msg">Ziur zaude erreserba hau bertan behera utzi nahi duzula?</string>
     <string name="reservation_cancel_confirm">Bai, bertan behera utzi</string>
 
-    <string name="bot_vocab">erreserbatu,erreserba,gunea,elektrikoa,motoa,desgaitua,ordua,gehienez,etorkizuna,egunak,editatu,aldatu,luzatu,checkin,check,aktiboa,denbora,ezeztatu,bertan_behera,ibilgailua,autoa,gehitu,ezarri,plaka,matrikula,izena,ezarpenak,profila,kontua,pasahitza,argazkia,irudia,borobila,ahaztu,berreskuratu,jakinarazpena,abisua,alerta,50%,erdia,beterik,kanpaia,abisatu,bateria,ez,iritsi,baimenak,atzealdea,planoa</string>
+    <string name="bot_vocab">erreserbatu,erreserba,erreserbak,gunea,guneak,elektrikoa,elektrikoak,motoa,motoak,desgaitua,desgaituak,ordua,orduak,gehienez,etorkizuna,eguna,egunak,aparkalekua,aparkalekuak,parking,tokia,tokiak,plaza,plazak,editatu,aldatu,luzatu,checkin,check,aktiboa,aktiboa,aktiboak,aktiboak,denbora,denborak,modifikatu,luzatu,luzatu,ezeztatu,bertan_behera,kendu,ezabatu,borratu,ibilgailua,ibilgailuak,autoa,autoak,gehitu,gehitu,plaka,plakak,matrikula,matrikulak,turismoa,turismoak,autoa,autoak,izena,izenak,ezarpenak,profila,profilak,kontua,kontuak,pasahitza,pasahitzak,argazkia,argazkiak,irudia,irudiak,borobila,borobilak,zirkulua,zirkuluak,avatara,ahaztu,berreskuratu,gakoa,gakoak,pasahitza,sarrera,sarrerak,sartu,jakinarazpena,jakinarazpenak,abisua,abisuak,alerta,alertak,50%,erdia,beterik,kanpaia,kanpaiak,abisatu,okupazioa,bateria,bateriak,ez,iritsi,baimenak,atzealdea,planoa,blokeatu,optimizazioa,funtsa</string>
     <string name="bot_fallback">Barkatu, aparkalekuko laguntzailea naiz. Erreserbak, profila, ibilgailuak, ezeztapenak edo jakinarazpen arazoei buruz galdetu diezadakezu. Aplikazioa beste hizkuntza batean erabiltzen baduzu, saiatu hizkuntza aldatzen!</string>
     <string name="system_temporarily_inactive">Sistema aldi baterako inaktibo dago. Saiatu berriro geroago.</string>
 

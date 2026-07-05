@@ -1,5 +1,5 @@
 ﻿<resources>
-    <string name="app_name">lksParking</string>
+    <string name="app_name">Click&amp;Park</string>
 
     <string name="booking_header_label">ESTÁ A RESERVAR LUGAR EM</string>
     <string name="booking_select_vehicle">Selecionar veículo</string>

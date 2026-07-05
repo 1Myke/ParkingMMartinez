@@ -1,5 +1,5 @@
 ﻿<resources>
-    <string name="app_name">lksParking</string>
+    <string name="app_name">Click&amp;Park</string>
 
     <!-- TEXTO BOOKING_SCREEN EN ALEMÁN -->
     <string name="booking_header_label">SIE BUCHEN EINEN PARKPLATZ IN</string>

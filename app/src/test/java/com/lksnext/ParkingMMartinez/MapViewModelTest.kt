@@ -18,6 +18,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.mockito.Mockito.*
 import java.util.Date
+import android.content.Context
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class MapViewModelTest {
@@ -68,5 +69,20 @@ class MapViewModelTest {
         assertEquals(30, viewModel.selectedStartTime.minute)
         assertEquals(15, viewModel.selectedEndTime.hour)
     }
+
+    @Test
+    fun refreshParking_reloadsData() = runBlocking {
+        viewModel.refreshParking()
+        assertNotNull(viewModel.zones)
+    }
+
+    @Test
+    fun toggleZoneSubscription_earlyReturn_whenUserNull() {
+        val mockContext = mock(Context::class.java)
+        `when`(mockSessionManager.getActiveUserId()).thenReturn(null)
+        viewModel.toggleZoneSubscription(mockContext, "Zone A")
+        assertTrue(viewModel.subscribedZoneNames.isEmpty())
+    }
 }
+
 

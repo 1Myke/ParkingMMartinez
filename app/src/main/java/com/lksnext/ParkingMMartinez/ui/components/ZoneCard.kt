@@ -133,7 +133,7 @@ private fun ZoneBadgeSection(
 @Composable
 private fun ZoneStatusBadge(isZoneFull: Boolean, isZoneHalfFull: Boolean) {
     Surface(
-        color = if (isZoneFull) LksGreen else if (isZoneHalfFull) Color(0xFFFF9800) else LksGreen,
+        color = if (isZoneFull) Color.Red else if (isZoneHalfFull) Color(0xFFFF9800) else LksGreen,
         shape = RoundedCornerShape(8.dp)
     ) {
         Text(

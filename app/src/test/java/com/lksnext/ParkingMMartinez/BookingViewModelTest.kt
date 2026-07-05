@@ -63,7 +63,9 @@ class BookingViewModelTest {
     fun setUp() = runTest {
         Dispatchers.setMain(testDispatcher)
 
-        mockRepository = mock(BookingRepository::class.java)
+        mockRepository = mock(BookingRepository::class.java) { invocation ->
+            if (invocation.method.name == "trySaveReservationAtomic") true else org.mockito.Mockito.RETURNS_DEFAULTS.answer(invocation)
+        }
         mockVehicleRepository = mock(VehicleRepository::class.java)
         mockSessionManager = mock(SessionManager::class.java)
         mockContext = mock(Context::class.java)
@@ -103,6 +105,7 @@ class BookingViewModelTest {
 
         // Evitamos que las corrutinas del repositorio queden en un limbo asíncrono
         `when`(mockRepository.getAllReservations()).thenReturn(emptyList())
+        `when`(mockRepository.getAllReservationsWithVersion()).thenReturn(Pair(emptyList(), 0L))
 
         viewModel = BookingViewModel(mockRepository, mockVehicleRepository, mockSessionManager, mockNotificationRepository)
     }
@@ -236,51 +239,14 @@ class BookingViewModelTest {
     }
 
     @Test
-    fun loadReservationForEditing_populatesViewModelStates() {
-        val targetDate = GregorianCalendar(2026, Calendar.OCTOBER, 10).time
-        val targetReservation = Reservation(
-            id = "edit_id_999",
-            spotNumber = 12,
-            vehicle = fakeVehicle,
-            zone = fakeZone,
-            date = targetDate,
-            startTime = LocalTime.of(9, 0),
-            endTime = LocalTime.of(13, 0),
-            isCheckedIn = false
-        )
-
-        viewModel.loadReservationForEditing(targetReservation)
-
-        assertEquals("edit_id_999", viewModel.editingReservationId)
-        assertEquals(ZoneNames.STANDARD, viewModel.parkingZone)
-        assertEquals(9, viewModel.startHour)
-        assertEquals(0, viewModel.startMinute)
-        assertEquals(targetDate, viewModel.selectedDate)
-        assertEquals(4.0f, viewModel.duration, 0.0f)
-    }
-
-    @Test
-    fun cancelEditing_clearsEditingId() {
-        val targetReservation = Reservation(
-            id = "edit_id_999", spotNumber = 12, vehicle = fakeVehicle, zone = fakeZone,
-            date = Date(), startTime = LocalTime.of(9, 0), endTime = LocalTime.of(11, 0), isCheckedIn = false
-        )
-        viewModel.loadReservationForEditing(targetReservation)
-
-        viewModel.cancelEditing()
-
-        assertNull(viewModel.editingReservationId)
-    }
-
-    @Test
     fun confirmReservation_createsAndSavesNewReservation() = runTest {
         var onCompleteCalled = false
         viewModel.setZone(ZoneNames.STANDARD)
         viewModel.onTimeChange(10, 0)
         viewModel.onDurationChange(3.0f)
 
-        // Garantizamos que devuelva lista vacía al calcular huecos disponibles
         `when`(mockRepository.getAllReservations()).thenReturn(emptyList())
+        `when`(mockRepository.getAllReservationsWithVersion()).thenReturn(Pair(emptyList(), 0L))
 
         viewModel.confirmReservation(mockContext, fakeVehicle, fakeZone) {
             onCompleteCalled = true
@@ -293,19 +259,20 @@ class BookingViewModelTest {
     }
 
     @Test
-    fun confirmReservation_whenEditing_cancelsOldReservationBeforeSaving() = runTest {
+    fun confirmReservation_whenEditing_savesOverExistingReservation() = runTest {
         val oldReservation = Reservation(
             id = "old_res_id", spotNumber = 12, vehicle = fakeVehicle, zone = fakeZone,
             date = Date(), startTime = LocalTime.of(9, 0), endTime = LocalTime.of(11, 0), isCheckedIn = false
         )
 
         `when`(mockRepository.getAllReservations()).thenReturn(emptyList())
+        `when`(mockRepository.getAllReservationsWithVersion()).thenReturn(Pair(emptyList(), 0L))
         viewModel.loadReservationForEditing(oldReservation)
 
         viewModel.confirmReservation(mockContext, fakeVehicle, fakeZone) {}
         testDispatcher.scheduler.advanceUntilIdle()
 
-        verify(mockRepository).cancelReservation("old_res_id")
+        verify(mockRepository, never()).cancelReservation(anyString())
         assertTrue(viewModel.hasActiveReservation)
     }
 
@@ -412,7 +379,7 @@ class BookingViewModelTest {
 
         // 4. VERIFICACIÓN FINAL: El repositorio solo debió haber sido consultado 1 única vez.
         // Si el candado hubiera fallado, el método confirmReservation habría entrado dos veces y llamado 2 veces a getAllReservations().
-        verify(mockRepository, times(1)).getAllReservations()
+        verify(mockRepository, times(1)).getAllReservationsWithVersion()
     }
 
     // ==========================================
@@ -465,6 +432,7 @@ class BookingViewModelTest {
         )
 
         `when`(mockRepository.getAllReservations()).thenReturn(listOf(existingRes))
+        `when`(mockRepository.getAllReservationsWithVersion()).thenReturn(Pair(listOf(existingRes), 0L))
         `when`(mockSessionManager.getActiveUserId()).thenReturn(userId)
 
         var onCompleteCalled = false

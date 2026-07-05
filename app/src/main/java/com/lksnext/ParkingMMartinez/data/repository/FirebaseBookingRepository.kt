@@ -12,6 +12,7 @@ import java.util.Date
 class FirebaseBookingRepository() : BookingRepository {
     private val db = FirebaseFirestore.getInstance()
     private val collection = db.collection("bookings")
+    private val lockDoc = db.collection("metadata").document("booking_lock")
 
     override suspend fun saveReservation(reservation: Reservation) {
         val data = hashMapOf(
@@ -27,8 +28,47 @@ class FirebaseBookingRepository() : BookingRepository {
         collection.document(reservation.id).set(data).await()
     }
 
+    override suspend fun trySaveReservationAtomic(reservation: Reservation, expectedVersion: Long): Boolean {
+        return try {
+            db.runTransaction { transaction ->
+                val snapshot = transaction.get(lockDoc)
+                val currentVersion = snapshot.getLong("version") ?: 0L
+                if (currentVersion != expectedVersion) {
+                    throw com.google.firebase.firestore.FirebaseFirestoreException("Version mismatch", com.google.firebase.firestore.FirebaseFirestoreException.Code.ABORTED)
+                }
+
+                val data = hashMapOf(
+                    "id" to reservation.id,
+                    "spotNumber" to reservation.spotNumber,
+                    "vehicle" to reservation.vehicle,
+                    "zone" to reservation.zone,
+                    "date" to reservation.date,
+                    "startTime" to reservation.startTime.toString(),
+                    "endTime" to reservation.endTime.toString(),
+                    "isCheckedIn" to reservation.isCheckedIn
+                )
+                transaction.set(collection.document(reservation.id), data)
+                transaction.set(lockDoc, hashMapOf("version" to currentVersion + 1))
+            }.await()
+            true
+        } catch (e: Exception) {
+            false
+        }
+    }
+
     override suspend fun cancelReservation(reservationId: String) {
-        collection.document(reservationId).delete().await()
+        try {
+            db.runTransaction { transaction ->
+                val snapshot = transaction.get(lockDoc)
+                val currentVersion = snapshot.getLong("version") ?: 0L
+
+                transaction.delete(collection.document(reservationId))
+                transaction.set(lockDoc, hashMapOf("version" to currentVersion + 1))
+            }.await()
+        } catch (e: Exception) {
+            // fallback if transaction fails
+            collection.document(reservationId).delete().await()
+        }
     }
 
     private fun mapDocumentToReservation(doc: com.google.firebase.firestore.DocumentSnapshot): Reservation? {
@@ -56,6 +96,13 @@ class FirebaseBookingRepository() : BookingRepository {
     override suspend fun getAllReservations(): List<Reservation> {
         val snapshot = collection.get().await()
         return snapshot.documents.mapNotNull { mapDocumentToReservation(it) }
+    }
+
+    override suspend fun getAllReservationsWithVersion(): Pair<List<Reservation>, Long> {
+        val snapshot = collection.get().await()
+        val lockSnapshot = lockDoc.get().await()
+        val currentVersion = lockSnapshot.getLong("version") ?: 0L
+        return Pair(snapshot.documents.mapNotNull { mapDocumentToReservation(it) }, currentVersion)
     }
 
     override suspend fun getUserReservations(userId: String): List<Reservation> {

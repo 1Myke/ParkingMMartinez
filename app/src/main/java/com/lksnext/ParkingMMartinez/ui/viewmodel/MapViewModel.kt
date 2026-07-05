@@ -117,6 +117,7 @@ class MapViewModel(
         viewModelScope.launch {
             refreshParkingStatus()
         }
+        loadUserSubscriptions()
     }
 
     private suspend fun refreshParkingStatus() {
@@ -149,7 +150,11 @@ class MapViewModel(
 
     /** Reload which zones the user has subscribed to for the currently selected date. */
     private fun loadUserSubscriptions() {
-        val userId = sessionManager.getActiveUserId() ?: return
+        val userId = sessionManager.getActiveUserId()
+        if (userId == null) {
+            subscribedZoneNames = emptySet()
+            return
+        }
         notificationRepository.getUserZoneSubscriptions(userId, currentDateKey()) { zoneNames ->
             subscribedZoneNames = zoneNames
         }
@@ -161,7 +166,7 @@ class MapViewModel(
      */
     fun toggleZoneSubscription(context: Context, zoneName: String) {
         val userId       = sessionManager.getActiveUserId() ?: return
-        val onesignalId  = OneSignal.User.pushSubscription.id ?: return
+        val onesignalId  = OneSignal.User.pushSubscription.id
         val languageCode = context.resources.configuration.locales[0]?.language ?: "en"
         val dateKey      = currentDateKey()
 

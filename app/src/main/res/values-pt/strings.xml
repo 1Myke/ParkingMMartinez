@@ -1,4 +1,4 @@
-<resources>
+﻿<resources>
     <string name="app_name">lksParking</string>
 
     <string name="booking_header_label">ESTÁ A RESERVAR LUGAR EM</string>
@@ -179,4 +179,36 @@
     <string name="reservation_cancel_msg">Tem certeza de que deseja cancelar esta reserva?</string>
     <string name="reservation_cancel_confirm">Sim, cancelar</string>
 
+    <string name="bot_vocab">reservar,reserva,reservas,zona,zonas,elétrica,elétricas,moto,motos,deficiente,deficientes,hora,horas,máximo,futuro,dia,dias,estacionamento,estacionamentos,parking,sítio,sítios,vaga,vagas,editar,alterar,prolongar,checkin,check,ativo,ativa,ativas,ativos,tempo,tempos,modificar,estender,prolongar,cancelar,anular,remover,eliminar,apagar,veículo,veículos,carro,carros,adicionar,inserir,placa,placas,matrícula,matrículas,turismo,turismos,auto,autos,nome,nomes,ajustes,perfil,perfis,conta,contas,senha,senhas,foto,fotos,imagem,imagens,círculo,círculos,círculo,círculos,avatar,esqueci,recuperar,chave,chaves,senha,acesso,acessos,entrar,notificação,notificações,aviso,avisos,alerta,alertas,50%,metade,cheio,campainha,campainhas,avisar,ocupação,bateria,baterias,não,chegam,permissões,segundo,plano,bloqueia,otimização,fundo</string>
+    <string name="bot_fallback">Desculpe, sou o assistente de estacionamento. Você pode me perguntar sobre reservas, perfil, veículos, cancelamentos ou problemas com notificações. Se você usa o aplicativo em outro idioma, tente mudar o idioma!</string>
+    <string name="system_temporarily_inactive">O sistema está temporariamente inativo. Tente novamente mais tarde.</string>
+
+    <string name="res_clase_0">Este é um parque de estacionamento da empresa, pelo que todas as reservas são totalmente gratuitas. Pode reservar a partir de hoje até 7 dias de antecedência para estadias de 1h a 8h no máximo. Dispomos de 4 zonas: Carregamento Elétrico, Deficientes, Normais e Motos. Lembre-se de que apenas pode ter uma reserva ativa de cada vez e que pode cancelá-la a qualquer momento a partir da app se mudar de ideias.</string>
+    <string name="res_clase_1">Sim, pode editar as suas reservas! Se precisar de prolongar o tempo da sua reserva atual, é OBRIGATÓRIO ter efetuado previamente o check-in ao chegar. Se estiver dentro do horário da sua reserva mas ainda não tiver feito o check-in, o sistema não lhe permitirá estender o tempo. Não se esqueça de registar a sua entrada!</string>
+    <string name="res_clase_2">Com certeza. Se mudar de ideias ou os seus planos variarem, pode cancelar a sua reserva atual diretamente a partir da aplicação sem qualquer custo. Ao cancelá-la, libertará o lugar para os seus colegas e a sua conta ficará disponível de imediato para poder agendar uma nova reserva sempre que precisar.</string>
+    <string name="res_clase_3">Não há limite de frota na sua conta! Pode adicionar, registar e gerir tantos veículos quantos necessitar dentro da aplicação. Ao realizar uma reserva, certifique-se apenas de selecionar qual dos seus veículos registados vai utilizar nesse dia.</string>
+    <string name="res_clase_4">Para atualizar os seus dados de perfil dispõe de duas opções: Pode alterar o seu nome de utilizador ou a sua palavra-passe de forma segura a partir da secção \'Definições\'. Se o que deseja é alterar a sua foto de perfil, vá a \'Perfil\' e pressione diretamente sobre o círculo da imagem para carregar uma nova foto.</string>
+    <string name="res_clase_5">Se não se lembra da sua palavra-passe para iniciar sessão, não se preocupe. Vá ao ecrã de acesso principal da app e toque no botão \"Recuperar palavra-passe\". Siga as instruções no ecrã para a redefinir de forma segura e voltar a aceder à sua conta.</string>
+    <string name="res_clase_6">A app conta com dois alertas de ocupação: Enviaremos uma notificação automática quando o parque atingir 50% da sua capacidade. Caso o parque já esteja cheio, verá o ícone de um sino; se o ativar, enviaremos um alerta imediato se outro utilizador cancelar a reserva dele para que possa aproveitar o lugar livre.</string>
+    <string name="res_clase_7">A aplicação envia 5 tipos de notificações importantes: aviso de parque a 50%, alertas do sino (cancelamentos), lembrete antes de começar, aviso para fazer o check-in e aviso de fim de reserva. Se não as estiver a receber, vá ao menu de \'Notificações\' na app onde verá as instruções para desativar a otimização de bateria do seu telemóvel, já que o seu sistema operativo poderá estar a bloqueá-las em segundo plano.</string>
+
+    <string name="chat_empty_title">Como posso ajudá-lo?</string>
+    <string name="chat_empty_body">Faça perguntas sobre zonas de estacionamento, horários ou suas reservas de estacionamento LKS.</string>
+    <string name="chat_loading">A pensar...</string>
+    <string name="chat_input_label">A sua consulta</string>
+    <string name="chat_input_placeholder">Escreva a sua questão sobre estacionamento...</string>
+    <string name="chat_input_send">Enviar</string>
+    <string name="chat_sender_you">Tu</string>
+    <string name="chat_sender_bot">Assistente LKS</string>
+    <string name="chat_sug_1">Como posso reservar?</string>
+    <string name="chat_sug_2">Posso editar uma reserva?</string>
+    <string name="chat_sug_3">Posso cancelar uma reserva?</string>
+    <string name="chat_sug_4">Posso adicionar outro veículo?</string>
+    <string name="chat_sug_5">Posso editar a minha conta no perfil?</string>
+    <string name="chat_sug_6">Posso mudar a minha senha?</string>
+    <string name="chat_sug_7">A aplicação tem algum aviso?</string>
+    <string name="chat_sug_8">Por que não estou a receber avisos?</string>
+
 </resources>
+
+

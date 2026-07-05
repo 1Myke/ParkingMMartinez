@@ -9,6 +9,7 @@ import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import androidx.test.rule.GrantPermissionRule
 import com.lksnext.ParkingMMartinez.data.SessionManager
 import com.lksnext.ParkingMMartinez.ui.constants.TestTags
 import org.junit.Before
@@ -19,6 +20,9 @@ import java.util.Calendar
 
 @RunWith(AndroidJUnit4::class)
 class BookingFlowTest {
+
+    @get:Rule
+    val grantPermissionRule: GrantPermissionRule = GrantPermissionRule.grant(android.Manifest.permission.POST_NOTIFICATIONS)
 
     @get:Rule
     val composeTestRule = createAndroidComposeRule<MainActivity>()
@@ -72,9 +76,15 @@ class BookingFlowTest {
         // --- 5. CONFIRMAR RESERVA ---
         composeTestRule.onNodeWithTag(TestTags.BOOKING_SUBMIT_BTN).assertIsEnabled()
         composeTestRule.onNodeWithTag(TestTags.BOOKING_SUBMIT_BTN).performClick()
-        Thread.sleep(2000)
 
         // --- 6. VERIFICACIÓN FINAL ---
-        composeTestRule.onNodeWithTag(TestTags.MAP_HEADER).assertExists()
+        composeTestRule.waitUntil(timeoutMillis = 10000) {
+            try {
+                composeTestRule.onNodeWithTag(TestTags.BOOKING_REGISTER_TITLE).assertExists()
+                true
+            } catch (e: AssertionError) {
+                false
+            }
+        }
     }
 }

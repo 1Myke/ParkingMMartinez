@@ -10,8 +10,8 @@ plugins {
     jacoco
 }
 
-val appVersionCode = 4
-val appVersionName = "v1.2.0"
+val appVersionCode = 5
+val appVersionName = "v1.2.1"
 val targetSdkVersion = 36
 
 // Versiones de paquetes
@@ -25,6 +25,7 @@ val appcompatVersion = "1.7.0"
 val coilVersion = "2.6.0"
 val mockitoKotlinVersion = "5.2.1"
 val oneSignalVersion = "5.1.23"
+val testRulesVersion = "1.6.1"
 val tensorflowVersion = "1.4.0"
 
 android {
@@ -135,6 +136,7 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation("androidx.test:rules:$testRulesVersion")
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.tooling)

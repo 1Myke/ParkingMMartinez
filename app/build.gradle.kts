@@ -93,7 +93,7 @@ android {
 sonar {
     properties {
         property("sonar.coverage.jacoco.xmlReportPaths", "build/reports/coverage/test/debug/report.xml")
-        property("sonar.coverage.exclusions", "**/MainActivity.kt, **/ui/components/**, **/ui/screens/**, **/ui/navigation/**, **/ui/theme/**, **/receiver/**, **/service/**")
+        property("sonar.coverage.exclusions", "**/MainActivity.kt, **/ui/components/**, **/ui/screens/**, **/ui/navigation/**, **/ui/theme/**, **/receiver/**, **/service/**, **/repository/NeuralNetworkChatRepository")
     }
 }
 

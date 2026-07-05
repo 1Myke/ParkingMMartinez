@@ -10,8 +10,8 @@ plugins {
     jacoco
 }
 
-val appVersionCode = 5
-val appVersionName = "v1.2.1"
+val appVersionCode = 6
+val appVersionName = "v1.3.0"
 val targetSdkVersion = 36
 
 // Versiones de paquetes

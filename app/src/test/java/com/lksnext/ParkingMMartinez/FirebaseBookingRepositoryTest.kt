@@ -94,4 +94,58 @@ class FirebaseBookingRepositoryTest {
             verify(mockDocument).delete()
         }
     }
+
+    @Test
+    fun getAllReservations_returnsEmptyList_whenNoDocuments() = runBlocking {
+        val mockQuerySnapshot = mock(com.google.firebase.firestore.QuerySnapshot::class.java)
+        `when`(mockQuerySnapshot.documents).thenReturn(emptyList())
+        val task: Task<com.google.firebase.firestore.QuerySnapshot> = Tasks.forResult(mockQuerySnapshot)
+        `when`(mockCollection.get()).thenReturn(task)
+
+        val result = repository.getAllReservations()
+        assertTrue(result.isEmpty())
+    }
+
+    @Test
+    fun getAllReservationsWithVersion_returnsEmptyListAndVersion() = runBlocking {
+        val mockQuerySnapshot = mock(com.google.firebase.firestore.QuerySnapshot::class.java)
+        `when`(mockQuerySnapshot.documents).thenReturn(emptyList())
+        val queryTask: Task<com.google.firebase.firestore.QuerySnapshot> = Tasks.forResult(mockQuerySnapshot)
+        `when`(mockCollection.get()).thenReturn(queryTask)
+
+        val mockDocSnapshot = mock(com.google.firebase.firestore.DocumentSnapshot::class.java)
+        `when`(mockDocSnapshot.getLong("version")).thenReturn(5L)
+        val docTask: Task<com.google.firebase.firestore.DocumentSnapshot> = Tasks.forResult(mockDocSnapshot)
+        `when`(mockLockDoc.get()).thenReturn(docTask)
+
+        val (list, version) = repository.getAllReservationsWithVersion()
+        assertTrue(list.isEmpty())
+        assertEquals(5L, version)
+    }
+
+    @Test
+    fun getUserReservations_returnsEmptyList_whenNoDocuments() = runBlocking {
+        val mockQuery = mock(com.google.firebase.firestore.Query::class.java)
+        val mockQuerySnapshot = mock(com.google.firebase.firestore.QuerySnapshot::class.java)
+        `when`(mockQuerySnapshot.documents).thenReturn(emptyList())
+        val task: Task<com.google.firebase.firestore.QuerySnapshot> = Tasks.forResult(mockQuerySnapshot)
+        
+        `when`(mockCollection.whereEqualTo("vehicle.userId", "user1")).thenReturn(mockQuery)
+        `when`(mockQuery.get()).thenReturn(task)
+
+        val result = repository.getUserReservations("user1")
+        assertTrue(result.isEmpty())
+    }
+
+    @Test
+    fun trySaveReservationAtomic_fails_whenTransactionFails() = runBlocking {
+        val vehicle = Vehicle("v1", "user1", "Car", "1234ABC", VehicleType.STANDARD)
+        val zone = ParkingZone("Zone A", 10, 10, 0, Color.Red)
+        val reservation = Reservation(
+            "res1", 1, vehicle, zone, Date(), LocalTime.of(10, 0), LocalTime.of(11, 0), false
+        )
+        // Without mocking the transaction deeply, it should throw/catch and return false
+        val result = repository.trySaveReservationAtomic(reservation, 0L)
+        assertFalse(result)
+    }
 }

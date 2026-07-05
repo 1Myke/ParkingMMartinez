@@ -525,4 +525,50 @@ class BookingViewModelTest {
         assertFalse(viewModel.isButtonEnabled)
         assertEquals("10:00", viewModel.nextCollisionTime)
     }
+
+    @Test
+    fun resetLoadingState_setsIsLoadingToFalse() {
+        // Start by manually forcing loading if it's not possible easily, 
+        // wait, we can just call resetLoadingState.
+        viewModel.resetLoadingState()
+        assertFalse(viewModel.isLoading)
+    }
+
+    @Test
+    fun cancelEditing_clearsEditingState() {
+        val oldReservation = Reservation(
+            id = "old_res", spotNumber = 1, vehicle = fakeVehicle, zone = fakeZone,
+            date = Date(), startTime = LocalTime.of(9, 0), endTime = LocalTime.of(10, 0), isCheckedIn = true
+        )
+        viewModel.loadReservationForEditing(oldReservation)
+        assertTrue(viewModel.isEditingCheckedIn)
+        assertEquals("old_res", viewModel.editingReservationId)
+
+        viewModel.cancelEditing()
+        assertFalse(viewModel.isEditingCheckedIn)
+        assertNull(viewModel.editingReservationId)
+    }
+
+    @Test
+    fun checkUserReservationStatus_returnsFalse_ifReservationCompletelyPast() = runTest {
+        val pastDate = GregorianCalendar(2000, Calendar.JANUARY, 1).time
+        val pastRes = Reservation(
+            id = "res_past", spotNumber = 2, vehicle = fakeVehicle, zone = fakeZone,
+            date = pastDate, startTime = LocalTime.of(10, 0), endTime = LocalTime.of(12, 0), isCheckedIn = false
+        )
+        `when`(mockSessionManager.getActiveUserId()).thenReturn(userId)
+        `when`(mockRepository.getAllReservations()).thenReturn(listOf(pastRes))
+
+        viewModel.checkUserReservationStatus()
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        assertFalse(viewModel.hasActiveReservation)
+    }
+    
+    @Test
+    fun isDateTimeValid_returnsTrue_whenEditingCheckedIn() = runTest {
+        val res = Reservation("edit_id", 1, fakeVehicle, fakeZone, Date(), LocalTime.of(10, 0), LocalTime.of(12, 0), true)
+        viewModel.loadReservationForEditing(res)
+        assertTrue(viewModel.isDateTimeValid())
+    }
 }

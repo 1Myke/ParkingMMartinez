@@ -25,6 +25,11 @@ class BookingRepositoryTest {
         val reservation = mock(Reservation::class.java)
         val saved = repo.trySaveReservationAtomic(reservation, 0L)
         assertTrue(saved)
+
+        // Covering defaults
+        repo.saveReservation(reservation)
+        repo.cancelReservation("id")
+        val userRes = repo.getUserReservations("user")
+        assertEquals(0, userRes.size)
     }
 }
-

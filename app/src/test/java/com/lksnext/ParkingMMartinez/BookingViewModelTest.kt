@@ -276,6 +276,40 @@ class BookingViewModelTest {
         assertTrue(viewModel.hasActiveReservation)
     }
 
+    @Test
+    fun confirmReservation_fallsBackToNormalSave_whenAtomicFails() = runTest {
+        var atomicCalls = 0
+        var savedCalls = 0
+
+        val failingRepo = object : BookingRepository {
+            override suspend fun getAllReservations(): List<Reservation> = emptyList()
+            override suspend fun getAllReservationsWithVersion(): Pair<List<Reservation>, Long> = Pair(emptyList(), 0L)
+            override suspend fun saveReservation(reservation: Reservation) {
+                savedCalls++
+            }
+            override suspend fun trySaveReservationAtomic(reservation: Reservation, expectedVersion: Long): Boolean {
+                atomicCalls++
+                return false
+            }
+            override suspend fun cancelReservation(reservationId: String) {}
+            override suspend fun getUserReservations(userId: String): List<Reservation> = emptyList()
+        }
+
+        val testVm = BookingViewModel(failingRepo, mockVehicleRepository, mockSessionManager, mockNotificationRepository)
+
+        testVm.setZone(ZoneNames.STANDARD)
+        testVm.onTimeChange(10, 0)
+        testVm.onDurationChange(3.0f)
+
+        testVm.confirmReservation(mockContext, fakeVehicle, fakeZone) { }
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        // It retries 3 times, then calls the non-atomic saveReservation
+        assertEquals(3, atomicCalls)
+        assertEquals(1, savedCalls)
+        assertTrue(testVm.hasActiveReservation)
+    }
+
     // ==========================================
     // 4. TESTS DE FILTRADO DE VEHÍCULOS POR ZONA
     // ==========================================

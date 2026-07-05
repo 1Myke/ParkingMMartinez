@@ -1,4 +1,4 @@
-# Click&Park - Mikel Martine Diez
+# Click&Park - Mikel Martinez Diez
 Bienvenido a **Click&Park**, una aplicación de gestión de reservas de parking moderna, intuitiva y eficiente, diseñada para optimizar la experiencia de los trabajadores de LKS a la hora de reservar plaza para el Parking de la empresa.
 ---
 > [!warning]

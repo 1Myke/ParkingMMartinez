@@ -21,6 +21,7 @@ import java.time.LocalTime
 import java.util.Date
 
 import androidx.compose.ui.graphics.Color
+import com.google.firebase.firestore.getField
 
 class FirebaseBookingRepositoryTest {
 
@@ -135,6 +136,53 @@ class FirebaseBookingRepositoryTest {
 
         val result = repository.getUserReservations("user1")
         assertTrue(result.isEmpty())
+    }
+    
+    @Test
+    fun mapDocumentToReservation_returnsReservation_whenValid() = runBlocking {
+        val mockQuerySnapshot = mock(com.google.firebase.firestore.QuerySnapshot::class.java)
+        val mockDocSnapshot = mock(com.google.firebase.firestore.DocumentSnapshot::class.java)
+        `when`(mockQuerySnapshot.documents).thenReturn(listOf(mockDocSnapshot))
+        
+        `when`(mockDocSnapshot.getString("id")).thenReturn("res2")
+        `when`(mockDocSnapshot.getLong("spotNumber")).thenReturn(5L)
+        `when`(mockDocSnapshot.getDate("date")).thenReturn(Date())
+        `when`(mockDocSnapshot.getBoolean("isCheckedIn")).thenReturn(true)
+        `when`(mockDocSnapshot.getString("startTime")).thenReturn("10:00")
+        `when`(mockDocSnapshot.getString("endTime")).thenReturn("12:00")
+        
+        val vehicle = Vehicle("v1", "user1", "Car", "1234", VehicleType.STANDARD)
+        val zone = ParkingZone("Zone A", 10, 10, 0, Color.Red)
+        `when`(mockDocSnapshot.getField<Vehicle>("vehicle")).thenReturn(vehicle)
+        `when`(mockDocSnapshot.getField<ParkingZone>("zone")).thenReturn(zone)
+
+        val task: Task<com.google.firebase.firestore.QuerySnapshot> = Tasks.forResult(mockQuerySnapshot)
+        `when`(mockCollection.get()).thenReturn(task)
+
+        val result = repository.getAllReservations()
+        assertEquals(1, result.size)
+        assertEquals("res2", result[0].id)
+    }
+
+    @Test
+    fun mapDocumentToReservation_returnsNull_whenExceptionThrown() = runBlocking {
+        mockStatic(android.util.Log::class.java).use { mockedLog ->
+            mockedLog.`when`<Int> {
+                android.util.Log.e(anyString(), anyString())
+            }.thenReturn(0)
+            
+            val mockQuerySnapshot = mock(com.google.firebase.firestore.QuerySnapshot::class.java)
+            val mockDocSnapshot = mock(com.google.firebase.firestore.DocumentSnapshot::class.java)
+            `when`(mockQuerySnapshot.documents).thenReturn(listOf(mockDocSnapshot))
+            
+            `when`(mockDocSnapshot.getString("id")).thenThrow(RuntimeException("Mock error"))
+            
+            val task: Task<com.google.firebase.firestore.QuerySnapshot> = Tasks.forResult(mockQuerySnapshot)
+            `when`(mockCollection.get()).thenReturn(task)
+
+            val result = repository.getAllReservations()
+            assertTrue(result.isEmpty())
+        }
     }
 
     @Test

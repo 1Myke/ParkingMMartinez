@@ -462,6 +462,7 @@ class BookingViewModel (
         selectedDate = reservation.date
         val diff = java.time.Duration.between(reservation.startTime, reservation.endTime).toHours()
         duration = diff.toFloat().coerceIn(1f, 8f)
+        selectedVehicle = reservation.vehicle
     }
 
     fun cancelEditing() {
